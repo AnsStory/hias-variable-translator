@@ -51,6 +51,18 @@
 
 在 VSCode 设置中配置 `variableTranslator.services`，详见 [配置项](/guide/config)。
 
+### Q: 如何获取 API Key？
+
+| 服务 | 获取地址 | 说明 |
+|------|----------|------|
+| OpenAI | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | 创建 API Key |
+| 百度翻译 | [fanyi-api.baidu.com](https://fanyi-api.baidu.com/) | 开通通用翻译 API |
+| 腾讯翻译君 | [console.cloud.tencent.com/cam/capi](https://console.cloud.tencent.com/cam/capi) | 获取 SecretId/SecretKey |
+| Bing/Azure | [portal.azure.com](https://portal.azure.com/) | 创建 Translator 资源 |
+| DeepLX | [github.com/DeepLX/DeepLX](https://github.com/DeepLX/DeepLX) | 本地部署服务 |
+
+详细获取步骤请参考 [翻译服务文档](/guide/services)。
+
 ### Q: 文件名冲突怎么处理？
 
 当目标文件已存在时，插件会自动添加后缀（如 `test_1.test.js`）并提示用户。
@@ -91,4 +103,4 @@ npm run build
 
 ## 联系方式
 
-- GitHub Issues: https://github.com/variable-translator-publisher/variable-translator/issues
+- GitHub Issues: https://github.com/AnsStory/hias-variable-translator/issues

@@ -51,6 +51,18 @@ The plugin supports auto-detection and translation of:
 
 Configure `variableTranslator.services` in VSCode settings, see [Configuration](/en/guide/config).
 
+### Q: How to get API Key?
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| OpenAI | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | Create API Key |
+| Baidu Translation | [fanyi-api.baidu.com](https://fanyi-api.baidu.com/) | Enable General Translation API |
+| Tencent Translation | [console.cloud.tencent.com/cam/capi](https://console.cloud.tencent.com/cam/capi) | Get SecretId/SecretKey |
+| Bing/Azure | [portal.azure.com](https://portal.azure.com/) | Create Translator resource |
+| DeepLX | [github.com/DeepLX/DeepLX](https://github.com/DeepLX/DeepLX) | Local deployment |
+
+For detailed steps, see [Translation Services Documentation](/en/guide/services).
+
 ### Q: How is filename conflict handled?
 
 When the target file already exists, the plugin automatically adds a suffix (e.g., `test_1.test.js`) and prompts the user.
@@ -91,4 +103,4 @@ npm run build
 
 ## Contact
 
-- GitHub Issues: https://github.com/variable-translator-publisher/variable-translator/issues
+- GitHub Issues: https://github.com/AnsStory/hias-variable-translator/issues

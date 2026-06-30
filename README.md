@@ -27,7 +27,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 1. 在资源管理器中右键新建文件
 2. 输入包含非英文字符的路径，如: `你好/世界/测试.test.js`
 3. 选择命名格式
-4. 文件自动翻译创建(结果为: `hello/world/test.test.js`)
+4. 文件自动翻译创建，结果为: `hello/world/test.test.js`
 
 ### 选中文本翻译
 
@@ -119,6 +119,18 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
   }
 }
 ```
+
+## API 获取方式
+
+| 服务 | 获取地址 | 说明 |
+|------|----------|------|
+| OpenAI | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | 创建 API Key |
+| 百度翻译 | [fanyi-api.baidu.com](https://fanyi-api.baidu.com/) | 开通通用翻译 API |
+| 腾讯翻译君 | [console.cloud.tencent.com/cam/capi](https://console.cloud.tencent.com/cam/capi) | 获取 SecretId/SecretKey |
+| Bing/Azure | [portal.azure.com](https://portal.azure.com/) | 创建 Translator 资源 |
+| DeepLX | [github.com/DeepLX/DeepLX](https://github.com/DeepLX/DeepLX) | 本地部署服务 |
+
+详细获取步骤请参考 [翻译服务文档](https://ansstory.github.io/hias-variable-translator/guide/services)。
 
 ## 许可证
 

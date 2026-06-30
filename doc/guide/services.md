@@ -12,6 +12,47 @@
 | 百度翻译 | APP_ID + Key | 按量付费 | 需要百度翻译开放平台账号 |
 | 腾讯翻译君 | SecretId + SecretKey | 按量付费 | 需要腾讯云账号 |
 
+## API 获取方式
+
+### OpenAI
+
+1. 访问 [OpenAI Platform](https://platform.openai.com/)
+2. 注册/登录账号
+3. 进入 [API Keys 页面](https://platform.openai.com/api-keys)
+4. 点击 "Create new secret key"
+5. 复制生成的 API Key（格式：`sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`）
+
+### 百度翻译
+
+1. 访问 [百度翻译开放平台](https://fanyi-api.baidu.com/)
+2. 注册/登录账号
+3. 进入 [控制台](https://fanyi-api.baidu.com/aitrans)
+4. 开通通用翻译 API 服务
+5. 获取 APP_ID 和 Secret Key
+
+### 腾讯翻译君
+
+1. 访问 [腾讯云](https://console.cloud.tencent.com/)
+2. 注册/登录账号
+3. 开通 [机器翻译](https://console.cloud.tencent.com/tmt) 服务
+4. 进入 [API 密钥管理](https://console.cloud.tencent.com/cam/capi)
+5. 获取 SecretId 和 SecretKey
+
+### Bing / Azure Translator
+
+1. 访问 [Azure Portal](https://portal.azure.com/)
+2. 注册/登录账号
+3. 创建 [Translator](https://portal.azure.com/#create/Microsoft.CognitiveServicesMultiService) 资源
+4. 进入资源 → "密钥和终结点"
+5. 复制 API Key 和 Region
+
+### DeepLX
+
+1. 访问 [DeepLX GitHub](https://github.com/DeepLX/DeepLX)
+2. 按照说明本地部署服务
+3. 默认地址：`http://127.0.0.1:1188`
+4. 无需额外配置
+
 ## 切换方式
 
 ### 快捷键
@@ -58,10 +99,10 @@
 
 ## 服务降级
 
-当翻译服务调用失败时，插件会自动降级为拼音翻译：
+当翻译服务调用失败时，插件会自动按优先级降级：
 
 ```
-翻译 API 调用失败 → 自动降级为拼音
+当前服务失败 → 降级到下一个服务 → 所有服务失败 → 降级为拼音
 ```
 
 ## 自动语言检测
