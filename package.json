@@ -1,9 +1,9 @@
 {
-  "name": "variable-translator",
+  "name": "hais-variable-translator",
   "displayName": "变量翻译助手",
   "description": "将任意非英文字符自动检测并翻译为英文，支持文件路径翻译和选中文本翻译",
   "version": "0.1.0",
-  "publisher": "variable-translator-publisher",
+  "publisher": "ansstory",
   "homepage": "https://ansstory.github.io/hias-variable-translator/",
   "bugs": "https://github.com/AnsStory/hias-variable-translator/issues",
   "repository": {
@@ -178,6 +178,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "vsce:package": "npx vsce package",
+    "vsce:publish": "npx vsce publish",
     "docs:dev": "vitepress dev doc",
     "docs:build": "vitepress build doc",
     "docs:preview": "vitepress preview doc"
