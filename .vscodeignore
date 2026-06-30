@@ -8,4 +8,5 @@ tsconfig.json
 vite.config.ts
 .gitignore
 *.log
-docs/**
+doc/**
+!icon.png
