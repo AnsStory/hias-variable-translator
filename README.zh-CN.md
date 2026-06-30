@@ -25,9 +25,9 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 ### 文件路径翻译
 
 1. 在资源管理器中右键新建文件
-2. 输入包含非英文字符的路径，如: `你好/世界/测试.test.js`
+2. 输入包含非英文字符的路径，如 `测试文件/test.js`
 3. 选择命名格式
-4. 文件自动翻译创建(结果为: `hello/world/test.test.js`)
+4. 文件自动翻译创建
 
 ### 选中文本翻译
 
@@ -118,6 +118,86 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
     }
   }
 }
+```
+
+## 开发
+
+### 环境要求
+
+- Node.js >= 20
+- VSCode >= 1.80.0
+
+### 开发命令
+
+```bash
+# 安装依赖
+npm install --registry https://registry.npmmirror.com
+
+# 编译
+npm run compile
+
+# 开发构建
+npm run build:dev
+
+# 生产构建（带代码混淆）
+npm run build
+
+# 代码检查
+npm run lint
+
+# 代码格式化
+npm run format
+
+# 打包插件
+npm run vsce:package
+```
+
+### 调试
+
+1. 在 VSCode 中打开项目
+2. 按 F5 启动调试（会自动编译并打开新窗口）
+3. 在新窗口中测试插件功能
+
+### 文档开发
+
+```bash
+# 启动文档开发服务器
+npm run docs:dev
+
+# 构建文档
+npm run docs:build
+
+# 预览文档
+npm run docs:preview
+```
+
+## 项目结构
+
+```
+变量翻译助手/
+├── src/
+│   ├── extension.ts              # 插件入口
+│   ├── translator.ts             # 翻译器
+│   ├── namingConvention.ts       # 命名格式转换
+│   ├── chineseDetector.ts        # 非英文字符检测
+│   ├── undoManager.ts            # 撤回管理
+│   ├── config.ts                 # 配置管理
+│   └── services/                 # 翻译服务实现
+│       ├── index.ts              # 服务接口定义
+│       ├── pinyin.ts             # 拼音服务
+│       ├── openai.ts             # OpenAI服务
+│       ├── google.ts             # Google翻译服务
+│       ├── bing.ts               # Bing翻译服务
+│       ├── deeplx.ts             # DeepLX服务
+│       ├── baidu.ts              # 百度翻译服务
+│       └── tencent.ts            # 腾讯翻译服务
+├── doc/                          # VitePress 文档
+├── package.json                  # 插件配置
+├── tsconfig.json                 # TypeScript 配置
+├── vite.config.ts                # Vite 构建配置
+├── eslint.config.js              # ESLint 配置
+├── .prettierrc                   # Prettier 配置
+└── LICENSE                       # MIT 许可证
 ```
 
 ## 许可证
