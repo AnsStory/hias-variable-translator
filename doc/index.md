@@ -11,7 +11,7 @@ hero:
       link: /guide/
     - theme: alt
       text: GitHub
-      link: https://github.com/variable-translator-publisher/variable-translator
+      link: https://github.com/AnsStory/hias-variable-translator
 
 features:
   - title: 多语言支持
@@ -21,9 +21,9 @@ features:
   - title: 文本翻译
     details: 选中文本后一键翻译替换
   - title: 多种命名格式
-    details: 支持 camelCase、PascalCase、snake_case 等 6 种命名格式
+    details: 支持 camelCase、PascalCase、snake_case 等 8 种命名格式
   - title: 多翻译服务
-    details: 支持 Copilot、OpenAI、Google、Bing、百度、腾讯等 7 种翻译服务
+    details: 支持 Pinyin、OpenAI、Google、Bing、百度、腾讯等 7 种翻译服务
   - title: 一键撤回
     details: 1 分钟内可撤回翻译，自动清理文件和目录
 ---

@@ -4,6 +4,8 @@
   "description": "将任意非英文字符自动检测并翻译为英文，支持文件路径翻译和选中文本翻译",
   "version": "0.1.0",
   "publisher": "variable-translator-publisher",
+  "homepage": "https://ansstory.github.io/hias-variable-translator/",
+  "bugs": "https://github.com/AnsStory/hias-variable-translator/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/AnsStory/hias-variable-translator.git"

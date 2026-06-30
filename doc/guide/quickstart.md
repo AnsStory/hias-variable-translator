@@ -2,6 +2,13 @@
 
 ## 安装
 
+### 从 VSCode Marketplace 安装（推荐）
+
+1. 打开 VSCode
+2. 按 `Ctrl+Shift+X` 打开扩展面板
+3. 搜索 "变量翻译助手" 或 "Variable Translator"
+4. 点击 **Install** 安装
+
 ### 从 VSIX 安装
 
 1. 下载 `.vsix` 文件
@@ -9,11 +16,11 @@
 3. 输入 "Extensions: Install from VSIX..."
 4. 选择下载的 `.vsix` 文件
 
-### 从源码构建
+### 从源码构建（开发者）
 
 ```bash
 # 克隆项目
-git clone https://github.com/variable-translator-publisher/variable-translator.git
+git clone https://github.com/AnsStory/hias-variable-translator.git
 
 # 安装依赖
 npm install --registry https://registry.npmmirror.com

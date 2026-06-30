@@ -13,7 +13,7 @@ export default defineConfig({
           { text: '首页', link: '/' },
           { text: '指南', link: '/guide/' },
           { text: '配置', link: '/guide/config' },
-          { text: 'GitHub', link: 'https://github.com/variable-translator-publisher/variable-translator' },
+          { text: 'GitHub', link: 'https://github.com/AnsStory/hias-variable-translator' },
         ],
         sidebar: {
           '/guide/': [
@@ -31,7 +31,7 @@ export default defineConfig({
             },
           ],
         },
-        socialLinks: [{ icon: 'github', link: 'https://github.com/variable-translator-publisher/variable-translator' }],
+        socialLinks: [{ icon: 'github', link: 'https://github.com/AnsStory/hias-variable-translator' }],
         footer: {
           message: '基于 MIT 许可发布',
           copyright: '© 2026 Variable Translator',
@@ -46,7 +46,7 @@ export default defineConfig({
           { text: 'Home', link: '/en/' },
           { text: 'Guide', link: '/en/guide/' },
           { text: 'Config', link: '/en/guide/config' },
-          { text: 'GitHub', link: 'https://github.com/variable-translator-publisher/variable-translator' },
+          { text: 'GitHub', link: 'https://github.com/AnsStory/hias-variable-translator' },
         ],
         sidebar: {
           '/en/guide/': [
@@ -64,7 +64,7 @@ export default defineConfig({
             },
           ],
         },
-        socialLinks: [{ icon: 'github', link: 'https://github.com/variable-translator-publisher/variable-translator' }],
+        socialLinks: [{ icon: 'github', link: 'https://github.com/AnsStory/hias-variable-translator' }],
         footer: {
           message: 'Released under the MIT License.',
           copyright: '© 2026 Variable Translator',
@@ -74,7 +74,7 @@ export default defineConfig({
   },
   themeConfig: {
     logo: '/logo.svg',
-    siteTitle: 'hias-cli-md',
+    siteTitle: 'Variable Translator',
     socialLinks: [{ icon: 'github', link: 'https://github.com/AnsStory' }],
     search: {
       provider: 'local',

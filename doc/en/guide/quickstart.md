@@ -2,6 +2,13 @@
 
 ## Installation
 
+### Install from VSCode Marketplace (Recommended)
+
+1. Open VSCode
+2. Press `Ctrl+Shift+X` to open the Extensions panel
+3. Search for "Variable Translator"
+4. Click **Install**
+
 ### Install from VSIX
 
 1. Download the `.vsix` file
@@ -9,11 +16,11 @@
 3. Type "Extensions: Install from VSIX..."
 4. Select the downloaded `.vsix` file
 
-### Build from Source
+### Build from Source (Developers)
 
 ```bash
 # Clone the project
-git clone https://github.com/variable-translator-publisher/variable-translator.git
+git clone https://github.com/AnsStory/hias-variable-translator.git
 
 # Install dependencies
 npm install --registry https://registry.npmmirror.com

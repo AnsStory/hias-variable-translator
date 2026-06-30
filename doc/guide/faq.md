@@ -65,7 +65,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/variable-translator-publisher/variable-translator.git
+git clone https://github.com/AnsStory/hias-variable-translator.git
 
 # 安装依赖
 npm install --registry https://registry.npmmirror.com

@@ -65,7 +65,7 @@ When translation fails, the plugin automatically degrades to pinyin translation,
 
 ```bash
 # Clone the project
-git clone https://github.com/variable-translator-publisher/variable-translator.git
+git clone https://github.com/AnsStory/hias-variable-translator.git
 
 # Install dependencies
 npm install --registry https://registry.npmmirror.com
