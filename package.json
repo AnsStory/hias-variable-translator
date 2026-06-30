@@ -10,6 +10,21 @@
     "type": "git",
     "url": "https://github.com/AnsStory/hias-variable-translator.git"
   },
+  "author": "AnsStory <story0809@163.com>",
+  "keywords": [
+    "translate",
+    "translation",
+    "chinese",
+    "japanese",
+    "korean",
+    "variable",
+    "rename",
+    "file",
+    "text",
+    "english",
+    "i18n",
+    "localization"
+  ],
   "engines": {
     "vscode": "^1.80.0",
     "node": "^20.19.2"
@@ -142,6 +157,11 @@
               }
             }
           }
+        },
+        "variableTranslator.servicePriority": {
+          "type": "string",
+          "default": "copilot,openai,google,bing,deeplx,baidu,tencent",
+          "markdownDescription": "翻译服务优先级（从高到低，翻译失败时按顺序降级，逗号分隔）。示例：`copilot,openai,google,bing,deeplx,baidu,tencent`"
         }
       }
     }
@@ -159,8 +179,8 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "vsce:package": "npx vsce package",
     "docs:dev": "vitepress dev doc",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:build": "vitepress build doc",
+    "docs:preview": "vitepress preview doc"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

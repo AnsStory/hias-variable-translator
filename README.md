@@ -116,6 +116,9 @@ npm run build
   // 选择翻译服务：copilot | openai | google | bing | deeplx | baidu | tencent
   "variableTranslator.translationService": "copilot",
 
+  // 翻译服务优先级（从高到低，翻译失败时按顺序降级，逗号分隔）
+  "variableTranslator.servicePriority": "copilot,openai,google,bing,deeplx,baidu,tencent",
+
   // 翻译服务配置（无需配置的服务可省略）
   "variableTranslator.services": {
     "openai": {

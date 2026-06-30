@@ -74,22 +74,35 @@ export class Translator {
    * @returns 翻译结果
    */
   async translate(text: string, serviceType?: TranslationServiceType): Promise<TranslationResult> {
-    const targetService = serviceType || ConfigManager.getTranslationService()
-
-    // 尝试使用指定的翻译服务
-    const result = await this.tryTranslate(text, targetService)
-
-    if (result.success) {
-      return result
-    }
-
-    // 如果指定服务失败，尝试降级到拼音服务
-    if (targetService !== 'copilot') {
-      console.log(`翻译服务 ${targetService} 失败，降级到拼音服务`)
+    // 如果指定了服务，直接尝试该服务
+    if (serviceType) {
+      const result = await this.tryTranslate(text, serviceType)
+      if (result.success) {
+        return result
+      }
+      // 如果指定服务失败，降级到拼音
       return await this.pinyinService.translate(text)
     }
 
-    return result
+    // 获取优先级列表
+    const priorityList = ConfigManager.getServicePriority()
+    const currentService = ConfigManager.getTranslationService()
+
+    // 将当前选中的服务放到优先级列表最前面
+    const servicesToTry = [currentService, ...priorityList.filter((s) => s !== currentService)]
+
+    // 按优先级顺序尝试翻译服务
+    for (const serviceType of servicesToTry) {
+      const result = await this.tryTranslate(text, serviceType)
+      if (result.success) {
+        return result
+      }
+      console.log(`翻译服务 ${serviceType} 失败: ${result.error}`)
+    }
+
+    // 所有服务都失败，降级到拼音
+    console.log('所有翻译服务都失败，降级到拼音服务')
+    return await this.pinyinService.translate(text)
   }
 
   /**

@@ -13,6 +13,7 @@ export interface PluginConfig {
   enableFileTranslation: boolean
   translationService: TranslationServiceType
   services: TranslationServiceConfig
+  servicePriority: TranslationServiceType[]
 }
 
 /**
@@ -32,6 +33,7 @@ export class ConfigManager {
       enableFileTranslation: config.get<boolean>('enableFileTranslation', true),
       translationService: config.get<TranslationServiceType>('translationService', 'copilot'),
       services: config.get<TranslationServiceConfig>('services', {}),
+      servicePriority: config.get<TranslationServiceType[]>('servicePriority', ['copilot', 'openai', 'google', 'bing', 'deeplx', 'baidu', 'tencent']),
     }
   }
 
@@ -91,6 +93,27 @@ export class ConfigManager {
   }
 
   /**
+   * 获取翻译服务优先级
+   * @returns 翻译服务优先级列表
+   */
+  static getServicePriority(): TranslationServiceType[] {
+    const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
+    const priorityStr = config.get<string>('servicePriority', 'copilot,openai,google,bing,deeplx,baidu,tencent')
+    // 解析逗号分隔的字符串
+    return priorityStr.split(',').map(s => s.trim()) as TranslationServiceType[]
+  }
+
+  /**
+   * 设置翻译服务优先级
+   * @param priority 翻译服务优先级列表
+   */
+  static async setServicePriority(priority: TranslationServiceType[]): Promise<void> {
+    const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
+    // 转换为逗号分隔的字符串
+    await config.update('servicePriority', priority.join(','), vscode.ConfigurationTarget.Global)
+  }
+
+  /**
    * 检查翻译服务是否已配置
    * @param service 翻译服务类型
    * @returns 是否已配置
@@ -126,7 +149,8 @@ export class ConfigManager {
       if (
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.enableFileTranslation`) ||
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.translationService`) ||
-        e.affectsConfiguration(`${this.CONFIG_PREFIX}.services`)
+        e.affectsConfiguration(`${this.CONFIG_PREFIX}.services`) ||
+        e.affectsConfiguration(`${this.CONFIG_PREFIX}.servicePriority`)
       ) {
         callback(e)
       }

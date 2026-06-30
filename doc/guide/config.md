@@ -171,6 +171,9 @@
   // 选择翻译服务：copilot | openai | google | bing | deeplx | baidu | tencent
   "variableTranslator.translationService": "openai",
 
+  // 翻译服务优先级（从高到低，翻译失败时按顺序降级，逗号分隔）
+  "variableTranslator.servicePriority": "copilot,openai,google,bing,deeplx,baidu,tencent",
+
   // 翻译服务配置（无需配置的服务可省略）
   "variableTranslator.services": {
     // OpenAI 配置
@@ -210,6 +213,7 @@
 |--------|------|--------|------|
 | `enableFileTranslation` | boolean | `true` | 是否启用文件路径翻译功能 |
 | `translationService` | string | `"copilot"` | 选择翻译服务 |
+| `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | 翻译服务优先级（从高到低，逗号分隔） |
 | `services.openai.apiKey` | string | `""` | OpenAI API Key |
 | `services.baidu.appId` | string | `""` | 百度翻译 APP_ID |
 | `services.baidu.secretKey` | string | `""` | 百度翻译 Secret Key |

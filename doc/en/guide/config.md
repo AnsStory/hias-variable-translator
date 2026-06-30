@@ -171,6 +171,9 @@ Here is a complete example of all configuration options. Copy this to your `sett
   // Select translation service: copilot | openai | google | bing | deeplx | baidu | tencent
   "variableTranslator.translationService": "openai",
 
+  // Translation service priority (high to low, fallback in order when translation fails, comma separated)
+  "variableTranslator.servicePriority": "copilot,openai,google,bing,deeplx,baidu,tencent",
+
   // Translation service configuration (services that don't require configuration can be omitted)
   "variableTranslator.services": {
     // OpenAI configuration
@@ -210,6 +213,7 @@ Here is a complete example of all configuration options. Copy this to your `sett
 |---------------|------|---------|-------------|
 | `enableFileTranslation` | boolean | `true` | Enable file path translation feature |
 | `translationService` | string | `"copilot"` | Select translation service |
+| `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | Translation service priority (high to low, comma separated) |
 | `services.openai.apiKey` | string | `""` | OpenAI API Key |
 | `services.baidu.appId` | string | `""` | Baidu Translation APP_ID |
 | `services.baidu.secretKey` | string | `""` | Baidu Translation Secret Key |
