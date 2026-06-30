@@ -6,7 +6,7 @@
 
 1. 打开 VSCode
 2. 按 `Ctrl+Shift+X` 打开扩展面板
-3. 搜索 "变量翻译助手" 或 "Variable Translator"
+3. 搜索 "变量翻译助手"
 4. 点击 **Install** 安装
 
 ### 从 VSIX 安装

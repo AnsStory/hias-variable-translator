@@ -1,4 +1,4 @@
-# 变量翻译助手
+# [变量翻译助手](https://ansstory.github.io/hias-variable-translator/)
 
 VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
@@ -17,31 +17,8 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
 1. 打开 VSCode
 2. 按 `Ctrl+Shift+X` 打开扩展面板
-3. 搜索 "变量翻译助手" 或 "Variable Translator"
+3. 搜索 "变量翻译助手"
 4. 点击 **Install** 安装
-
-### 从 VSIX 安装
-
-1. 下载 `.vsix` 文件
-2. 在 VSCode 中按 `Ctrl+Shift+P`
-3. 输入 "Extensions: Install from VSIX..."
-4. 选择下载的 `.vsix` 文件
-
-### 从源码构建
-
-```bash
-# 克隆项目
-git clone https://github.com/AnsStory/hias-variable-translator.git
-
-# 安装依赖
-npm install --registry https://registry.npmmirror.com
-
-# 编译
-npm run compile
-
-# 打包
-npm run build
-```
 
 ## 使用说明
 
