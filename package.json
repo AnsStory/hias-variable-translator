@@ -1,0 +1,188 @@
+{
+  "name": "variable-translator",
+  "displayName": "变量翻译助手",
+  "description": "将任意非英文字符自动检测并翻译为英文，支持文件路径翻译和选中文本翻译",
+  "version": "0.1.0",
+  "publisher": "variable-translator-publisher",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnsStory/hias-variable-translator.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0",
+    "node": "^20.19.2"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "variableTranslator.translateSelection",
+        "title": "翻译选中文本"
+      },
+      {
+        "command": "variableTranslator.undoTranslation",
+        "title": "撤回翻译"
+      },
+      {
+        "command": "variableTranslator.toggleFileTranslation",
+        "title": "切换文件翻译开关"
+      },
+      {
+        "command": "variableTranslator.switchTranslationService",
+        "title": "切换翻译服务"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "variableTranslator.translateSelection",
+        "key": "alt+shift+t",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "variableTranslator.undoTranslation",
+        "key": "alt+shift+z"
+      },
+      {
+        "command": "variableTranslator.toggleFileTranslation",
+        "key": "alt+shift+d"
+      },
+      {
+        "command": "variableTranslator.switchTranslationService",
+        "key": "alt+shift+s"
+      }
+    ],
+    "configuration": {
+      "title": "变量翻译助手",
+      "properties": {
+        "variableTranslator.enableFileTranslation": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否启用文件路径翻译功能（右键新建文件时自动翻译）"
+        },
+        "variableTranslator.translationService": {
+          "type": "string",
+          "enum": [
+            "copilot",
+            "openai",
+            "google",
+            "bing",
+            "deeplx",
+            "baidu",
+            "tencent"
+          ],
+          "default": "copilot",
+          "description": "选择翻译服务"
+        },
+        "variableTranslator.services": {
+          "type": "object",
+          "default": {},
+          "description": "翻译服务配置（无需配置的服务可省略）",
+          "properties": {
+            "openai": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "default": "",
+                  "description": "OpenAI API Key"
+                }
+              }
+            },
+            "baidu": {
+              "type": "object",
+              "properties": {
+                "appId": {
+                  "type": "string",
+                  "default": "",
+                  "description": "百度翻译 APP_ID"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "default": "",
+                  "description": "百度翻译 Secret Key"
+                }
+              }
+            },
+            "tencent": {
+              "type": "object",
+              "properties": {
+                "secretId": {
+                  "type": "string",
+                  "default": "",
+                  "description": "腾讯翻译君 SecretId"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "default": "",
+                  "description": "腾讯翻译君 SecretKey"
+                }
+              }
+            },
+            "bing": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "default": "",
+                  "description": "Bing / Azure Translator API Key"
+                },
+                "region": {
+                  "type": "string",
+                  "default": "global",
+                  "description": "Bing / Azure Translator Region"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "vsce:package": "npx vsce package",
+    "docs:dev": "vitepress dev doc",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^18.19.130",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.62.1",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "javascript-obfuscator": "^5.4.3",
+    "prettier": "^3.9.4",
+    "rollup-plugin-obfuscator": "^1.1.0",
+    "terser": "^5.48.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.62.1",
+    "vite": "^6.4.3",
+    "vite-plugin-obfuscator": "^1.0.5",
+    "vitepress": "^1.6.4"
+  },
+  "dependencies": {
+    "pinyin-pro": "^3.0.0"
+  },
+  "volta": {
+    "node": "20.19.2"
+  }
+}
