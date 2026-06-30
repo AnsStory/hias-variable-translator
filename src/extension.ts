@@ -408,6 +408,9 @@ async function handleFileCreated(fileUri: vscode.Uri) {
 
     console.log('重命名成功')
 
+    // 清理空的中文目录
+    await cleanupEmptyDirs(path.dirname(filePath), workspaceFolder.uri.fsPath)
+
     // 添加撤回记录
     undoManager.addRecord(filePath, finalPath)
 
