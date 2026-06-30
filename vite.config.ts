@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import { viteObfuscateFile } from 'vite-plugin-obfuscator';
+import { defineConfig } from 'vite'
+import { resolve } from 'path'
+import { viteObfuscateFile } from 'vite-plugin-obfuscator'
 
 export default defineConfig({
   plugins: [
@@ -32,38 +32,30 @@ export default defineConfig({
       stringArrayWrappersType: 'function',
       stringArrayThreshold: 0.75,
       transformObjectKeys: true,
-      unicodeEscapeSequence: false
-    })
+      unicodeEscapeSequence: false,
+    }),
   ],
   build: {
     outDir: 'dist',
     lib: {
       entry: resolve(__dirname, 'src/extension.ts'),
       formats: ['cjs'],
-      fileName: 'extension'
+      fileName: 'extension',
     },
     rollupOptions: {
-      external: [
-        'vscode',
-        'path',
-        'fs',
-        'crypto',
-        'url',
-        'http',
-        'https'
-      ],
+      external: ['vscode', 'path', 'fs', 'crypto', 'url', 'http', 'https'],
       output: {
         entryFileNames: 'extension.js',
         chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]'
-      }
+        assetFileNames: '[name].[ext]',
+      },
     },
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
-      }
-    }
-  }
-});
+        drop_debugger: true,
+      },
+    },
+  },
+})

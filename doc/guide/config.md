@@ -155,3 +155,66 @@
 
 - **VS Code Copilot**：需要 Copilot 订阅
 - **谷歌翻译**：免费，有调用限制
+- **DeepLX**：默认地址为 `http://127.0.0.1:1188`，无需配置
+
+---
+
+## 完整配置示例
+
+以下是所有配置项的完整示例，可根据需要复制到 `settings.json` 中：
+
+```json
+{
+  // 启用文件路径翻译功能（右键新建文件时自动翻译）
+  "variableTranslator.enableFileTranslation": true,
+
+  // 选择翻译服务：copilot | openai | google | bing | deeplx | baidu | tencent
+  "variableTranslator.translationService": "openai",
+
+  // 翻译服务配置（无需配置的服务可省略）
+  "variableTranslator.services": {
+    // OpenAI 配置
+    "openai": {
+      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+
+    // 百度翻译配置
+    "baidu": {
+      "appId": "your-app-id",
+      "secretKey": "your-secret-key"
+    },
+
+    // 腾讯翻译君配置
+    "tencent": {
+      "secretId": "your-secret-id",
+      "secretKey": "your-secret-key"
+    },
+
+    // Bing / Azure Translator 配置
+    "bing": {
+      "apiKey": "your-api-key",
+      "region": "global"
+    },
+
+    // DeepLX 配置（默认地址为 http://127.0.0.1:1188）
+    "deeplx": {
+      "baseUrl": "http://127.0.0.1:1188"
+    }
+  }
+}
+```
+
+### 配置说明
+
+| 配置项 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `enableFileTranslation` | boolean | `true` | 是否启用文件路径翻译功能 |
+| `translationService` | string | `"copilot"` | 选择翻译服务 |
+| `services.openai.apiKey` | string | `""` | OpenAI API Key |
+| `services.baidu.appId` | string | `""` | 百度翻译 APP_ID |
+| `services.baidu.secretKey` | string | `""` | 百度翻译 Secret Key |
+| `services.tencent.secretId` | string | `""` | 腾讯云 SecretId |
+| `services.tencent.secretKey` | string | `""` | 腾讯云 SecretKey |
+| `services.bing.apiKey` | string | `""` | Azure Translator API Key |
+| `services.bing.region` | string | `"global"` | Azure Translator Region |
+| `services.deeplx.baseUrl` | string | `"http://127.0.0.1:1188"` | DeepLX 服务地址 |

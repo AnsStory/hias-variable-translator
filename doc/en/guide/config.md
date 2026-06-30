@@ -155,3 +155,66 @@ The following services don't require additional configuration:
 
 - **VS Code Copilot**: Requires Copilot subscription
 - **Google Translation**: Free, has rate limits
+- **DeepLX**: Default URL is `http://127.0.0.1:1188`, no configuration needed
+
+---
+
+## Complete Configuration Example
+
+Here is a complete example of all configuration options. Copy this to your `settings.json` as needed:
+
+```json
+{
+  // Enable file path translation feature (auto-translate when creating new files)
+  "variableTranslator.enableFileTranslation": true,
+
+  // Select translation service: copilot | openai | google | bing | deeplx | baidu | tencent
+  "variableTranslator.translationService": "openai",
+
+  // Translation service configuration (services that don't require configuration can be omitted)
+  "variableTranslator.services": {
+    // OpenAI configuration
+    "openai": {
+      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+
+    // Baidu Translation configuration
+    "baidu": {
+      "appId": "your-app-id",
+      "secretKey": "your-secret-key"
+    },
+
+    // Tencent Translation configuration
+    "tencent": {
+      "secretId": "your-secret-id",
+      "secretKey": "your-secret-key"
+    },
+
+    // Bing / Azure Translator configuration
+    "bing": {
+      "apiKey": "your-api-key",
+      "region": "global"
+    },
+
+    // DeepLX configuration (default URL is http://127.0.0.1:1188)
+    "deeplx": {
+      "baseUrl": "http://127.0.0.1:1188"
+    }
+  }
+}
+```
+
+### Configuration Description
+
+| Configuration | Type | Default | Description |
+|---------------|------|---------|-------------|
+| `enableFileTranslation` | boolean | `true` | Enable file path translation feature |
+| `translationService` | string | `"copilot"` | Select translation service |
+| `services.openai.apiKey` | string | `""` | OpenAI API Key |
+| `services.baidu.appId` | string | `""` | Baidu Translation APP_ID |
+| `services.baidu.secretKey` | string | `""` | Baidu Translation Secret Key |
+| `services.tencent.secretId` | string | `""` | Tencent Cloud SecretId |
+| `services.tencent.secretKey` | string | `""` | Tencent Cloud SecretKey |
+| `services.bing.apiKey` | string | `""` | Azure Translator API Key |
+| `services.bing.region` | string | `"global"` | Azure Translator Region |
+| `services.deeplx.baseUrl` | string | `"http://127.0.0.1:1188"` | DeepLX service URL |
