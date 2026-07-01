@@ -270,7 +270,7 @@ function registerFileCreationListener(context: vscode.ExtensionContext) {
 
     for (const fileUri of event.files) {
       console.log('处理文件:', fileUri.fsPath)
-      await handleFileCreated(fileUri)
+      await handleFileCreated(fileUri, true)
     }
   })
 
@@ -293,7 +293,7 @@ function registerFileRenameListener(context: vscode.ExtensionContext) {
 
     for (const { newUri } of event.files) {
       console.log('处理重命名文件:', newUri.fsPath)
-      await handleFileCreated(newUri)
+      await handleFileCreated(newUri, false)
     }
   })
 
@@ -303,8 +303,9 @@ function registerFileRenameListener(context: vscode.ExtensionContext) {
 /**
  * 处理文件创建事件
  * @param fileUri 文件URI
+ * @param isNewFile 是否是新建文件（取消时删除）
  */
-async function handleFileCreated(fileUri: vscode.Uri) {
+async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean) {
   const filePath = fileUri.fsPath
 
   console.log('处理文件:', filePath)
@@ -348,15 +349,17 @@ async function handleFileCreated(fileUri: vscode.Uri) {
   const format = await showFormatPicker()
   if (!format) {
     console.log('用户取消了格式选择')
-    // 用户取消时，删除创建的内容
-    try {
-      if (!isDirectory) {
-        await closeEditorForFile(filePath)
+    // 只有新建文件才删除，重命名文件保留原文件
+    if (isNewFile) {
+      try {
+        if (!isDirectory) {
+          await closeEditorForFile(filePath)
+        }
+        await vscode.workspace.fs.delete(fileUri, { recursive: true })
+        await cleanupEmptyDirs(path.dirname(filePath), workspaceFolder.uri.fsPath)
+      } catch {
+        // 忽略删除错误
       }
-      await vscode.workspace.fs.delete(fileUri, { recursive: true })
-      await cleanupEmptyDirs(path.dirname(filePath), workspaceFolder.uri.fsPath)
-    } catch {
-      // 忽略删除错误
     }
     return
   }
