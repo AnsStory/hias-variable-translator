@@ -2,6 +2,8 @@
 
 VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
+# [Extensions for Visual Studio Code](https://marketplace.visualstudio.com/)
+
 ## 功能特性
 
 - **多语言支持**：自动检测中文、日文、韩文、俄文等任意非英文字符并翻译为英文
