@@ -4,6 +4,9 @@ export default defineConfig({
   title: '变量翻译助手',
   description: 'VSCode 插件 - 将非英文字符翻译为英文',
 
+  head: [['link', { rel: 'icon', type: 'image/png', href: '/hias-variable-translator/favicon.png' }]],
+  lastUpdated: true,
+  cleanUrls: true,
   locales: {
     root: {
       label: '中文',
