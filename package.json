@@ -81,7 +81,7 @@
         "variableTranslator.enableFileTranslation": {
           "type": "boolean",
           "default": true,
-          "description": "是否启用文件路径翻译功能（右键新建文件时自动翻译）"
+          "description": "是否启用: 文件路径自动翻译（右键新建/重命名文件、文件夹时自动翻译）"
         },
         "variableTranslator.translationService": {
           "type": "string",
