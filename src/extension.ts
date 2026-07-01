@@ -45,6 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
   registerFileCreationListener(context)
   console.log('文件创建监听注册完成')
 
+  // 监听文件重命名事件
+  registerFileRenameListener(context)
+  console.log('文件重命名监听注册完成')
+
   // 监听配置变化
   registerConfigListener()
 
@@ -267,6 +271,29 @@ function registerFileCreationListener(context: vscode.ExtensionContext) {
     for (const fileUri of event.files) {
       console.log('处理文件:', fileUri.fsPath)
       await handleFileCreated(fileUri)
+    }
+  })
+
+  context.subscriptions.push(listener)
+}
+
+/**
+ * 监听文件重命名事件
+ * @param context 插件上下文
+ */
+function registerFileRenameListener(context: vscode.ExtensionContext) {
+  const listener = vscode.workspace.onDidRenameFiles(async (event) => {
+    console.log('文件重命名事件触发:', event.files.length, '个文件')
+
+    // 检查是否启用了文件翻译
+    if (!ConfigManager.isFileTranslationEnabled()) {
+      console.log('文件翻译已禁用')
+      return
+    }
+
+    for (const { newUri } of event.files) {
+      console.log('处理重命名文件:', newUri.fsPath)
+      await handleFileCreated(newUri)
     }
   })
 
