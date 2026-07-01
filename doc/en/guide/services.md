@@ -48,7 +48,7 @@
 
 ### DeepLX
 
-1. Visit [DeepLX GitHub](https://github.com/DeepLX/DeepLX)
+1. Visit [DeepLX](https://deeplx.owo.network/) or [DeepLX GitHub](https://github.com/OwO-Network/DeepLX)
 2. Follow instructions for local deployment
 3. Default URL: `http://127.0.0.1:1188`
 4. No additional configuration needed

@@ -26,6 +26,8 @@
 - CONSTANT_CASE
 - param-case
 - Header-Case
+- Capital Case
+- no case
 
 ### Alt+Shift+Z - 撤回文件翻译
 

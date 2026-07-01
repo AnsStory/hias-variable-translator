@@ -59,7 +59,7 @@ Configure `variableTranslator.services` in VSCode settings, see [Configuration](
 | Baidu Translation | [fanyi-api.baidu.com](https://fanyi-api.baidu.com/) | Enable General Translation API |
 | Tencent Translation | [console.cloud.tencent.com/cam/capi](https://console.cloud.tencent.com/cam/capi) | Get SecretId/SecretKey |
 | Bing/Azure | [portal.azure.com](https://portal.azure.com/) | Create Translator resource |
-| DeepLX | [github.com/DeepLX/DeepLX](https://github.com/DeepLX/DeepLX) | Local deployment |
+| DeepLX | [DeepLX GitHub](https://github.com/OwO-Network/DeepLX) | Local deployment |
 
 For detailed steps, see [Translation Services Documentation](/en/guide/services).
 

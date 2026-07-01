@@ -23,13 +23,23 @@ The plugin automatically detects and translates the following languages:
 | Russian | Имя пользователя → userName |
 | Others | Any non-English characters |
 
-## Naming Formats
 
-| Format | Example |
-|--------|---------|
-| camelCase | userName |
-| PascalCase | UserName |
-| snake_case | user_name |
-| CONSTANT_CASE | USER_NAME |
-| param-case | user-name |
-| Header-Case | User-Name |
+## Naming Format Description
+
+### File Translation Formats
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| camelCase | userName | Lower camel case, first letter lowercase |
+| PascalCase | UserName | Upper camel case, first letter uppercase |
+| snake_case | user_name | Underscore separated, all lowercase |
+| CONSTANT_CASE | USER_NAME | Underscore separated, all uppercase |
+| param-case | user-name | Hyphen separated, all lowercase |
+| Header-Case | User-Name | Hyphen separated, first letter uppercase |
+
+### Selected Text Translation Additional Formats
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| Capital Case | User Name | First letter uppercase, space separated |
+| no case | user name | All lowercase, space separated |

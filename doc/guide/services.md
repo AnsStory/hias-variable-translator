@@ -48,7 +48,7 @@
 
 ### DeepLX
 
-1. 访问 [DeepLX GitHub](https://github.com/DeepLX/DeepLX)
+1. 访问 [DeepLX](https://deeplx.owo.network/) 或 [DeepLX GitHub](https://github.com/OwO-Network/DeepLX)
 2. 按照说明本地部署服务
 3. 默认地址：`http://127.0.0.1:1188`
 4. 无需额外配置

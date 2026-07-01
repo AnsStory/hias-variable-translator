@@ -23,13 +23,22 @@
 | 俄文 | Имя пользователя → userName |
 | 其他 | 任何非英文字符 |
 
-## 命名格式
+## 命名格式说明
 
-| 格式 | 示例 |
-|------|------|
-| camelCase | userName |
-| PascalCase | UserName |
-| snake_case | user_name |
-| CONSTANT_CASE | USER_NAME |
-| param-case | user-name |
-| Header-Case | User-Name |
+### 文件翻译格式
+
+| 格式 | 示例 | 说明 |
+|------|------|------|
+| camelCase | userName | 小驼峰，首字母小写 |
+| PascalCase | UserName | 大驼峰，首字母大写 |
+| snake_case | user_name | 下划线分隔，全小写 |
+| CONSTANT_CASE | USER_NAME | 下划线分隔，全大写 |
+| param-case | user-name | 连字符分隔，全小写 |
+| Header-Case | User-Name | 连字符分隔，首字母大写 |
+
+### 选中文本翻译额外格式
+
+| 格式 | 示例 | 说明 |
+|------|------|------|
+| Capital Case | User Name | 首字母大写，空格分隔 |
+| no case | user name | 全小写，空格分隔 |

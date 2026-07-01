@@ -59,7 +59,7 @@
 | 百度翻译 | [fanyi-api.baidu.com](https://fanyi-api.baidu.com/) | 开通通用翻译 API |
 | 腾讯翻译君 | [console.cloud.tencent.com/cam/capi](https://console.cloud.tencent.com/cam/capi) | 获取 SecretId/SecretKey |
 | Bing/Azure | [portal.azure.com](https://portal.azure.com/) | 创建 Translator 资源 |
-| DeepLX | [github.com/DeepLX/DeepLX](https://github.com/DeepLX/DeepLX) | 本地部署服务 |
+| DeepLX | [DeepLX GitHub](https://github.com/OwO-Network/DeepLX) | 本地部署服务 |
 
 详细获取步骤请参考 [翻译服务文档](/guide/services)。
 
