@@ -544,26 +544,48 @@ async function showFormatPicker(isTextTranslation: boolean = false): Promise<Nam
     const formatOptions = isTextTranslation ? TEXT_FORMAT_OPTIONS : FILE_FORMAT_OPTIONS
 
     // 创建QuickPick选项
-    const options = formatOptions.map((option) => ({
+    const options: (vscode.QuickPickItem & { value: NamingFormat; index: number })[] = formatOptions.map((option, index) => ({
       label: option.value,
-      description: option.description,
+      description: `${index + 1}. ${option.description}`,
       value: option.value,
+      index: index,
     }))
 
-    // 使用showQuickPick并添加ignoreFocusOut选项（参考var-translation实现）
-    const selected = await vscode.window.showQuickPick(options, {
-      placeHolder: isTextTranslation ? '选择翻译格式：' : '检测到非英文文件名，选择命名格式：',
-      title: isTextTranslation ? '文本翻译' : '文件名翻译',
-      ignoreFocusOut: true,
+    // 创建QuickPick实例
+    const quickPick = vscode.window.createQuickPick<typeof options[0]>()
+    quickPick.items = options
+    quickPick.title = isTextTranslation ? '文本翻译' : '文件名翻译'
+    quickPick.placeholder = isTextTranslation ? '输入数字1-8选择格式' : '输入数字1-6选择格式'
+    quickPick.ignoreFocusOut = true
+
+    return new Promise<NamingFormat | undefined>((resolve) => {
+      // 监听输入变化，数字匹配后自动确认
+      quickPick.onDidChangeValue((value) => {
+        const num = parseInt(value)
+        if (num >= 1 && num <= options.length) {
+          quickPick.hide()
+          resolve(options[num - 1].value)
+        }
+      })
+
+      // 监听选择确认
+      quickPick.onDidAccept(() => {
+        const selected = quickPick.selectedItems[0]
+        if (selected) {
+          resolve(selected.value)
+        } else {
+          resolve(undefined)
+        }
+        quickPick.hide()
+      })
+
+      // 监听取消
+      quickPick.onDidHide(() => {
+        resolve(undefined)
+      })
+
+      quickPick.show()
     })
-
-    console.log('用户选择:', selected)
-
-    if (!selected) {
-      return undefined
-    }
-
-    return selected.value as NamingFormat
   } catch (error) {
     console.error('格式选择器错误:', error)
     return undefined
