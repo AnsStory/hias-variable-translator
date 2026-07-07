@@ -22,38 +22,28 @@ let statusBarItem: vscode.StatusBarItem
  * @param context 插件上下文
  */
 export function activate(context: vscode.ExtensionContext) {
-  console.log('变量翻译助手已激活')
-
   // 初始化模块
   translator = new Translator()
   undoManager = new UndoManager()
-
-  console.log('翻译器初始化完成')
 
   // 创建状态栏项目
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100)
   updateStatusBar()
   statusBarItem.show()
 
-  console.log('状态栏初始化完成')
-
   // 注册命令
   registerCommands(context)
-  console.log('命令注册完成')
 
   // 监听文件创建事件
   registerFileCreationListener(context)
-  console.log('文件创建监听注册完成')
 
   // 监听文件重命名事件
   registerFileRenameListener(context)
-  console.log('文件重命名监听注册完成')
 
   // 监听配置变化
   registerConfigListener()
 
   context.subscriptions.push(statusBarItem)
-  console.log('插件初始化完成，等待文件创建事件...')
 }
 
 /**
@@ -120,8 +110,6 @@ async function handleTranslateSelection() {
   await editor.edit((editBuilder) => {
     editBuilder.replace(selection, translatedText)
   })
-
-  // vscode.window.showInformationMessage(`翻译完成: ${translatedText}`);
 }
 
 /**
@@ -130,7 +118,6 @@ async function handleTranslateSelection() {
 async function handleUndoTranslation() {
   // 获取所有有效的撤回记录
   const validRecords = undoManager.getValidRecords()
-  console.log('有效的撤回记录数量:', validRecords.length)
 
   if (validRecords.length === 0) {
     vscode.window.showWarningMessage('没有可撤回的翻译记录（已超过1分钟有效期）')
@@ -140,12 +127,10 @@ async function handleUndoTranslation() {
   // 获取最近的一条记录
   const latestRecord = validRecords[validRecords.length - 1]
   const filePath = latestRecord.translatedPath
-  console.log('删除文件:', filePath)
 
   try {
     // 检查文件是否存在
     if (!fs.existsSync(filePath)) {
-      console.log('文件不存在')
       vscode.window.showWarningMessage('文件不存在，可能已被删除')
       undoManager.removeRecord(filePath)
       return
@@ -153,7 +138,6 @@ async function handleUndoTranslation() {
 
     // 删除文件
     await vscode.workspace.fs.delete(vscode.Uri.file(filePath))
-    console.log('文件删除成功')
 
     // 关闭编辑器窗口
     await closeEditorForFile(filePath)
@@ -163,8 +147,6 @@ async function handleUndoTranslation() {
 
     // 删除撤回记录
     undoManager.removeRecord(filePath)
-
-    // vscode.window.showInformationMessage('已删除: ' + path.basename(filePath));
   } catch (error) {
     console.error('删除文件失败:', error)
     vscode.window.showErrorMessage(`删除文件失败: ${error}`)
@@ -190,7 +172,6 @@ async function deleteEmptyDirs(dirPath: string): Promise<void> {
 
     // 删除空目录
     fs.rmdirSync(dirPath)
-    console.log('删除空目录:', dirPath)
 
     // 递归删除上级空目录
     const parentDir = path.dirname(dirPath)
@@ -260,16 +241,12 @@ async function handleSwitchTranslationService() {
  */
 function registerFileCreationListener(context: vscode.ExtensionContext) {
   const listener = vscode.workspace.onDidCreateFiles(async (event) => {
-    console.log('文件创建事件触发:', event.files.length, '个文件')
-
     // 检查是否启用了文件翻译
     if (!ConfigManager.isFileTranslationEnabled()) {
-      console.log('文件翻译已禁用')
       return
     }
 
     for (const fileUri of event.files) {
-      console.log('处理文件:', fileUri.fsPath)
       await handleFileCreated(fileUri, true)
     }
   })
@@ -283,16 +260,12 @@ function registerFileCreationListener(context: vscode.ExtensionContext) {
  */
 function registerFileRenameListener(context: vscode.ExtensionContext) {
   const listener = vscode.workspace.onDidRenameFiles(async (event) => {
-    console.log('文件重命名事件触发:', event.files.length, '个文件')
-
     // 检查是否启用了文件翻译
     if (!ConfigManager.isFileTranslationEnabled()) {
-      console.log('文件翻译已禁用')
       return
     }
 
     for (const { newUri } of event.files) {
-      console.log('处理重命名文件:', newUri.fsPath)
       await handleFileCreated(newUri, false)
     }
   })
@@ -308,47 +281,35 @@ function registerFileRenameListener(context: vscode.ExtensionContext) {
 async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean) {
   const filePath = fileUri.fsPath
 
-  console.log('处理文件:', filePath)
-
   // 检查是文件还是文件夹
   let isDirectory: boolean
   try {
     const stat = await vscode.workspace.fs.stat(fileUri)
     isDirectory = stat.type === vscode.FileType.Directory
-    console.log('类型:', isDirectory ? '文件夹' : '文件')
   } catch {
-    console.log('无法获取文件状态，跳过')
     return
   }
 
   // 获取工作区文件夹
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri)
   if (!workspaceFolder) {
-    console.log('不在工作区内，跳过')
     return
   }
 
   // 获取相对路径（包含目录）
   const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath)
-  console.log('相对路径:', relativePath)
 
   // 检测相对路径是否包含非英文字符
   if (!containsNonEnglish(relativePath)) {
-    console.log('路径不包含非英文字符，跳过')
     return
   }
-
-  console.log('检测到非英文字符，等待创建完成...')
 
   // 延迟等待创建完成
   await new Promise((resolve) => setTimeout(resolve, 200))
 
-  console.log('弹出格式选择框')
-
   // 选择翻译格式
   const format = await showFormatPicker()
   if (!format) {
-    console.log('用户取消了格式选择')
     // 只有新建文件才删除，重命名文件保留原文件
     if (isNewFile) {
       try {
@@ -364,8 +325,6 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean) {
     return
   }
 
-  console.log('用户选择格式:', format)
-
   // 获取文件名部分（不含扩展名）
   let nameWithoutExt: string
   let ext: string
@@ -376,42 +335,62 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean) {
     ext = ''
   } else {
     ext = path.extname(relativePath)
-    nameWithoutExt = relativePath.slice(0, -ext.length)
+    nameWithoutExt = relativePath.slice(0, -ext.length || undefined)
   }
-  console.log('名称（不含扩展名）:', nameWithoutExt, '扩展名:', ext)
 
-  // 翻译路径的每个部分
-  const parts = nameWithoutExt.split(/[/\\]/)
+  // 翻译路径的每个部分（支持路径分隔符和点号作为分隔符）
+  const pathParts = nameWithoutExt.split(/[/\\]/)
   const translatedParts: string[] = []
 
-  for (const part of parts) {
-    if (!part) continue
+  for (const pathPart of pathParts) {
+    if (!pathPart) continue
 
-    if (containsNonEnglish(part)) {
-      console.log('翻译部分:', part)
-      // 翻译非英文部分
-      const result = await translator.translate(part)
+    // 将点号也作为分隔符处理
+    const dotParts = pathPart.split('.')
+    const translatedDotParts: string[] = []
+
+    for (const dotPart of dotParts) {
+      if (!dotPart) {
+        translatedDotParts.push(dotPart)
+        continue
+      }
+
+      if (containsNonEnglish(dotPart)) {
+        // 翻译非英文部分
+        const result = await translator.translate(dotPart)
+        if (result.success) {
+          const words = splitIntoWords(result.translatedText)
+          const translated = convertToFormat(words, format)
+          translatedDotParts.push(translated)
+        } else {
+          translatedDotParts.push(dotPart)
+        }
+      } else {
+        // 英文部分保持原样
+        translatedDotParts.push(dotPart)
+      }
+    }
+
+    translatedParts.push(translatedDotParts.join('.'))
+  }
+
+  // 翻译扩展名（去掉前面的点号）
+  let translatedExt = ext
+  if (ext) {
+    const extContent = ext.slice(1) // 去掉点号
+    if (containsNonEnglish(extContent)) {
+      const result = await translator.translate(extContent)
       if (result.success) {
-        console.log('翻译结果:', result.translatedText)
         const words = splitIntoWords(result.translatedText)
         const translated = convertToFormat(words, format)
-        console.log('格式转换后:', translated)
-        translatedParts.push(translated)
-      } else {
-        translatedParts.push(part)
+        translatedExt = '.' + translated
       }
-    } else {
-      // 英文部分保持原样
-      translatedParts.push(part)
     }
   }
 
-  console.log('翻译后的部分:', translatedParts)
-
   // 构建新的相对路径
-  const newRelativePath = translatedParts.join('/') + ext
+  const newRelativePath = translatedParts.join('/') + translatedExt
   const newFilePath = path.join(workspaceFolder.uri.fsPath, newRelativePath)
-  console.log('新路径:', newFilePath)
 
   // 处理文件名冲突
   let finalPath = newFilePath
@@ -430,13 +409,9 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean) {
   const targetDir = path.dirname(finalPath)
   await createDirectoryRecursive(targetDir)
 
-  console.log('开始重命名...')
-
   // 重命名
   try {
-    await vscode.workspace.fs.rename(fileUri, vscode.Uri.file(finalPath), { overwrite: true })
-
-    console.log('重命名成功')
+    await vscode.workspace.fs.rename(fileUri, vscode.Uri.file(finalPath), { overwrite: false })
 
     // 清理空的中文目录
     await cleanupEmptyDirs(path.dirname(filePath), workspaceFolder.uri.fsPath)
@@ -537,8 +512,6 @@ async function closeEditorForFile(filePath: string): Promise<void> {
  * @returns 选择的命名格式
  */
 async function showFormatPicker(isTextTranslation: boolean = false): Promise<NamingFormat | undefined> {
-  console.log('显示格式选择器')
-
   try {
     // 根据场景选择格式选项
     const formatOptions = isTextTranslation ? TEXT_FORMAT_OPTIONS : FILE_FORMAT_OPTIONS
@@ -618,8 +591,6 @@ function registerConfigListener() {
  * 插件停用函数
  */
 export function deactivate() {
-  console.log('变量翻译助手已停用')
-
   if (undoManager) {
     undoManager.dispose()
   }

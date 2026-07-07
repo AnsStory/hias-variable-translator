@@ -97,11 +97,9 @@ export class Translator {
       if (result.success) {
         return result
       }
-      console.log(`翻译服务 ${serviceType} 失败: ${result.error}`)
     }
 
     // 所有服务都失败，降级到拼音
-    console.log('所有翻译服务都失败，降级到拼音服务')
     return await this.pinyinService.translate(text)
   }
 

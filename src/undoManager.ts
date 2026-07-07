@@ -38,10 +38,7 @@ export class UndoManager {
       timestamp: Date.now(),
     }
 
-    // 只用翻译后的路径作为key
     this.records.set(translatedPath, record)
-
-    console.log('添加撤回记录:', { originalPath, translatedPath })
   }
 
   /**
