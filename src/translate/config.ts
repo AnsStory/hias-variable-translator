@@ -84,7 +84,7 @@ export class ConfigManager {
    * @returns 是否已配置
    */
   static isServiceConfigured(service: TranslationServiceType): boolean {
-    if (service === 'copilot' || service === 'google' || service === 'deeplx') {
+    if (service === 'copilot' || service === 'pinyin' || service === 'google' || service === 'deeplx') {
       return true // 这些服务不需要配置
     }
 

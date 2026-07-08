@@ -55,8 +55,8 @@ export function hasSnippetSyntax(template: string): boolean {
  * @returns 解析后的字符串（保留 snippet 语法）
  */
 export function parseConsoleLogTemplate(value: string, template: string): string {
-  // 先处理 ${name:prefix,suffix} 变量（必须在 ${name} 之前处理）
-  let result = template.replace(/\$\{name:([^}]+)\}/g, (match, format) => {
+  // 先处理 ${n:name:prefix,suffix} 变量（snippet + name + 前后缀）
+  let result = template.replace(/\$\{\d+:name:([^}]+)\}/g, (match, format) => {
     const parts = format.split(',')
     if (parts.length === 2) {
       return `${parts[0]}${value}${parts[1]}`
@@ -64,27 +64,26 @@ export function parseConsoleLogTemplate(value: string, template: string): string
     return match
   })
 
-  // 处理 ${value} 变量（只替换非 snippet 的 ${value}）
-  // 匹配 ${value} 但排除 ${数字...} 形式的 snippet
-  result = result.replace(/\$\{value\}/g, (match, offset) => {
-    // 检查前面是否是 ${数字 形式（snippet 语法）
-    const before = result.substring(0, offset)
-    if (/\$\{\d/.test(before)) {
-      return match
+  // 再处理 ${name:prefix,suffix} 变量（无 snippet）
+  result = result.replace(/\$\{name:([^}]+)\}/g, (match, format) => {
+    const parts = format.split(',')
+    if (parts.length === 2) {
+      return `${parts[0]}${value}${parts[1]}`
     }
-    return value
+    return match
   })
 
-  // 处理 ${name} 变量（只替换非 snippet 的 ${name}）
-  // 匹配 ${name} 但排除 ${数字...} 形式的 snippet
-  result = result.replace(/\$\{name\}/g, (match, offset) => {
-    // 检查前面是否是 ${数字 形式（snippet 语法）
-    const before = result.substring(0, offset)
-    if (/\$\{\d/.test(before)) {
-      return match
-    }
-    return value
-  })
+  // 处理 ${n:name} snippet 变量（如 ${1:name}）
+  result = result.replace(/\$\{\d+:name\}/g, value)
+
+  // 处理 ${n:value} snippet 变量（如 ${1:value}）
+  result = result.replace(/\$\{\d+:value\}/g, value)
+
+  // 处理 ${value} 变量
+  result = result.replace(/\$\{value\}/g, value)
+
+  // 处理 ${name} 变量
+  result = result.replace(/\$\{name\}/g, value)
 
   return result
 }

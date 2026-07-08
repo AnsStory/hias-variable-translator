@@ -554,6 +554,9 @@ export function updateStatusBar(): void {
 export function registerConfigListener(): void {
   ConfigManager.onConfigurationChanged(() => {
     updateStatusBar()
+    if (translator) {
+      translator.reinitializeServices()
+    }
   })
 }
 

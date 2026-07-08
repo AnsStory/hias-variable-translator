@@ -5,7 +5,7 @@
 /**
  * 翻译服务类型
  */
-export type TranslationServiceType = 'copilot' | 'openai' | 'google' | 'bing' | 'deeplx' | 'baidu' | 'tencent'
+export type TranslationServiceType = 'copilot' | 'openai' | 'google' | 'bing' | 'deeplx' | 'baidu' | 'tencent' | 'pinyin'
 
 /**
  * 翻译服务选项，用于QuickPick
@@ -22,8 +22,8 @@ export interface TranslationServiceOption {
  */
 export const TRANSLATION_SERVICE_OPTIONS: TranslationServiceOption[] = [
   {
-    label: 'VS Code Copilot',
-    description: '零配置，推荐',
+    label: '拼音',
+    description: '零配置，推荐（作为降级方案）',
     value: 'copilot',
     requiresConfig: false,
   },

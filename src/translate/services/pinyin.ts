@@ -7,7 +7,7 @@ import { ITranslationService, TranslationResult } from './index'
 import { pinyin } from 'pinyin-pro'
 
 export class PinyinService implements ITranslationService {
-  readonly type = 'copilot' as const
+  readonly type = 'pinyin' as const
   readonly name = '拼音（降级方案）'
 
   /**

@@ -26,8 +26,9 @@ export class Translator {
    * 初始化翻译服务
    */
   private initializeServices(): void {
-    // 注册拼音服务作为降级方案
+    // 注册拼音服务作为降级方案（copilot和pinyin都指向拼音服务）
     this.services.set('copilot', this.pinyinService)
+    this.services.set('pinyin', this.pinyinService)
 
     // 注册谷歌翻译（免费，始终可用）
     this.services.set('google', new GoogleService())
