@@ -65,10 +65,26 @@ export function parseConsoleLogTemplate(value: string, template: string): string
   })
 
   // 处理 ${value} 变量（只替换非 snippet 的 ${value}）
-  result = result.replace(/(?<!\$\{[^}]*)\$\{value\}(?!\})/g, value)
+  // 匹配 ${value} 但排除 ${数字...} 形式的 snippet
+  result = result.replace(/\$\{value\}/g, (match, offset) => {
+    // 检查前面是否是 ${数字 形式（snippet 语法）
+    const before = result.substring(0, offset)
+    if (/\$\{\d/.test(before)) {
+      return match
+    }
+    return value
+  })
 
   // 处理 ${name} 变量（只替换非 snippet 的 ${name}）
-  result = result.replace(/(?<!\$\{[^}]*)\$\{name\}(?!\})/g, value)
+  // 匹配 ${name} 但排除 ${数字...} 形式的 snippet
+  result = result.replace(/\$\{name\}/g, (match, offset) => {
+    // 检查前面是否是 ${数字 形式（snippet 语法）
+    const before = result.substring(0, offset)
+    if (/\$\{\d/.test(before)) {
+      return match
+    }
+    return value
+  })
 
   return result
 }
@@ -79,8 +95,15 @@ export function parseConsoleLogTemplate(value: string, template: string): string
  * @returns 匹配正则表达式
  */
 export function buildConsoleLogRegex(template: string): RegExp {
-  // 先替换模板变量为占位符，再转义特殊字符
-  let pattern = template
+  // 先清理 snippet 语法，再替换模板变量为占位符
+  let cleanTemplate = template
+  // 移除 ${n:placeholder}，只保留 placeholder
+  cleanTemplate = cleanTemplate.replace(/\$\{(\d+):([^}]+)\}/g, '$2')
+  // 移除 $n（光标位置标记）
+  cleanTemplate = cleanTemplate.replace(/\$\d+/g, '')
+
+  // 替换模板变量为占位符，再转义特殊字符
+  let pattern = cleanTemplate
     // 替换模板变量为占位符
     .replace(/\$\{value\}/g, '§VALUE§')
     .replace(/\$\{name:[^}]+\}/g, '§NAME_FORMAT§')
