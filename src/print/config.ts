@@ -57,15 +57,19 @@ export function parseConsoleLogTemplate(value: string, template: string): string
  * @returns 匹配正则表达式
  */
 export function buildConsoleLogRegex(template: string): RegExp {
-  // 将模板转换为正则表达式
-  const regexStr = template
-    // 转义特殊字符
+  // 先替换模板变量为占位符，再转义特殊字符
+  let pattern = template
+    // 替换模板变量为占位符
+    .replace(/\$\{value\}/g, '§VALUE§')
+    .replace(/\$\{name:[^}]+\}/g, '§NAME_FORMAT§')
+    .replace(/\$\{name\}/g, '§NAME§')
+    // 转义特殊字符（不包括 §）
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    // 替换模板变量为匹配模式
-    .replace(/\\$\\{value\\}/g, '.+')
-    .replace(/\\$\\{name\\}/g, '.+')
-    .replace(/\\$\\{name:[^}]+\\}/g, '.+')
+    // 将占位符替换为正则匹配模式
+    .replace(/§VALUE§/g, '.+')
+    .replace(/§NAME_FORMAT§/g, '.+')
+    .replace(/§NAME§/g, '.+')
 
   // 构建完整的正则表达式
-  return new RegExp(`^\\s*console\\.log\\(${regexStr}\\)\\s*$`)
+  return new RegExp(`^\\s*console\\.log\\(${pattern}\\)\\s*$`)
 }
