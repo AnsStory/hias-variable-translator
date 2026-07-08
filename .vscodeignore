@@ -9,4 +9,6 @@ vite.config.ts
 .gitignore
 *.log
 doc/**
+docs/**
+out/**
 !icon.png
