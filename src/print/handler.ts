@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode'
 import { findInsertionLine, getLineIndent } from './ast'
-import { isConsoleLogEnabled, getConsoleLogTemplate, parseConsoleLogTemplate, buildConsoleLogRegex } from './config'
+import { isConsoleLogEnabled, getConsoleLogTemplate, parseConsoleLogTemplate, buildConsoleLogRegex, hasSnippetSyntax, cleanSnippetSyntax } from './config'
 
 /**
  * 处理插入 console.log
@@ -24,12 +24,13 @@ export async function handleInsertConsoleLog(): Promise<void> {
   const selections = editor.selections
   const template = getConsoleLogTemplate()
   const fullText = editor.document.getText()
+  const useSnippet = hasSnippetSyntax(template)
 
   // 收集所有需要插入的信息
   const insertions: Array<{
-    text: string
     line: number
     indent: string
+    selectedText: string
   }> = []
 
   for (const selection of selections) {
@@ -42,8 +43,6 @@ export async function handleInsertConsoleLog(): Promise<void> {
 
     // 使用 AST 解析确定正确的插入位置
     let insertLine = findInsertionLine(fullText, selectedText, selectionLine)
-
-    // 如果 AST 解析失败，使用简单的下一行
     if (insertLine === -1) {
       insertLine = selectionLine + 1
     }
@@ -58,11 +57,10 @@ export async function handleInsertConsoleLog(): Promise<void> {
       indent = getLineIndent(currentLine.text)
     }
 
-    const consoleLogContent = parseConsoleLogTemplate(selectedText, template)
     insertions.push({
-      text: `${indent}console.log(${consoleLogContent})\n`,
       line: insertLine,
-      indent: indent
+      indent: indent,
+      selectedText: selectedText
     })
   }
 
@@ -73,13 +71,34 @@ export async function handleInsertConsoleLog(): Promise<void> {
   // 按行号降序排序，避免行号偏移问题
   insertions.sort((a, b) => b.line - a.line)
 
-  // 插入所有 console.log
-  await editor.edit((editBuilder) => {
+  if (useSnippet) {
+    // Snippet 模式：使用 WorkspaceEdit + SnippetTextEdit 支持多位置 snippet
+    const workspaceEdit = new vscode.WorkspaceEdit()
+    const snippetEdits: vscode.SnippetTextEdit[] = []
+
     for (const insertion of insertions) {
-      const insertPosition = new vscode.Position(insertion.line, 0)
-      editBuilder.insert(insertPosition, insertion.text)
+      const consoleLogContent = parseConsoleLogTemplate(insertion.selectedText, template)
+      const snippetText = `${insertion.indent}console.log(${consoleLogContent})\n`
+
+      const range = new vscode.Range(new vscode.Position(insertion.line, 0), new vscode.Position(insertion.line, 0))
+      const snippetString = new vscode.SnippetString(snippetText)
+      snippetEdits.push(vscode.SnippetTextEdit.insert(range.start, snippetString))
     }
-  })
+
+    // 使用 set 方法应用 snippet 编辑
+    workspaceEdit.set(editor.document.uri, snippetEdits)
+    await vscode.workspace.applyEdit(workspaceEdit)
+  } else {
+    // 普通模式：直接插入文本
+    await editor.edit((editBuilder) => {
+      for (const insertion of insertions) {
+        let consoleLogContent = parseConsoleLogTemplate(insertion.selectedText, template)
+        const text = `${insertion.indent}console.log(${consoleLogContent})\n`
+        const insertPosition = new vscode.Position(insertion.line, 0)
+        editBuilder.insert(insertPosition, text)
+      }
+    })
+  }
 }
 
 /**

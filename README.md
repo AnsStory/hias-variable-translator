@@ -46,12 +46,12 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
 ## 快捷键
 
-| 快捷键 | 功能 |
-|--------|------|
-| `Alt+Shift+T` | 翻译选中文本 |
-| `Alt+Shift+Z` | 撤回文件翻译 |
-| `Alt+Shift+D` | 切换文件翻译开关 |
-| `Alt+Shift+S` | 切换翻译服务 |
+| 快捷键 (Windows/Linux) | 快捷键 (macOS) | 功能 |
+|------------------------|----------------|------|
+| `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 |
+| `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 |
+| `Alt+Shift+D` | `Option+Shift+D` | 切换文件翻译开关 |
+| `Alt+Shift+S` | `Option+Shift+S` | 切换翻译服务 |
 
 ## 命名格式
 

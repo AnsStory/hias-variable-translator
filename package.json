@@ -127,7 +127,7 @@
         "variableTranslator.consoleLogTemplate": {
           "type": "string",
           "default": "${value}, `${name}`",
-          "description": "console.log 参数模板。可用变量: ${value}=选中文本, ${name}=原始文本。可自行添加引号包裹，如: ${value}, '${name}'"
+          "description": "console.log 参数模板。可用变量: ${value}=选中文本, ${name}=原始文本。支持 snippet 语法: $1, $2, ${1:placeholder} 等控制光标位置"
         },
         "variableTranslator.translationService": {
           "type": "string",

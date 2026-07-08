@@ -26,27 +26,49 @@ export function getConsoleLogTemplate(): string {
 }
 
 /**
+ * 清理 snippet 语法，转换为普通文本
+ * @param text 包含 snippet 语法的文本
+ * @returns 清理后的普通文本
+ */
+export function cleanSnippetSyntax(text: string): string {
+  // 移除 ${n:placeholder}，只保留 placeholder
+  let result = text.replace(/\$\{(\d+):([^}]+)\}/g, '$2')
+  // 移除 $n（光标位置标记）
+  result = result.replace(/\$\d+/g, '')
+  return result
+}
+
+/**
+ * 检查模板是否包含 snippet 语法
+ * @param template 模板字符串
+ * @returns 是否包含 snippet 语法
+ */
+export function hasSnippetSyntax(template: string): boolean {
+  // 匹配 $1, $2, ..., $0 或 ${1:...}, ${2:...}, ..., ${0:...}
+  return /\$\d/.test(template) || /\$\{\d/.test(template)
+}
+
+/**
  * 解析模板变量
  * @param value 选中的文本
  * @param template 模板字符串
- * @returns 解析后的字符串
+ * @returns 解析后的字符串（保留 snippet 语法）
  */
 export function parseConsoleLogTemplate(value: string, template: string): string {
-  // 处理 ${value} 变量
-  let result = template.replace(/\$\{value\}/g, value)
-
-  // 处理 ${name:prefix,suffix} 变量（必须在 ${name} 之前处理）
-  result = result.replace(/\$\{name:([^}]+)\}/g, (match, format) => {
+  // 先处理 ${name:prefix,suffix} 变量（必须在 ${name} 之前处理）
+  let result = template.replace(/\$\{name:([^}]+)\}/g, (match, format) => {
     const parts = format.split(',')
     if (parts.length === 2) {
       return `${parts[0]}${value}${parts[1]}`
     }
-    // 只有一个参数时不处理，保留原样
     return match
   })
 
-  // 处理 ${name} 变量（只输出原始文本）
-  result = result.replace(/\$\{name\}/g, value)
+  // 处理 ${value} 变量（只替换非 snippet 的 ${value}）
+  result = result.replace(/(?<!\$\{[^}]*)\$\{value\}(?!\})/g, value)
+
+  // 处理 ${name} 变量（只替换非 snippet 的 ${name}）
+  result = result.replace(/(?<!\$\{[^}]*)\$\{name\}(?!\})/g, value)
 
   return result
 }
