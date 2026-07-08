@@ -54,6 +54,22 @@
       {
         "command": "variableTranslator.switchTranslationService",
         "title": "切换翻译服务"
+      },
+      {
+        "command": "variableTranslator.insertConsoleLog",
+        "title": "插入 console.log"
+      },
+      {
+        "command": "variableTranslator.deleteConsoleLog",
+        "title": "删除 console.log"
+      },
+      {
+        "command": "variableTranslator.commentConsoleLog",
+        "title": "注释 console.log"
+      },
+      {
+        "command": "variableTranslator.uncommentConsoleLog",
+        "title": "取消注释 console.log"
       }
     ],
     "keybindings": [
@@ -73,6 +89,26 @@
       {
         "command": "variableTranslator.switchTranslationService",
         "key": "alt+shift+s"
+      },
+      {
+        "command": "variableTranslator.insertConsoleLog",
+        "key": "ctrl+alt+l",
+        "when": "editorTextFocus && editorHasSelection && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+      },
+      {
+        "command": "variableTranslator.deleteConsoleLog",
+        "key": "ctrl+alt+d",
+        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+      },
+      {
+        "command": "variableTranslator.commentConsoleLog",
+        "key": "ctrl+alt+c",
+        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+      },
+      {
+        "command": "variableTranslator.uncommentConsoleLog",
+        "key": "ctrl+alt+u",
+        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
       }
     ],
     "configuration": {
@@ -82,6 +118,16 @@
           "type": "boolean",
           "default": true,
           "description": "是否启用: 文件路径自动翻译（右键新建/重命名文件、文件夹时自动翻译）"
+        },
+        "variableTranslator.enableConsoleLog": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否启用: 选中文本后按 Ctrl+Alt+L 快速插入 console.log"
+        },
+        "variableTranslator.consoleLogTemplate": {
+          "type": "string",
+          "default": "${value}, `${name}`",
+          "description": "console.log 参数模板。可用变量: ${value}=选中文本, ${name}=原始文本。可自行添加引号包裹，如: ${value}, '${name}'"
         },
         "variableTranslator.translationService": {
           "type": "string",
@@ -186,6 +232,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/acorn": "^4.0.6",
     "@types/node": "^18.19.130",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
@@ -204,6 +251,7 @@
     "vitepress": "^1.6.4"
   },
   "dependencies": {
+    "acorn": "^8.17.0",
     "pinyin-pro": "^3.0.0"
   },
   "volta": {
