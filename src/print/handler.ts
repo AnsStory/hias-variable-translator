@@ -4,6 +4,7 @@
  */
 
 import * as vscode from 'vscode'
+import * as path from 'path'
 import { findInsertionLine, getLineIndent } from './ast'
 import { isConsoleLogEnabled, getConsoleLogTemplate, parseConsoleLogTemplate, buildConsoleLogRegex, hasSnippetSyntax, cleanSnippetSyntax } from './config'
 
@@ -25,6 +26,7 @@ export async function handleInsertConsoleLog(): Promise<void> {
   const template = getConsoleLogTemplate()
   const fullText = editor.document.getText()
   const useSnippet = hasSnippetSyntax(template)
+  const fileExtension = path.extname(editor.document.fileName)
 
   // 收集所有需要插入的信息
   const insertions: Array<{
@@ -42,7 +44,7 @@ export async function handleInsertConsoleLog(): Promise<void> {
     const selectionLine = selection.active.line
 
     // 使用 AST 解析确定正确的插入位置
-    let insertLine = findInsertionLine(fullText, selectedText, selectionLine)
+    let insertLine = findInsertionLine(fullText, selectedText, selectionLine, fileExtension)
     if (insertLine === -1) {
       insertLine = selectionLine + 1
     }
