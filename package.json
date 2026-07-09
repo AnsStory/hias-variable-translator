@@ -230,18 +230,18 @@
             "type": "string",
             "enum": [
               "camelCase",
+              "originalValue",
               "PascalCase",
+              "no case",
               "snake_case",
               "CONSTANT_CASE",
               "param-case",
               "Header-Case",
-              "Capital Case",
-              "no case",
-              "originalValue"
+              "Capital Case"
             ]
           },
           "default": [],
-          "description": "复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）。用户选择的格式会排到第一位。originalValue 表示复制原始翻译值"
+          "description": "复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）。用户选择的格式会排到第一位。originalValue 表示复制未翻译的原始值"
         }
       }
     }
