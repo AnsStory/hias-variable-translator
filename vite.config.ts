@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => ({
       : []),
   ],
   build: {
+    // sourcemap: true,
     outDir: 'dist',
     lib: {
       entry: resolve(__dirname, 'src/extension.ts'),

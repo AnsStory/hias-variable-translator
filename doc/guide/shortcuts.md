@@ -3,6 +3,7 @@
 | 快捷键 (Windows/Linux) | 快捷键 (macOS) | 功能 | 说明 |
 |------------------------|----------------|------|------|
 | `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 | 编辑器中选中非英文文本后翻译 |
+| `Alt+Shift+C` | `Option+Shift+C` | 翻译并复制到剪贴板 | 翻译后复制多种格式到剪贴板历史 |
 | `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 | 删除翻译后的文件/目录（1分钟内有效） |
 | `Alt+Shift+D` | `Option+Shift+D` | 切换文件翻译开关 | 开启/关闭文件路径翻译功能 |
 | `Alt+Shift+S` | `Option+Shift+S` | 切换翻译服务 | 选择不同的翻译服务 |
@@ -26,6 +27,39 @@
 - Header-Case
 - Capital Case
 - no case
+
+### Alt+Shift+C - 翻译并复制到剪贴板
+
+**使用方法**：
+1. 在编辑器中选中非英文文本
+2. 按 `Alt+Shift+C`
+3. 选择翻译格式
+4. 翻译结果复制到剪贴板历史
+
+**配置示例**：
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "originalValue",
+    "PascalCase",
+    "no case",
+    "snake_case",
+    "CONSTANT_CASE",
+    "param-case",
+    "Header-Case",
+    "Capital Case",
+  ]
+}
+```
+
+**效果**：翻译"用户名称"后，剪贴板历史中会依次包含：
+- `用户名称`（原始值）
+- `world`（camelCase）
+- `world`（snake_case）
+
+最终剪贴板保留用户选择的格式
 
 ### Alt+Shift+Z - 撤回文件翻译
 

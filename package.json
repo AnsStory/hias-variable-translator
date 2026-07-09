@@ -2,7 +2,7 @@
   "name": "hais-variable-translator",
   "displayName": "变量翻译助手",
   "description": "将任意非英文字符自动检测并翻译为英文，支持文件路径翻译和选中文本翻译",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "publisher": "ansstory",
   "icon": "icon.png",
   "homepage": "https://ansstory.github.io/hias-variable-translator/",
@@ -44,6 +44,10 @@
         "title": "翻译选中文本"
       },
       {
+        "command": "variableTranslator.translateCopy",
+        "title": "翻译并复制到剪贴板"
+      },
+      {
         "command": "variableTranslator.undoTranslation",
         "title": "撤回翻译"
       },
@@ -76,6 +80,11 @@
       {
         "command": "variableTranslator.translateSelection",
         "key": "alt+shift+t",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "variableTranslator.translateCopy",
+        "key": "alt+shift+c",
         "when": "editorTextFocus && editorHasSelection"
       },
       {
@@ -209,6 +218,30 @@
           "type": "string",
           "default": "copilot,openai,google,bing,deeplx,baidu,tencent",
           "markdownDescription": "翻译服务优先级（从高到低，翻译失败时按顺序降级，逗号分隔）。示例：`copilot,openai,google,bing,deeplx,baidu,tencent`"
+        },
+        "variableTranslator.copyToClipboard": {
+          "type": "boolean",
+          "default": false,
+          "description": "翻译完成后是否自动将结果复制到剪贴板"
+        },
+        "variableTranslator.clipboardFormats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "camelCase",
+              "PascalCase",
+              "snake_case",
+              "CONSTANT_CASE",
+              "param-case",
+              "Header-Case",
+              "Capital Case",
+              "no case",
+              "originalValue"
+            ]
+          },
+          "default": [],
+          "description": "复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）。用户选择的格式会排到第一位。originalValue 表示复制原始翻译值"
         }
       }
     }

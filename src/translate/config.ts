@@ -105,6 +105,24 @@ export class ConfigManager {
   }
 
   /**
+   * 是否启用翻译后复制到剪贴板
+   * @returns 是否启用
+   */
+  static isCopyToClipboard(): boolean {
+    const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
+    return config.get<boolean>('copyToClipboard', false)
+  }
+
+  /**
+   * 获取剪贴板格式配置
+   * @returns 剪贴板格式列表
+   */
+  static getClipboardFormats(): string[] {
+    const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
+    return config.get<string[]>('clipboardFormats', [])
+  }
+
+  /**
    * 监听配置变化
    * @param callback 配置变化回调
    * @returns 取消监听的Disposable
@@ -117,7 +135,9 @@ export class ConfigManager {
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.consoleLogTemplate`) ||
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.translationService`) ||
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.services`) ||
-        e.affectsConfiguration(`${this.CONFIG_PREFIX}.servicePriority`)
+        e.affectsConfiguration(`${this.CONFIG_PREFIX}.servicePriority`) ||
+        e.affectsConfiguration(`${this.CONFIG_PREFIX}.copyToClipboard`) ||
+        e.affectsConfiguration(`${this.CONFIG_PREFIX}.clipboardFormats`)
       ) {
         callback(e)
       }

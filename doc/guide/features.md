@@ -98,6 +98,70 @@
 
 ---
 
+## 功能 3：翻译并复制到剪贴板
+
+### 使用场景
+
+用户在任意文件中编写非英文字符，选中后通过快捷键翻译并复制多种格式到剪贴板历史。
+
+### 操作流程
+
+```
+选中文本 → 按下 Alt+Shift+C → 选择翻译格式 → 翻译结果复制到剪贴板
+```
+
+### 示例
+
+```
+选中：用户名称
+按下：Alt+Shift+C
+选择格式：camelCase
+
+配置的 clipboardFormats：["originalValue", "camelCase", "snake_case"]
+
+复制到剪贴板历史：
+- 用户名称（原始值，翻译前的原始文本）
+- userName（camelCase）
+- user_name（snake_case）
+
+当前剪贴板：userName（用户选择的格式）
+```
+
+### 配置项
+
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "originalValue",
+    "PascalCase",
+    "no case",
+    "snake_case",
+    "CONSTANT_CASE",
+    "param-case",
+    "Header-Case",
+    "Capital Case",
+    "CONSTANT_CASE"
+  ]
+}
+```
+
+### clipboardFormats 可选值
+
+| 值 | 说明 |
+|----|------|
+| `camelCase` | 小驼峰 |
+| `PascalCase` | 大驼峰 |
+| `snake_case` | 下划线 |
+| `CONSTANT_CASE` | 常量格式 |
+| `param-case` | 连字符 |
+| `Header-Case` | 头部连字符 |
+| `no case` | 空格分隔 |
+| `originalValue` | 翻译前的原始文本（即你选中的中文文本） |
+
+---
+
 ## 命名格式说明
 
 ### 文件翻译格式

@@ -12,6 +12,7 @@ import { Translator } from './translator'
 import { UndoManager } from './undoManager'
 import { ConfigManager } from './config'
 import { TranslationServiceType } from './services'
+import { copyTranslationToClipboard, copyFileTranslationToClipboard, showClipboardStatus, showFileClipboardStatus } from './clipboard'
 
 let translator: Translator
 let undoManager: UndoManager
@@ -33,6 +34,55 @@ export function createStatusBarItem() {
   updateStatusBar()
   statusBarItem.show()
   return statusBarItem
+}
+
+/**
+ * 处理翻译并复制到剪贴板（不替换原文）
+ */
+export async function handleTranslateCopy(): Promise<void> {
+  const editor = vscode.window.activeTextEditor
+  if (!editor) {
+    vscode.window.showWarningMessage('请先选中文本')
+    return
+  }
+
+  const selection = editor.selection
+  const selectedText = editor.document.getText(selection)
+
+  if (!selectedText) {
+    vscode.window.showWarningMessage('请先选中要翻译的文本')
+    return
+  }
+
+  if (!containsNonEnglish(selectedText)) {
+    return
+  }
+
+  // 选择翻译格式
+  const format = await showFormatPicker(true)
+  if (!format) {
+    return
+  }
+
+  // 翻译文本
+  const result = await translator.translate(selectedText)
+
+  if (!result.success) {
+    vscode.window.showErrorMessage(`翻译失败: ${result.error}`)
+    return
+  }
+
+  // 复制到剪贴板（不替换原文）
+  const copyCount = await copyTranslationToClipboard(selectedText, result.translatedText, format)
+  if (copyCount > 0) {
+    showClipboardStatus(selectedText, result.translatedText, format, copyCount)
+  } else {
+    // 未启用剪贴板复制，只复制用户选择的格式
+    const words = splitIntoWords(result.translatedText)
+    const translatedText = convertToFormat(words, format)
+    await vscode.env.clipboard.writeText(translatedText)
+    vscode.window.setStatusBarMessage(`已复制到剪贴板: ${translatedText}`, 3000)
+  }
 }
 
 /**
@@ -79,6 +129,12 @@ export async function handleTranslateSelection(): Promise<void> {
   await editor.edit((editBuilder) => {
     editBuilder.replace(selection, translatedText)
   })
+
+  // 复制到剪贴板
+  const copyCount = await copyTranslationToClipboard(selectedText, result.translatedText, format)
+  if (copyCount > 0) {
+    showClipboardStatus(selectedText, result.translatedText, format, copyCount)
+  }
 }
 
 /**
@@ -281,6 +337,8 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
   // 翻译路径的每个部分（支持路径分隔符和点号作为分隔符）
   const pathParts = nameWithoutExt.split(/[/\\]/)
   const translatedParts: string[] = []
+  let lastTranslatedPart: string = ''
+  let lastOriginalPart: string = ''
 
   for (const pathPart of pathParts) {
     if (!pathPart) continue
@@ -302,8 +360,11 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
           const words = splitIntoWords(result.translatedText)
           const translated = convertToFormat(words, format)
           translatedDotParts.push(translated)
+          lastTranslatedPart = translated
+          lastOriginalPart = dotPart
         } else {
           translatedDotParts.push(dotPart)
+          lastOriginalPart = dotPart
         }
       } else {
         // 英文部分保持原样
@@ -358,6 +419,14 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
 
     // 添加撤回记录
     undoManager.addRecord(filePath, finalPath)
+
+    // 复制到剪贴板（复制"最后一个"翻译结果）
+    if (lastTranslatedPart && lastOriginalPart && containsNonEnglish(lastOriginalPart)) {
+      const copyCount = await copyFileTranslationToClipboard(lastOriginalPart, lastTranslatedPart, format)
+      if (copyCount > 0) {
+        showFileClipboardStatus(lastOriginalPart, lastTranslatedPart, format, copyCount)
+      }
+    }
 
     // 文件才需要关闭窗口和打开新文件
     if (!isDirectory) {

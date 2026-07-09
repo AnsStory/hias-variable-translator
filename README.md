@@ -12,6 +12,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 - **多种命名格式**：支持 camelCase、PascalCase、snake_case 等 8 种命名格式
 - **多翻译服务**：支持 Pinyin、OpenAI、Google、Bing、百度、腾讯等 7 种翻译服务
 - **一键撤回**：1 分钟内可撤回翻译，自动清理文件和目录
+- **剪贴板复制**：翻译后自动复制多种命名格式到剪贴板历史
 
 ## 安装
 
@@ -44,11 +45,39 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 2. 翻译后的文件被删除
 3. 1 分钟内可撤回
 
+### 翻译并复制到剪贴板
+
+1. 在编辑器中选中非英文文本
+2. 按 `Alt+Shift+C`
+3. 选择命名格式
+4. 翻译结果复制到剪贴板（不替换原文）
+
+**使用前提**：需在设置中开启 `copyToClipboard: true`，并配置 `clipboardFormats` 指定要复制的格式。(其中：originalValue为翻以前的原始文本)
+
+#### 配置示例
+
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": ["camelCase","originalValue","PascalCase","no case","snake_case","CONSTANT_CASE","param-case","Header-Case","Capital Case",]
+}
+```
+
+#### 效果
+
+选中 `用户名称`，按 `Alt+Shift+C` 选择 `snake_case`：
+
+剪贴板历史（Win+V 可查看）：
+- `user_name`（snake_case，用户选择的排第一）
+- `userName`（camelCase）
+- `USER_NAME`（CONSTANT_CASE）
+
 ## 快捷键
 
 | 快捷键 (Windows/Linux) | 快捷键 (macOS) | 功能 |
 |------------------------|----------------|------|
 | `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 |
+| `Alt+Shift+C` | `Option+Shift+C` | 翻译并复制到剪贴板 |
 | `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 |
 | `Alt+Shift+D` | `Option+Shift+D` | 切换文件翻译开关 |
 | `Alt+Shift+S` | `Option+Shift+S` | 切换翻译服务 |
@@ -97,6 +126,14 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
   // 翻译服务优先级（从高到低，翻译失败时按顺序降级，逗号分隔）
   "variableTranslator.servicePriority": "copilot,openai,google,bing,deeplx,baidu,tencent",
+
+  // 翻译后是否自动将结果复制到剪贴板
+  "variableTranslator.copyToClipboard": false,
+
+  // 复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）
+  // 可选值：camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case, originalValue
+  // originalValue 表示复制原始翻译前的文本
+  "variableTranslator.clipboardFormats": [],
 
   // 翻译服务配置（无需配置的服务可省略）
   "variableTranslator.services": {

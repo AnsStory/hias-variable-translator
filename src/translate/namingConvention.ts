@@ -3,7 +3,7 @@
  * 支持6种命名格式：camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case
  */
 
-export type NamingFormat = 'camelCase' | 'PascalCase' | 'snake_case' | 'CONSTANT_CASE' | 'param-case' | 'Header-Case' | 'Capital Case' | 'no case'
+export type NamingFormat = 'camelCase' | 'PascalCase' | 'snake_case' | 'CONSTANT_CASE' | 'param-case' | 'Header-Case' | 'Capital Case' | 'no case' | 'originalValue'
 
 /**
  * 格式选项，用于QuickPick
@@ -46,6 +46,11 @@ export const TEXT_FORMAT_OPTIONS: FormatOption[] = [
 export function convertToFormat(words: string[], format: NamingFormat): string {
   if (words.length === 0) {
     return ''
+  }
+
+  // originalValue 返回原始值（首字母大写，空格分隔）
+  if (format === 'originalValue') {
+    return words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')
   }
 
   switch (format) {

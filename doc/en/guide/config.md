@@ -26,6 +26,51 @@ The following options can be configured in VSCode settings:
 }
 ```
 
+### copyToClipboard
+
+- **Type**: `boolean`
+- **Default**: `false`
+- **Description**: Whether to automatically copy translation results to clipboard after translation
+
+```json
+{
+  "variableTranslator.copyToClipboard": true
+}
+```
+
+### clipboardFormats
+
+- **Type**: `string[]`
+- **Default**: `[]`
+- **Description**: Naming formats to copy to clipboard (supports multiple selections, written sequentially to clipboard history). User selected format will be moved to first position
+
+**Options**:
+- `camelCase` - Lower camel case
+- `PascalCase` - Upper camel case
+- `snake_case` - Underscore separated
+- `CONSTANT_CASE` - Constant case
+- `param-case` - Hyphen separated
+- `Header-Case` - Header case
+- `no case` - Space separated
+- `originalValue` - The original text before translation (e.g., the Chinese text you selected)
+
+```json
+{
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "originalValue",
+    "PascalCase",
+    "no case",
+    "snake_case",
+    "CONSTANT_CASE",
+    "param-case",
+    "Header-Case",
+    "Capital Case",
+    "CONSTANT_CASE"
+  ]
+}
+```
+
 ### translationService
 
 - **Type**: `string`
@@ -174,6 +219,24 @@ Here is a complete example of all configuration options. Copy this to your `sett
   // Translation service priority (high to low, fallback in order when translation fails, comma separated)
   "variableTranslator.servicePriority": "copilot,openai,google,bing,deeplx,baidu,tencent",
 
+  // Whether to automatically copy translation results to clipboard after translation
+  "variableTranslator.copyToClipboard": true,
+
+  // Naming formats to copy to clipboard (supports multiple selections, written sequentially to clipboard history)
+  // Options: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, no case, originalValue
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "originalValue",
+    "PascalCase",
+    "no case",
+    "snake_case",
+    "CONSTANT_CASE",
+    "param-case",
+    "Header-Case",
+    "Capital Case",
+    "CONSTANT_CASE"
+  ],
+
   // Translation service configuration (services that don't require configuration can be omitted)
   "variableTranslator.services": {
     // OpenAI configuration
@@ -214,6 +277,8 @@ Here is a complete example of all configuration options. Copy this to your `sett
 | `enableFileTranslation` | boolean | `true` | Enable file path translation feature |
 | `translationService` | string | `"copilot"` | Select translation service |
 | `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | Translation service priority (high to low, comma separated) |
+| `copyToClipboard` | boolean | `false` | Whether to automatically copy translation results to clipboard |
+| `clipboardFormats` | string[] | `[]` | Naming formats to copy to clipboard |
 | `services.openai.apiKey` | string | `""` | OpenAI API Key |
 | `services.baidu.appId` | string | `""` | Baidu Translation APP_ID |
 | `services.baidu.secretKey` | string | `""` | Baidu Translation Secret Key |

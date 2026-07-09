@@ -3,6 +3,7 @@
 | Shortcut (Windows/Linux) | Shortcut (macOS) | Function | Description |
 |--------------------------|------------------|----------|-------------|
 | `Alt+Shift+T` | `Option+Shift+T` | Translate selected text | Translate non-English text selected in editor |
+| `Alt+Shift+C` | `Option+Shift+C` | Translate and copy to clipboard | Copy multiple formats to clipboard history after translation |
 | `Alt+Shift+Z` | `Option+Shift+Z` | Undo file translation | Delete translated file/directory (valid within 1 minute) |
 | `Alt+Shift+D` | `Option+Shift+D` | Toggle file translation | Enable/disable file path translation feature |
 | `Alt+Shift+S` | `Option+Shift+S` | Switch translation service | Select different translation service |
@@ -26,6 +27,39 @@
 - Header-Case
 - Capital Case
 - no case
+
+### Alt+Shift+C - Translate and Copy to Clipboard
+
+**How to use**:
+1. Select non-English text in editor
+2. Press `Alt+Shift+C`
+3. Select translation format
+4. Translation result is copied to clipboard history
+
+**Configuration Example**:
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "originalValue",
+    "PascalCase",
+    "no case",
+    "snake_case",
+    "CONSTANT_CASE",
+    "param-case",
+    "Header-Case",
+    "Capital Case",
+  ]
+}
+```
+
+**Effect**: After translating "用户名称", clipboard history will contain:
+- `用户名称` (original value)
+- `world` (camelCase)
+- `world` (snake_case)
+
+Final clipboard retains user selected format
 
 ### Alt+Shift+Z - Undo File Translation
 

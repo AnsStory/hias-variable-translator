@@ -98,6 +98,70 @@ Use VSCode's built-in undo: `Ctrl+Z`
 
 ---
 
+## Feature 3: Translate and Copy to Clipboard
+
+### Use Case
+
+Users write non-English characters in any file, select them and translate via shortcut, then copy multiple formats to clipboard history.
+
+### Operation Flow
+
+```
+Select text → Press Alt+Shift+C → Select format → Translation result copied to clipboard
+```
+
+### Example
+
+```
+Select: 用户名称
+Press: Alt+Shift+C
+Select format: camelCase
+
+Configured clipboardFormats: ["originalValue", "camelCase", "snake_case"]
+
+Copied to clipboard history:
+- 用户名称 (original value, the text before translation)
+- userName (camelCase)
+- user_name (snake_case)
+
+Current clipboard: userName (user selected format)
+```
+
+### Configuration
+
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "originalValue",
+    "PascalCase",
+    "no case",
+    "snake_case",
+    "CONSTANT_CASE",
+    "param-case",
+    "Header-Case",
+    "Capital Case",
+    "CONSTANT_CASE"
+  ]
+}
+```
+
+### clipboardFormats Options
+
+| Value | Description |
+|-------|-------------|
+| `camelCase` | Lower camel case |
+| `PascalCase` | Upper camel case |
+| `snake_case` | Underscore separated |
+| `CONSTANT_CASE` | Constant case |
+| `param-case` | Hyphen separated |
+| `Header-Case` | Header case |
+| `no case` | Space separated |
+| `originalValue` | Original text before translation (the Chinese text you selected) |
+
+---
+
 ## Naming Format Description
 
 ### File Translation Formats

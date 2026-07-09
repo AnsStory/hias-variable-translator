@@ -14,6 +14,7 @@ export {
   initTranslateModule,
   createStatusBarItem,
   handleTranslateSelection,
+  handleTranslateCopy,
   handleUndoTranslation,
   handleToggleFileTranslation,
   handleSwitchTranslationService,
