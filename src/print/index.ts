@@ -4,5 +4,6 @@
  */
 
 export { findInsertionLine, getLineIndent } from './ast'
+export type { InsertionResult } from './ast'
 export { isConsoleLogEnabled, getConsoleLogTemplate, parseConsoleLogTemplate, buildConsoleLogRegex } from './config'
 export { handleInsertConsoleLog, handleDeleteConsoleLog, handleCommentConsoleLog, handleUncommentConsoleLog } from './handler'

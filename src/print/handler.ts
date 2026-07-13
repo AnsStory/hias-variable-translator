@@ -44,7 +44,8 @@ export async function handleInsertConsoleLog(): Promise<void> {
     const selectionLine = selection.active.line
 
     // 使用 AST 解析确定正确的插入位置
-    let insertLine = findInsertionLine(fullText, selectedText, selectionLine, fileExtension)
+    const insertResult = findInsertionLine(fullText, selectedText, selectionLine, fileExtension)
+    let insertLine = insertResult.line
     if (insertLine === -1) {
       insertLine = selectionLine + 1
     }
