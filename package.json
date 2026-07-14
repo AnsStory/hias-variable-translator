@@ -242,6 +242,16 @@
           },
           "default": [],
           "description": "复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）。用户选择的格式会排到第一位。originalValue 表示复制未翻译的原始值"
+        },
+        "variableTranslator.consoleLogCopyToClipboard": {
+          "type": "boolean",
+          "default": false,
+          "description": "插入 console.log 后是否自动将匹配内容复制到剪贴板"
+        },
+        "variableTranslator.consoleLogClipboardPattern": {
+          "type": "string",
+          "default": "",
+          "description": "console.log 复制到剪贴板的提取模板。使用与 consoleLogTemplate 相同的变量语法: ${value}=选中文本, ${name}=原始文本, ${name:prefix,suffix}=带前后缀。示例: ${name:log_,} 可提取 log_params"
         }
       }
     }

@@ -1277,6 +1277,20 @@ const checkWithinConditionBlock = (ast: ASTNode, code: string, selectionLine: nu
 const checkWithinReturnStatement = (ast: ASTNode, code: string, selectionLine: number, variableName: string): InsertionResult => {
   let result: InsertionResult = { line: -1 }
   const hasRef = createIdentifierSearcher(code)
+  const wanted = variableName.trim()
+  const parentMap = buildParentMap(ast)
+
+  // 找到选中行上的标识符节点，用于判断是否嵌套在 return 内的回调中
+  const selectionNodes: ASTNode[] = []
+  walkAST(ast, (node) => {
+    if (!ID_TYPES.has(node.type)) return
+    const name = node.type === 'PrivateIdentifier' ? `#${(node as Record<string, unknown>).name}` : (node as Record<string, unknown>).name
+    if (name !== wanted) return
+    if (node.start === undefined || node.end === undefined) return
+    const sl = offsetToLine(code, node.start)
+    const el = offsetToLine(code, node.end)
+    if (selectionLine >= sl && selectionLine <= el) selectionNodes.push(node)
+  })
 
   walkAST(ast, (node): boolean | void => {
     if (result.line !== -1) return true
@@ -1288,7 +1302,18 @@ const checkWithinReturnStatement = (ast: ASTNode, code: string, selectionLine: n
     const s = lineFromLoc(loc, 'start'),
       e = lineFromLoc(loc, 'end')
     if (selectionLine < s || selectionLine > e) return
-    if (!hasRef(arg, variableName.trim())) return
+    if (!hasRef(arg, wanted)) return
+
+    // 关键修复：如果选中节点嵌套在 return 参数内的回调/函数中，
+    // 说明选中节点属于内部作用域，不应由 return 场景处理
+    for (const selNode of selectionNodes) {
+      let cur: ASTNode | undefined = parentMap.get(selNode)
+      while (cur && cur !== node) {
+        if (FN_LIKE.has(cur.type)) return // 选中节点在回调内，跳过
+        cur = parentMap.get(cur)
+      }
+    }
+
     result = { line: s }
   })
 
@@ -1347,6 +1372,9 @@ const checkWanderingExpression = (ast: ASTNode, code: string, selectionLine: num
     if (p.type === 'PropertyDefinition' && (p as Record<string, unknown>).key === candidate) continue
     // 跳过：ImportSpecifier local
     if (p.type === 'ImportSpecifier' && (p as Record<string, unknown>).local === candidate) continue
+    // 跳过：TypeScript 枚举成员 / 接口属性 key（类型声明，非运行时引用）
+    if (p.type === 'TSEnumMember' && (p as Record<string, unknown>).key === candidate) continue
+    if (p.type === 'TSPropertySignature' && (p as Record<string, unknown>).key === candidate) continue
 
     // 向上爬到最近的语句节点
     let cur: ASTNode | undefined = candidate

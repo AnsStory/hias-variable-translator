@@ -6,7 +6,16 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import { findInsertionLine, getLineIndent } from './ast'
-import { isConsoleLogEnabled, getConsoleLogTemplate, parseConsoleLogTemplate, buildConsoleLogRegex, hasSnippetSyntax, cleanSnippetSyntax } from './config'
+import {
+  isConsoleLogEnabled,
+  getConsoleLogTemplate,
+  parseConsoleLogTemplate,
+  buildConsoleLogRegex,
+  hasSnippetSyntax,
+  isConsoleLogCopyToClipboardEnabled,
+  getConsoleLogClipboardPattern,
+  extractClipboardText
+} from './config'
 
 /**
  * 处理插入 console.log
@@ -63,7 +72,7 @@ export async function handleInsertConsoleLog(): Promise<void> {
     insertions.push({
       line: insertLine,
       indent: indent,
-      selectedText: selectedText
+      selectedText: selectedText,
     })
   }
 
@@ -101,6 +110,18 @@ export async function handleInsertConsoleLog(): Promise<void> {
         editBuilder.insert(insertPosition, text)
       }
     })
+  }
+
+  // 复制到剪贴板逻辑
+  if (isConsoleLogCopyToClipboardEnabled() && insertions.length > 0) {
+    const extractTemplate = getConsoleLogClipboardPattern()
+    if (extractTemplate) {
+      const clipboardText = extractClipboardText(insertions[0].selectedText, extractTemplate)
+      if (clipboardText) {
+        await vscode.env.clipboard.writeText(clipboardText)
+        // vscode.window.showInformationMessage(`已复制到剪贴板: ${clipboardText}`)
+      }
+    }
   }
 }
 

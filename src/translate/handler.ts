@@ -81,7 +81,7 @@ export async function handleTranslateCopy(): Promise<void> {
     const words = splitIntoWords(result.translatedText)
     const translatedText = convertToFormat(words, format)
     await vscode.env.clipboard.writeText(translatedText)
-    vscode.window.setStatusBarMessage(`已复制到剪贴板: ${translatedText}`, 3000)
+    // vscode.window.setStatusBarMessage(`已复制到剪贴板: ${translatedText}`, 3000)
   }
 }
 

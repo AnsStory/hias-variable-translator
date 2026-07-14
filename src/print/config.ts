@@ -26,19 +26,6 @@ export function getConsoleLogTemplate(): string {
 }
 
 /**
- * 清理 snippet 语法，转换为普通文本
- * @param text 包含 snippet 语法的文本
- * @returns 清理后的普通文本
- */
-export function cleanSnippetSyntax(text: string): string {
-  // 移除 ${n:placeholder}，只保留 placeholder
-  let result = text.replace(/\$\{(\d+):([^}]+)\}/g, '$2')
-  // 移除 $n（光标位置标记）
-  result = result.replace(/\$\d+/g, '')
-  return result
-}
-
-/**
  * 检查模板是否包含 snippet 语法
  * @param template 模板字符串
  * @returns 是否包含 snippet 语法
@@ -86,6 +73,38 @@ export function parseConsoleLogTemplate(value: string, template: string): string
   result = result.replace(/\$\{name\}/g, value)
 
   return result
+}
+
+/**
+ * 检查是否启用 console.log 复制到剪贴板
+ * @returns 是否启用
+ */
+export function isConsoleLogCopyToClipboardEnabled(): boolean {
+  const config = vscode.workspace.getConfiguration(CONFIG_PREFIX)
+  return config.get<boolean>('consoleLogCopyToClipboard', false)
+}
+
+/**
+ * 获取 console.log 剪贴板提取模板
+ * @returns 提取模板字符串，为空字符串时返回 null
+ */
+export function getConsoleLogClipboardPattern(): string | null {
+  const config = vscode.workspace.getConfiguration(CONFIG_PREFIX)
+  const pattern = config.get<string>('consoleLogClipboardPattern', '')
+  if (!pattern) {
+    return null
+  }
+  return pattern
+}
+
+/**
+ * 从选中文本解析剪贴板提取模板，返回要复制的文本
+ * @param selectedText 选中的文本
+ * @param extractTemplate 提取模板
+ * @returns 解析后的文本
+ */
+export function extractClipboardText(selectedText: string, extractTemplate: string): string {
+  return parseConsoleLogTemplate(selectedText, extractTemplate)
 }
 
 /**
