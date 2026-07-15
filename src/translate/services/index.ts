@@ -35,9 +35,9 @@ export const TRANSLATION_SERVICE_OPTIONS: TranslationServiceOption[] = [
   },
   {
     label: '谷歌翻译',
-    description: '免费（有限制）',
+    description: '需要 API Key',
     value: 'google',
-    requiresConfig: false,
+    requiresConfig: true,
   },
   {
     label: 'Bing / Azure Translator',
@@ -106,8 +106,13 @@ export interface ITranslationService {
  * 翻译服务配置
  */
 export interface TranslationServiceConfig {
+  google?: {
+    apiKey?: string
+  }
   openai?: {
     apiKey?: string
+    baseUrl?: string
+    model?: string
   }
   baidu?: {
     appId?: string
@@ -116,9 +121,13 @@ export interface TranslationServiceConfig {
   tencent?: {
     secretId?: string
     secretKey?: string
+    region?: string
   }
   bing?: {
     apiKey?: string
     region?: string
+  }
+  deeplx?: {
+    baseUrl?: string
   }
 }

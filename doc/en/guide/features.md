@@ -29,13 +29,16 @@ Format selection:
 ### Undo Feature
 
 ```
-Press Alt+Shift+Z → Delete translated file/directory → Close editor window for that file
+Press Alt+Shift+Z → Delete translated file/directory → Auto-clean empty directories → Close editor window for that file
 ```
 
 **Undo Rules**:
 - Undo operation directly deletes the translated file, not restoring to original non-English path
+- Automatically cleans up only directories created by translation: determined by comparing paths before and after translation; identical prefix segments (e.g., `src/`) belong to the user and are never cleaned
 - Only closes the editor window for the deleted file, not other open files
 - **Can undo within 1 minute**, after which the undo cache is automatically cleared
+
+> Example: typing `你好/世界/美好.test.js` under `src/` translates to `src/hello/world/beautiful.test.js`; undoing will remove `hello/world/` and `hello/`, but `src/` is preserved regardless of whether it is empty.
 
 ### Filename Conflict Handling
 
@@ -48,8 +51,12 @@ Handling: Automatically add suffix (e.g., test_1.test.js) and prompt user
 
 ```
 Scenario: Translation API call fails (network error, quota exhausted, etc.)
-Handling: Automatically degrade to pinyin translation
+Handling: Degrade to next service by priority → All services failed → Auto-degrade to pinyin translation
 ```
+
+::: tip Timeout Protection
+All translation services have **10-second timeout control**, and global translation timeout is also 10 seconds. On timeout, automatically degrades to the next service, ultimately falling back to pinyin.
+:::
 
 ### Configuration
 
@@ -92,9 +99,9 @@ Format selection:
 - no case:        user name
 ```
 
-### Undo Feature
+### Undo
 
-Use VSCode's built-in undo: `Ctrl+Z`
+After text translation, use VSCode's built-in `Ctrl+Z` to undo the replacement. For file path translation undo, use `Alt+Shift+Z` (see Feature 1).
 
 ---
 
@@ -141,8 +148,7 @@ Current clipboard: userName (user selected format)
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case",
-    "CONSTANT_CASE"
+    "Capital Case"
   ]
 }
 ```
@@ -158,7 +164,7 @@ Current clipboard: userName (user selected format)
 | `param-case` | Hyphen separated |
 | `Header-Case` | Header case |
 | `no case` | Space separated |
-| `originalValue` | Original text before translation (the Chinese text you selected) |
+| `` | Original text before translation (the Chinese text you selected) |
 
 ---
 

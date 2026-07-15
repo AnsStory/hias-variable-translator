@@ -4,6 +4,7 @@
  */
 
 import { ITranslationService, TranslationResult } from './index'
+import { fetchWithTimeout } from './utils'
 
 export class BingService implements ITranslationService {
   readonly type = 'bing' as const
@@ -54,7 +55,7 @@ export class BingService implements ITranslationService {
   private async callBingAPI(text: string): Promise<string> {
     const url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=en'
 
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,11 +66,15 @@ export class BingService implements ITranslationService {
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`Bing 翻译 API 请求失败: ${error}`)
+      throw new Error(`Bing 翻译 API 请求失败 (HTTP ${response.status})`)
     }
 
-    const data = (await response.json()) as any
+    let data: any
+    try {
+      data = await response.json()
+    } catch {
+      throw new Error('Bing 翻译 API 返回无效 JSON')
+    }
 
     if (data && data[0] && data[0].translations && data[0].translations.length > 0) {
       return data[0].translations[0].text

@@ -11,8 +11,11 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 - **文本翻译**：选中文本后一键翻译替换
 - **多种命名格式**：支持 camelCase、PascalCase、snake_case 等 8 种命名格式
 - **多翻译服务**：支持 Pinyin、OpenAI、Google、Bing、百度、腾讯等 7 种翻译服务
-- **一键撤回**：1 分钟内可撤回翻译，自动清理文件和目录
+- **请求超时保护**：所有翻译服务均有 10 秒超时控制，避免长时间等待
+- **一键撤回**：1 分钟内可撤回文件翻译，自动清理文件和目录
+- **右键菜单**：编辑器右键菜单集成翻译、撤回、切换服务命令
 - **剪贴板复制**：翻译后自动复制多种命名格式到剪贴板历史
+- **灵活配置**：OpenAI 支持自定义 baseUrl/model，腾讯翻译支持自定义区域，DeepLX 支持自定义服务地址
 
 ## 安装
 
@@ -42,7 +45,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 ### 撤回翻译
 
 1. 按 `Alt+Shift+Z`
-2. 翻译后的文件被删除
+2. 删除翻译后的文件/目录，关闭对应编辑器窗口
 3. 1 分钟内可撤回
 
 ### 翻译并复制到剪贴板
@@ -106,13 +109,13 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
 | 服务 | 认证方式 | 费用 | 说明 |
 |------|----------|------|------|
-| Pinyin | 零配置 | 免费 | 降级方案，无需配置 |
-| ChatGPT / OpenAI | API Key | 按量付费 | 需要 OpenAI API Key |
-| 谷歌翻译 | 免费（有限制） | 免费 | 无需配置，但有调用限制 |
-| Bing / Azure Translator | API Key | 按量付费 | 需要 Azure 账号 |
-| DeepLX | 本地部署 | 免费 | 需要本地部署服务 |
+| Pinyin | 零配置 | 免费 | 降级方案，支持中日韩字符拼音转换 |
+| ChatGPT / OpenAI | API Key | 按量付费 | 支持自定义 baseUrl 和 model，兼容第三方 API |
+| 谷歌翻译 | API Key | 按量付费 | 官方 Cloud Translation API，需 Google Cloud API Key |
+| Bing / Azure Translator | API Key | 按量付费 | 需要 Azure 账号，支持自定义区域 |
+| DeepLX | 本地部署 | 免费 | 自动健康检查，支持自定义服务地址 |
 | 百度翻译 | APP_ID + Key | 按量付费 | 需要百度翻译开放平台账号 |
-| 腾讯翻译君 | SecretId + SecretKey | 按量付费 | 需要腾讯云账号 |
+| 腾讯翻译君 | SecretId + SecretKey | 按量付费 | 支持自定义区域（默认 ap-guangzhou） |
 
 ## 配置项
 
@@ -138,7 +141,12 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
   // 翻译服务配置（无需配置的服务可省略）
   "variableTranslator.services": {
     "openai": {
-      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "baseUrl": "https://api.openai.com",  // 可选，支持第三方兼容 API
+      "model": "gpt-3.5-turbo"              // 可选，自定义模型
+    },
+    "google": {
+      "apiKey": "your-google-api-key"       // 官方 Cloud Translation API Key
     },
     "baidu": {
       "appId": "your-app-id",
@@ -146,14 +154,15 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
     },
     "tencent": {
       "secretId": "your-secret-id",
-      "secretKey": "your-secret-key"
+      "secretKey": "your-secret-key",
+      "region": "ap-guangzhou"              // 可选，自定义区域
     },
     "bing": {
       "apiKey": "your-api-key",
       "region": "global"
     },
     "deeplx": {
-      "baseUrl": "http://127.0.0.1:1188"
+      "baseUrl": "http://127.0.0.1:1188"    // 可选，自定义 DeepLX 服务地址
     }
   }
 }
@@ -164,12 +173,31 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 | 服务 | 获取地址 | 说明 |
 |------|----------|------|
 | OpenAI | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | 创建 API Key |
+| Google 翻译 | [console.cloud.google.com](https://console.cloud.google.com/) | 启用 Cloud Translation API 并创建 API Key |
 | 百度翻译 | [fanyi-api.baidu.com](https://fanyi-api.baidu.com/) | 开通通用翻译 API |
 | 腾讯翻译君 | [console.cloud.tencent.com/cam/capi](https://console.cloud.tencent.com/cam/capi) | 获取 SecretId/SecretKey |
 | Bing/Azure | [portal.azure.com](https://portal.azure.com/) | 创建 Translator 资源 |
 | DeepLX | [DeepLX](https://deeplx.owo.network/) 或 [DeepLX GitHub](https://github.com/OwO-Network/DeepLX) | 本地部署服务 |
 
 详细获取步骤请参考 [翻译服务文档](https://ansstory.github.io/hias-variable-translator/guide/services)。
+
+## 更新日志
+
+### v0.1.14
+- **翻译超时保护**：全局 10 秒超时，超时后自动降级为拼音转换
+- **翻译服务超时**：所有翻译服务均有 10 秒请求超时控制
+- **OpenAI**：支持自定义 `baseUrl` 和 `model`，兼容第三方 OpenAI 兼容 API
+- **DeepLX**：添加异步健康检查机制（60 秒缓存），修复服务可用性检测
+- **DeepLX**：支持自定义 `baseUrl` 配置
+- **腾讯翻译**：支持自定义 `region` 配置（默认 ap-guangzhou）
+- **拼音服务**：扩展支持日文（平假名/片假名）和韩文（音节/字母）字符
+- **右键菜单**：编辑器右键菜单集成翻译选中文本、翻译并复制、撤回翻译、切换服务
+- **状态栏**：显示当前翻译服务名称
+- **撤回目录清理**：撤回时通过对比翻译前后路径判断翻译创建的目录，不会删除用户原有目录（如 `src/` 即使为空也会保留）
+- **Disposable 泄漏修复**：配置监听器正确注册到插件上下文
+- **并发控制**：防止重复翻译请求，全局超时保护
+- **激活策略**：`onStartupFinished`，确保文件事件监听器可靠注册
+- **单元测试**：Vitest 测试框架，208 个测试用例覆盖核心功能
 
 ## 许可证
 

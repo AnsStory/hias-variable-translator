@@ -7,6 +7,7 @@ export { containsNonEnglish } from './chineseDetector'
 export { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords } from './namingConvention'
 export { Translator } from './translator'
 export { UndoManager } from './undoManager'
+export type { UndoRecord } from './undoManager'
 export { TranslationServiceType, TRANSLATION_SERVICE_OPTIONS } from './services'
 export { ConfigManager } from './config'
 

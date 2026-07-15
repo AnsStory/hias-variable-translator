@@ -16,6 +16,22 @@
       "problemMatcher": ["$tsc-watch"],
       "group": "build",
       "isBackground": true
+    },
+    {
+      "label": "Run All Tests",
+      "type": "shell",
+      "command": "npx vitest",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Current Test File",
+      "type": "shell",
+      "command": "npx vitest ${relativeFile}",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
     }
   ]
 }

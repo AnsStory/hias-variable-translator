@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
   registerFileRenameListener(context)
 
   // 监听配置变化
-  registerConfigListener()
+  context.subscriptions.push(registerConfigListener())
 
   context.subscriptions.push(statusBarItem)
 }

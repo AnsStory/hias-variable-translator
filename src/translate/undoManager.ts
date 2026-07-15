@@ -4,12 +4,14 @@
  */
 
 /**
- * 撤回记录
+ * 撤回记录（文件翻译）
  */
 export interface UndoRecord {
   originalPath: string
   translatedPath: string
   timestamp: number
+  /** 翻译时创建的目录（只包含翻译文件的目录，不包含用户原有目录） */
+  createdDirs: string[]
 }
 
 /**
@@ -30,12 +32,14 @@ export class UndoManager {
    * 添加撤回记录
    * @param originalPath 原始路径
    * @param translatedPath 翻译后的路径
+   * @param createdDirs 翻译时创建的目录列表
    */
-  addRecord(originalPath: string, translatedPath: string): void {
+  addRecord(originalPath: string, translatedPath: string, createdDirs: string[] = []): void {
     const record: UndoRecord = {
       originalPath,
       translatedPath,
       timestamp: Date.now(),
+      createdDirs,
     }
 
     this.records.set(translatedPath, record)
@@ -123,7 +127,7 @@ export class UndoManager {
   }
 
   /**
-   * 获取所有有效的撤回记录
+   * 获取所有有效的撤回记录（按时间戳升序排列）
    * @returns 有效的撤回记录数组
    */
   getValidRecords(): UndoRecord[] {
@@ -135,6 +139,9 @@ export class UndoManager {
         validRecords.push(record)
       }
     }
+
+    // 按时间戳升序排列，确保最后一条是最新的
+    validRecords.sort((a, b) => a.timestamp - b.timestamp)
 
     return validRecords
   }

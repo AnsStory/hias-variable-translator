@@ -65,8 +65,7 @@ The following options can be configured in VSCode settings:
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case",
-    "CONSTANT_CASE"
+    "Capital Case"
   ]
 }
 ```
@@ -94,7 +93,12 @@ The following options can be configured in VSCode settings:
 {
   "variableTranslator.services": {
     "openai": {
-      "apiKey": "sk-xxx"
+      "apiKey": "sk-xxx",
+      "baseUrl": "https://api.openai.com",
+      "model": "gpt-3.5-turbo"
+    },
+    "google": {
+      "apiKey": "your-google-api-key"
     },
     "baidu": {
       "appId": "xxx",
@@ -102,7 +106,11 @@ The following options can be configured in VSCode settings:
     },
     "tencent": {
       "secretId": "xxx",
-      "secretKey": "xxx"
+      "secretKey": "xxx",
+      "region": "ap-guangzhou"
+    },
+    "deeplx": {
+      "baseUrl": "http://127.0.0.1:1188"
     }
   }
 }
@@ -116,7 +124,27 @@ The following options can be configured in VSCode settings:
 {
   "variableTranslator.services": {
     "openai": {
-      "apiKey": "your-api-key"
+      "apiKey": "your-api-key",
+      "baseUrl": "https://api.openai.com",
+      "model": "gpt-3.5-turbo"
+    }
+  }
+}
+```
+
+| Parameter | Description | Default | How to Get |
+|-----------|-------------|---------|------------|
+| apiKey | OpenAI API Key | - | https://platform.openai.com/api-keys |
+| baseUrl | API base URL | `https://api.openai.com` | Supports third-party OpenAI-compatible APIs |
+| model | Model name | `gpt-3.5-turbo` | Any OpenAI-compatible model |
+
+### Google Translation
+
+```json
+{
+  "variableTranslator.services": {
+    "google": {
+      "apiKey": "your-google-api-key"
     }
   }
 }
@@ -124,7 +152,7 @@ The following options can be configured in VSCode settings:
 
 | Parameter | Description | How to Get |
 |-----------|-------------|------------|
-| apiKey | OpenAI API Key | https://platform.openai.com/api-keys |
+| apiKey | Google Cloud Translation API Key | Create after enabling Cloud Translation API in Google Cloud Console |
 
 ### Baidu Translation
 
@@ -151,16 +179,18 @@ The following options can be configured in VSCode settings:
   "variableTranslator.services": {
     "tencent": {
       "secretId": "your-secret-id",
-      "secretKey": "your-secret-key"
+      "secretKey": "your-secret-key",
+      "region": "ap-guangzhou"
     }
   }
 }
 ```
 
-| Parameter | Description | How to Get |
-|-----------|-------------|------------|
-| secretId | Tencent Cloud SecretId | https://console.cloud.tencent.com/cam/capi |
-| secretKey | Tencent Cloud SecretKey | https://console.cloud.tencent.com/cam/capi |
+| Parameter | Description | Default | How to Get |
+|-----------|-------------|---------|------------|
+| secretId | Tencent Cloud SecretId | - | https://console.cloud.tencent.com/cam/capi |
+| secretKey | Tencent Cloud SecretKey | - | https://console.cloud.tencent.com/cam/capi |
+| region | Service region | `ap-guangzhou` | See [Tencent region config](https://cloud.tencent.com/document/product/551/15051) |
 
 ### Bing / Azure Translator
 
@@ -168,15 +198,17 @@ The following options can be configured in VSCode settings:
 {
   "variableTranslator.services": {
     "bing": {
-      "apiKey": "your-api-key"
+      "apiKey": "your-api-key",
+      "region": "global"
     }
   }
 }
 ```
 
-| Parameter | Description | How to Get |
-|-----------|-------------|------------|
-| apiKey | Azure Translator API Key | https://portal.azure.com/ |
+| Parameter | Description | Default | How to Get |
+|-----------|-------------|---------|------------|
+| apiKey | Azure Translator API Key | - | https://portal.azure.com/ |
+| region | Azure Translator Region | `global` | Azure resource region |
 
 ### DeepLX
 
@@ -198,9 +230,8 @@ The following options can be configured in VSCode settings:
 
 The following services don't require additional configuration:
 
-- **VS Code Copilot**: Requires Copilot subscription
-- **Google Translation**: Free, has rate limits
-- **DeepLX**: Default URL is `http://127.0.0.1:1188`, no configuration needed
+- **Pinyin**: Zero config, supports CJK character pinyin conversion
+- **DeepLX**: Default URL is `http://127.0.0.1:1188`, auto health check, no configuration needed
 
 ---
 
@@ -233,15 +264,21 @@ Here is a complete example of all configuration options. Copy this to your `sett
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case",
-    "CONSTANT_CASE"
+    "Capital Case"
   ],
 
   // Translation service configuration (services that don't require configuration can be omitted)
   "variableTranslator.services": {
     // OpenAI configuration
     "openai": {
-      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "baseUrl": "https://api.openai.com",
+      "model": "gpt-3.5-turbo"
+    },
+
+    // Google Translation configuration (official Cloud Translation API)
+    "google": {
+      "apiKey": "your-google-api-key"
     },
 
     // Baidu Translation configuration
@@ -253,7 +290,8 @@ Here is a complete example of all configuration options. Copy this to your `sett
     // Tencent Translation configuration
     "tencent": {
       "secretId": "your-secret-id",
-      "secretKey": "your-secret-key"
+      "secretKey": "your-secret-key",
+      "region": "ap-guangzhou"
     },
 
     // Bing / Azure Translator configuration
@@ -280,10 +318,14 @@ Here is a complete example of all configuration options. Copy this to your `sett
 | `copyToClipboard` | boolean | `false` | Whether to automatically copy translation results to clipboard |
 | `clipboardFormats` | string[] | `[]` | Naming formats to copy to clipboard |
 | `services.openai.apiKey` | string | `""` | OpenAI API Key |
+| `services.openai.baseUrl` | string | `"https://api.openai.com"` | OpenAI API base URL (supports third-party compatible APIs) |
+| `services.openai.model` | string | `"gpt-3.5-turbo"` | OpenAI model name |
+| `services.google.apiKey` | string | `""` | Google Cloud Translation API Key |
 | `services.baidu.appId` | string | `""` | Baidu Translation APP_ID |
 | `services.baidu.secretKey` | string | `""` | Baidu Translation Secret Key |
 | `services.tencent.secretId` | string | `""` | Tencent Cloud SecretId |
 | `services.tencent.secretKey` | string | `""` | Tencent Cloud SecretKey |
+| `services.tencent.region` | string | `"ap-guangzhou"` | Tencent Translation service region |
 | `services.bing.apiKey` | string | `""` | Azure Translator API Key |
 | `services.bing.region` | string | `"global"` | Azure Translator Region |
 | `services.deeplx.baseUrl` | string | `"http://127.0.0.1:1188"` | DeepLX service URL |

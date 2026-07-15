@@ -69,7 +69,11 @@ When the target file already exists, the plugin automatically adds a suffix (e.g
 
 ### Q: What happens if translation fails?
 
-When translation fails, the plugin automatically degrades to pinyin translation, ensuring the filename is still usable.
+When translation fails, the plugin automatically degrades to the next service by priority. If all services fail, it ultimately degrades to pinyin translation, ensuring the filename is still usable. All translation services have 10-second timeout control, and timeout also triggers automatic degradation.
+
+### Q: Directories not cleaned up after undoing translation?
+
+The undo operation automatically deletes the translated file and cleans up only directories created by translation. The judgment is based on **comparing paths before and after translation**: only segments that changed are considered translation-created, while identical prefix segments (e.g., `src/`) belong to the user and are never cleaned. For example: typing `你好/世界/美好.test.js` under `src/` translates to `src/hello/world/beautiful.test.js`; undoing will remove `hello/world/` and `hello/`, but `src/` is preserved regardless of whether it is empty.
 
 ## Technical Issues
 

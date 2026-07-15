@@ -5,7 +5,8 @@
 
 import * as vscode from 'vscode'
 import * as path from 'path'
-import * as fs from 'fs'
+import * as fs from 'fs/promises'
+import { existsSync } from 'fs'
 import { containsNonEnglish } from './chineseDetector'
 import { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords } from './namingConvention'
 import { Translator } from './translator'
@@ -22,6 +23,13 @@ let statusBarItem: vscode.StatusBarItem
  * 初始化翻译模块
  */
 export function initTranslateModule() {
+  // 释放旧实例（避免内存泄漏）
+  if (translator) {
+    translator.dispose()
+  }
+  if (undoManager) {
+    undoManager.dispose()
+  }
   translator = new Translator()
   undoManager = new UndoManager()
 }
@@ -55,6 +63,7 @@ export async function handleTranslateCopy(): Promise<void> {
   }
 
   if (!containsNonEnglish(selectedText)) {
+    vscode.window.showInformationMessage('选中文本不包含非英文字符，无需翻译')
     return
   }
 
@@ -104,6 +113,7 @@ export async function handleTranslateSelection(): Promise<void> {
   }
 
   if (!containsNonEnglish(selectedText)) {
+    vscode.window.showInformationMessage('选中文本不包含非英文字符，无需翻译')
     return
   }
 
@@ -138,24 +148,29 @@ export async function handleTranslateSelection(): Promise<void> {
 }
 
 /**
- * 处理撤回翻译
+ * 处理撤回翻译（仅用于文件/文件夹翻译撤回）
  */
 export async function handleUndoTranslation(): Promise<void> {
-  // 获取所有有效的撤回记录
-  const validRecords = undoManager.getValidRecords()
+  const records = undoManager.getValidRecords()
 
-  if (validRecords.length === 0) {
+  if (records.length === 0) {
     vscode.window.showWarningMessage('没有可撤回的翻译记录（已超过1分钟有效期）')
     return
   }
 
-  // 获取最近的一条记录
-  const latestRecord = validRecords[validRecords.length - 1]
-  const filePath = latestRecord.translatedPath
+  // 撤回最新的文件翻译
+  await undoFileTranslation(records[records.length - 1])
+}
+
+/**
+ * 撤回文件翻译
+ */
+async function undoFileTranslation(record: import('./undoManager').UndoRecord): Promise<void> {
+  const filePath = record.translatedPath
 
   try {
     // 检查文件是否存在
-    if (!fs.existsSync(filePath)) {
+    if (!existsSync(filePath)) {
       vscode.window.showWarningMessage('文件不存在，可能已被删除')
       undoManager.removeRecord(filePath)
       return
@@ -167,14 +182,30 @@ export async function handleUndoTranslation(): Promise<void> {
     // 关闭编辑器窗口
     await closeEditorForFile(filePath)
 
-    // 删除空目录
-    await deleteEmptyDirs(path.dirname(filePath))
+    // 只清理翻译时创建的目录（避免删除用户原有目录）
+    if (record.createdDirs && record.createdDirs.length > 0) {
+      // 从深到浅排序，先删除深层目录
+      const sortedDirs = [...record.createdDirs].sort((a, b) => b.length - a.length)
+      for (const dir of sortedDirs) {
+        try {
+          const stat = await fs.stat(dir)
+          if (stat.isDirectory()) {
+            const files = await fs.readdir(dir)
+            if (files.length === 0) {
+              await fs.rmdir(dir)
+            }
+          }
+        } catch {
+          // 忽略错误（目录可能已被删除）
+        }
+      }
+    }
 
     // 删除撤回记录
     undoManager.removeRecord(filePath)
   } catch (error) {
     console.error('删除文件失败:', error)
-    vscode.window.showErrorMessage(`删除文件失败: ${error}`)
+    vscode.window.showErrorMessage(`删除文件失败: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
@@ -300,8 +331,10 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
     return
   }
 
-  // 延迟等待创建完成
-  await new Promise((resolve) => setTimeout(resolve, 200))
+  // 等待文件就绪
+  await waitForFileReady(filePath)
+  // 等待 VSCode 编辑器稳定（避免新文件编辑器抢夺 QuickPick 焦点）
+  await new Promise((resolve) => setTimeout(resolve, 100))
 
   // 选择翻译格式
   const format = await showFormatPicker()
@@ -395,11 +428,11 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
 
   // 处理文件名冲突
   let finalPath = newFilePath
-  if (fs.existsSync(finalPath)) {
+  if (existsSync(finalPath)) {
     const dir = path.dirname(finalPath)
     const baseName = path.basename(finalPath, ext)
     let counter = 1
-    while (fs.existsSync(finalPath)) {
+    while (existsSync(finalPath)) {
       finalPath = path.join(dir, `${baseName}_${counter}${ext}`)
       counter++
     }
@@ -417,8 +450,9 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
     // 清理空的中文目录
     await cleanupEmptyDirs(path.dirname(filePath), workspaceFolder.uri.fsPath)
 
-    // 添加撤回记录
-    undoManager.addRecord(filePath, finalPath)
+    // 添加撤回记录（通过对比翻译前后路径确定翻译创建的目录）
+    const createdDirs = getTranslationCreatedDirs(filePath, finalPath)
+    undoManager.addRecord(filePath, finalPath, createdDirs)
 
     // 复制到剪贴板（复制"最后一个"翻译结果）
     if (lastTranslatedPart && lastOriginalPart && containsNonEnglish(lastOriginalPart)) {
@@ -437,7 +471,7 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
     }
   } catch (error) {
     console.error('重命名失败:', error)
-    vscode.window.showErrorMessage(`重命名失败: ${error}`)
+    vscode.window.showErrorMessage(`重命名失败: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
@@ -446,7 +480,7 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
  * @param dirPath 目录路径
  */
 async function createDirectoryRecursive(dirPath: string): Promise<void> {
-  if (fs.existsSync(dirPath)) {
+  if (existsSync(dirPath)) {
     return
   }
 
@@ -463,62 +497,80 @@ async function createDirectoryRecursive(dirPath: string): Promise<void> {
 }
 
 /**
- * 删除空目录（向上递归删除空目录）
- * @param dirPath 目录路径
+ * 等待文件就绪
+ * @param filePath 文件路径
+ * @param maxWait 最大等待时间（毫秒）
  */
-async function deleteEmptyDirs(dirPath: string): Promise<void> {
-  try {
-    // 检查目录是否存在
-    if (!fs.existsSync(dirPath)) {
-      return
+async function waitForFileReady(filePath: string, maxWait: number = 1000): Promise<void> {
+  const startTime = Date.now()
+  while (Date.now() - startTime < maxWait) {
+    try {
+      await fs.stat(filePath)
+      return // 文件已就绪
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 50))
     }
-
-    // 检查目录是否为空
-    const files = fs.readdirSync(dirPath)
-    if (files.length > 0) {
-      return // 目录不为空，不删除
-    }
-
-    // 删除空目录
-    fs.rmdirSync(dirPath)
-
-    // 递归删除上级空目录
-    const parentDir = path.dirname(dirPath)
-    if (parentDir !== dirPath) {
-      await deleteEmptyDirs(parentDir)
-    }
-  } catch (error) {
-    console.error('删除目录失败:', error)
   }
 }
 
 /**
- * 清理空目录
+ * 获取翻译创建的目录
+ * 通过对比翻译前与翻译后的路径，只有发生变化的路径段才是翻译创建的。
+ * 相同的前缀段（如 src）是用户原有目录，绝不清理。
+ * @param originalPath 翻译前的文件路径
+ * @param translatedPath 翻译后的文件路径
+ * @returns 翻译创建的目录列表（从深到浅）
+ */
+function getTranslationCreatedDirs(originalPath: string, translatedPath: string): string[] {
+  const origParts = originalPath.split(/[/\\]/)
+  const transParts = translatedPath.split(/[/\\]/)
+
+  // 找到翻译前与翻译后路径的第一个不同段（分歧点）
+  // 分歧点之前的段完全相同，属于用户原有目录，绝不清理
+  let divergeIndex = 0
+  while (divergeIndex < origParts.length && divergeIndex < transParts.length && origParts[divergeIndex] === transParts[divergeIndex]) {
+    divergeIndex++
+  }
+
+  // 从分歧点到文件名之前的每一级目录都是翻译创建的（从深到浅）
+  // transParts 最后一个是文件名，不算目录
+  const createdDirs: string[] = []
+  for (let i = transParts.length - 2; i >= divergeIndex; i--) {
+    createdDirs.push(transParts.slice(0, i + 1).join(path.sep))
+  }
+
+  return createdDirs
+}
+
+/**
+ * 清理空目录（异步版本）
  * @param dirPath 目录路径
  * @param workspaceRoot 工作区根路径
+ * @param onlyNonEnglish 是否只清理含非英文字符的目录（默认 true）
  */
-async function cleanupEmptyDirs(dirPath: string, workspaceRoot?: string): Promise<void> {
+async function cleanupEmptyDirs(dirPath: string, workspaceRoot?: string, onlyNonEnglish: boolean = true): Promise<void> {
   try {
     if (workspaceRoot && dirPath.startsWith(workspaceRoot)) {
       const relativePath = path.relative(workspaceRoot, dirPath)
       const parts = relativePath.split(/[/\\]/)
 
-      // 从最深的目录开始，逐级向上检查并删除空的中文目录
+      // 从最深的目录开始，逐级向上检查并删除空目录
       for (let i = parts.length - 1; i >= 0; i--) {
         const part = parts[i]
-        if (containsNonEnglish(part)) {
-          const fullPath = path.join(workspaceRoot, ...parts.slice(0, i + 1))
-          try {
-            const stat = fs.statSync(fullPath)
-            if (stat.isDirectory()) {
-              const files = fs.readdirSync(fullPath)
-              if (files.length === 0) {
-                fs.rmdirSync(fullPath)
-              }
+        if (onlyNonEnglish && !containsNonEnglish(part)) {
+          continue
+        }
+        const fullPath = path.join(workspaceRoot, ...parts.slice(0, i + 1))
+        try {
+          const stat = await fs.stat(fullPath)
+          if (stat.isDirectory()) {
+            const files = await fs.readdir(fullPath)
+            if (files.length === 0) {
+              await fs.rmdir(fullPath)
             }
-          } catch {
-            // 忽略错误
           }
+        } catch {
+          // 忽略错误（目录可能已被删除或无权限）
         }
       }
     }
@@ -571,32 +623,44 @@ async function showFormatPicker(isTextTranslation: boolean = false): Promise<Nam
     quickPick.ignoreFocusOut = true
 
     return new Promise<NamingFormat | undefined>((resolve) => {
+      // 收集事件监听器，用于清理
+      const disposables: vscode.Disposable[] = []
+
       // 监听输入变化，数字匹配后自动确认
-      quickPick.onDidChangeValue((value) => {
-        const num = parseInt(value)
-        if (num >= 1 && num <= options.length) {
-          quickPick.hide()
-          resolve(options[num - 1].value)
-        }
-      })
+      disposables.push(
+        quickPick.onDidChangeValue((value) => {
+          const num = parseInt(value)
+          if (num >= 1 && num <= options.length) {
+            quickPick.hide()
+            resolve(options[num - 1].value)
+          }
+        })
+      )
 
       // 监听选择确认
-      quickPick.onDidAccept(() => {
-        const selected = quickPick.selectedItems[0]
-        if (selected) {
-          resolve(selected.value)
-        } else {
-          resolve(undefined)
-        }
-        quickPick.hide()
-      })
+      disposables.push(
+        quickPick.onDidAccept(() => {
+          const selected = quickPick.selectedItems[0]
+          if (selected) {
+            resolve(selected.value)
+          } else {
+            resolve(undefined)
+          }
+          quickPick.hide()
+        })
+      )
 
       // 监听取消
-      quickPick.onDidHide(() => {
-        resolve(undefined)
-      })
+      disposables.push(
+        quickPick.onDidHide(() => {
+          resolve(undefined)
+        })
+      )
 
       quickPick.show()
+    }).finally(() => {
+      // 确保 QuickPick 及其事件监听器被正确释放
+      quickPick.dispose()
     })
   } catch (error) {
     console.error('格式选择器错误:', error)
@@ -609,10 +673,21 @@ async function showFormatPicker(isTextTranslation: boolean = false): Promise<Nam
  */
 export function updateStatusBar(): void {
   const isEnabled = ConfigManager.isFileTranslationEnabled()
+  const currentService = ConfigManager.getTranslationService()
 
   const status = isEnabled ? '✓' : '✗'
+  const serviceNames: Record<string, string> = {
+    copilot: 'Pinyin',
+    openai: 'OpenAI',
+    google: 'Google',
+    bing: 'Bing',
+    deeplx: 'DeepLX',
+    baidu: '百度',
+    tencent: '腾讯',
+  }
+  const serviceName = serviceNames[currentService] || currentService
 
-  statusBarItem.text = `$(globe) 文件翻译: ${status}`
+  statusBarItem.text = `$(globe) ${serviceName} | 文件翻译: ${status}`
   statusBarItem.tooltip = '点击切换文件翻译开关'
   statusBarItem.command = 'variableTranslator.toggleFileTranslation'
 }
@@ -620,8 +695,8 @@ export function updateStatusBar(): void {
 /**
  * 监听配置变化
  */
-export function registerConfigListener(): void {
-  ConfigManager.onConfigurationChanged(() => {
+export function registerConfigListener(): vscode.Disposable {
+  return ConfigManager.onConfigurationChanged(() => {
     updateStatusBar()
     if (translator) {
       translator.reinitializeServices()
@@ -633,6 +708,9 @@ export function registerConfigListener(): void {
  * 释放资源
  */
 export function disposeTranslateModule(): void {
+  if (translator) {
+    translator.dispose()
+  }
   if (undoManager) {
     undoManager.dispose()
   }

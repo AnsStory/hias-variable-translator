@@ -59,6 +59,7 @@ npm run build
 | 快捷键 | 功能 |
 |--------|------|
 | `Alt+Shift+T` | 翻译选中文本 |
+| `Alt+Shift+C` | 翻译并复制到剪贴板 |
 | `Alt+Shift+Z` | 撤回文件翻译 |
 | `Alt+Shift+D` | 切换文件翻译开关 |
 | `Alt+Shift+S` | 切换翻译服务 |

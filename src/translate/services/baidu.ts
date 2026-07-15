@@ -5,6 +5,7 @@
 
 import * as crypto from 'crypto'
 import { ITranslationService, TranslationResult } from './index'
+import { fetchWithTimeout } from './utils'
 
 export class BaiduService implements ITranslationService {
   readonly type = 'baidu' as const
@@ -72,7 +73,7 @@ export class BaiduService implements ITranslationService {
       sign: sign,
     })
 
-    const response = await fetch(`https://fanyi-api.baidu.com/api/trans/vip/translate?${params.toString()}`, {
+    const response = await fetchWithTimeout(`https://fanyi-api.baidu.com/api/trans/vip/translate?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

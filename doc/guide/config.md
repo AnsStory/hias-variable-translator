@@ -65,8 +65,7 @@
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case",
-    "CONSTANT_CASE"
+    "Capital Case"
   ]
 }
 ```
@@ -94,7 +93,12 @@
 {
   "variableTranslator.services": {
     "openai": {
-      "apiKey": "sk-xxx"
+      "apiKey": "sk-xxx",
+      "baseUrl": "https://api.openai.com",
+      "model": "gpt-3.5-turbo"
+    },
+    "google": {
+      "apiKey": "your-google-api-key"
     },
     "baidu": {
       "appId": "xxx",
@@ -102,7 +106,11 @@
     },
     "tencent": {
       "secretId": "xxx",
-      "secretKey": "xxx"
+      "secretKey": "xxx",
+      "region": "ap-guangzhou"
+    },
+    "deeplx": {
+      "baseUrl": "http://127.0.0.1:1188"
     }
   }
 }
@@ -116,7 +124,27 @@
 {
   "variableTranslator.services": {
     "openai": {
-      "apiKey": "your-api-key"
+      "apiKey": "your-api-key",
+      "baseUrl": "https://api.openai.com",
+      "model": "gpt-3.5-turbo"
+    }
+  }
+}
+```
+
+| 参数 | 说明 | 默认值 | 获取方式 |
+|------|------|--------|----------|
+| apiKey | OpenAI API Key | - | https://platform.openai.com/api-keys |
+| baseUrl | API 基础地址 | `https://api.openai.com` | 支持第三方 OpenAI 兼容 API |
+| model | 模型名称 | `gpt-3.5-turbo` | 支持任意 OpenAI 兼容模型 |
+
+### 谷歌翻译
+
+```json
+{
+  "variableTranslator.services": {
+    "google": {
+      "apiKey": "your-google-api-key"
     }
   }
 }
@@ -124,7 +152,7 @@
 
 | 参数 | 说明 | 获取方式 |
 |------|------|----------|
-| apiKey | OpenAI API Key | https://platform.openai.com/api-keys |
+| apiKey | Google Cloud Translation API Key | 在 Google Cloud Console 启用 Cloud Translation API 后创建 |
 
 ### 百度翻译
 
@@ -151,16 +179,18 @@
   "variableTranslator.services": {
     "tencent": {
       "secretId": "your-secret-id",
-      "secretKey": "your-secret-key"
+      "secretKey": "your-secret-key",
+      "region": "ap-guangzhou"
     }
   }
 }
 ```
 
-| 参数 | 说明 | 获取方式 |
-|------|------|----------|
-| secretId | 腾讯云 SecretId | https://console.cloud.tencent.com/cam/capi |
-| secretKey | 腾讯云 SecretKey | https://console.cloud.tencent.com/cam/capi |
+| 参数 | 说明 | 默认值 | 获取方式 |
+|------|------|--------|----------|
+| secretId | 腾讯云 SecretId | - | https://console.cloud.tencent.com/cam/capi |
+| secretKey | 腾讯云 SecretKey | - | https://console.cloud.tencent.com/cam/capi |
+| region | 服务区域 | `ap-guangzhou` | 可选值参考[腾讯翻译区域配置](https://cloud.tencent.com/document/product/551/15051) |
 
 ### Bing / Azure Translator
 
@@ -168,15 +198,17 @@
 {
   "variableTranslator.services": {
     "bing": {
-      "apiKey": "your-api-key"
+      "apiKey": "your-api-key",
+      "region": "global"
     }
   }
 }
 ```
 
-| 参数 | 说明 | 获取方式 |
-|------|------|----------|
-| apiKey | Azure Translator API Key | https://portal.azure.com/ |
+| 参数 | 说明 | 默认值 | 获取方式 |
+|------|------|--------|----------|
+| apiKey | Azure Translator API Key | - | https://portal.azure.com/ |
+| region | Azure Translator Region | `global` | Azure 资源区域 |
 
 ### DeepLX
 
@@ -198,9 +230,8 @@
 
 以下服务无需额外配置：
 
-- **VS Code Copilot**：需要 Copilot 订阅
-- **谷歌翻译**：免费，有调用限制
-- **DeepLX**：默认地址为 `http://127.0.0.1:1188`，无需配置
+- **拼音**：零配置，支持中日韩字符拼音转换
+- **DeepLX**：默认地址为 `http://127.0.0.1:1188`，自动健康检查，无需配置
 
 ---
 
@@ -233,15 +264,21 @@
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case",
-    "CONSTANT_CASE"
+    "Capital Case"
   ],
 
   // 翻译服务配置（无需配置的服务可省略）
   "variableTranslator.services": {
     // OpenAI 配置
     "openai": {
-      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "baseUrl": "https://api.openai.com",
+      "model": "gpt-3.5-turbo"
+    },
+
+    // 谷歌翻译配置（官方 Cloud Translation API）
+    "google": {
+      "apiKey": "your-google-api-key"
     },
 
     // 百度翻译配置
@@ -253,7 +290,8 @@
     // 腾讯翻译君配置
     "tencent": {
       "secretId": "your-secret-id",
-      "secretKey": "your-secret-key"
+      "secretKey": "your-secret-key",
+      "region": "ap-guangzhou"
     },
 
     // Bing / Azure Translator 配置
@@ -280,10 +318,14 @@
 | `copyToClipboard` | boolean | `false` | 翻译后是否自动将结果复制到剪贴板 |
 | `clipboardFormats` | string[] | `[]` | 复制到剪贴板的命名格式（支持多选） |
 | `services.openai.apiKey` | string | `""` | OpenAI API Key |
+| `services.openai.baseUrl` | string | `"https://api.openai.com"` | OpenAI API 基础地址（支持第三方兼容 API） |
+| `services.openai.model` | string | `"gpt-3.5-turbo"` | OpenAI 模型名称 |
+| `services.google.apiKey` | string | `""` | Google Cloud Translation API Key |
 | `services.baidu.appId` | string | `""` | 百度翻译 APP_ID |
 | `services.baidu.secretKey` | string | `""` | 百度翻译 Secret Key |
 | `services.tencent.secretId` | string | `""` | 腾讯云 SecretId |
 | `services.tencent.secretKey` | string | `""` | 腾讯云 SecretKey |
+| `services.tencent.region` | string | `"ap-guangzhou"` | 腾讯翻译服务区域 |
 | `services.bing.apiKey` | string | `""` | Azure Translator API Key |
 | `services.bing.region` | string | `"global"` | Azure Translator Region |
 | `services.deeplx.baseUrl` | string | `"http://127.0.0.1:1188"` | DeepLX 服务地址 |

@@ -31,7 +31,7 @@
     "node": "^20.19.2"
   },
   "categories": [
-    "Other"
+    "Formatters"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -76,6 +76,28 @@
         "title": "取消注释 console.log"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "variableTranslator.translateSelection",
+          "when": "editorHasSelection",
+          "group": "variableTranslator@1"
+        },
+        {
+          "command": "variableTranslator.translateCopy",
+          "when": "editorHasSelection",
+          "group": "variableTranslator@2"
+        },
+        {
+          "command": "variableTranslator.undoTranslation",
+          "group": "variableTranslator@3"
+        },
+        {
+          "command": "variableTranslator.switchTranslationService",
+          "group": "variableTranslator@4"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "variableTranslator.translateSelection",
@@ -102,22 +124,22 @@
       {
         "command": "variableTranslator.insertConsoleLog",
         "key": "ctrl+alt+l",
-        "when": "editorTextFocus && editorHasSelection && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+        "when": "editorTextFocus && editorHasSelection && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
       },
       {
         "command": "variableTranslator.deleteConsoleLog",
         "key": "ctrl+alt+d",
-        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
       },
       {
         "command": "variableTranslator.commentConsoleLog",
         "key": "ctrl+alt+c",
-        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
       },
       {
         "command": "variableTranslator.uncommentConsoleLog",
         "key": "ctrl+alt+u",
-        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|jsx|tsx$/"
+        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
       }
     ],
     "configuration": {
@@ -164,6 +186,26 @@
                   "type": "string",
                   "default": "",
                   "description": "OpenAI API Key"
+                },
+                "baseUrl": {
+                  "type": "string",
+                  "default": "",
+                  "description": "OpenAI API Base URL（留空使用官方地址，可配置第三方兼容接口）"
+                },
+                "model": {
+                  "type": "string",
+                  "default": "",
+                  "description": "OpenAI 模型名称（留空使用默认模型 gpt-4o-mini）"
+                }
+              }
+            },
+            "google": {
+              "type": "object",
+              "properties": {
+                "apiKey": {
+                  "type": "string",
+                  "default": "",
+                  "description": "Google Cloud Translation API Key（在 Google Cloud Console 启用 Cloud Translation API 后创建）"
                 }
               }
             },
@@ -194,6 +236,11 @@
                   "type": "string",
                   "default": "",
                   "description": "腾讯翻译君 SecretKey"
+                },
+                "region": {
+                  "type": "string",
+                  "default": "ap-guangzhou",
+                  "description": "腾讯翻译君 Region（如 ap-guangzhou、ap-shanghai、ap-beijing）"
                 }
               }
             },
@@ -209,6 +256,16 @@
                   "type": "string",
                   "default": "global",
                   "description": "Bing / Azure Translator Region"
+                }
+              }
+            },
+            "deeplx": {
+              "type": "object",
+              "properties": {
+                "baseUrl": {
+                  "type": "string",
+                  "default": "",
+                  "description": "DeepLX API Base URL（留空使用默认 http://localhost:1188）"
                 }
               }
             }
@@ -269,6 +326,8 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "vsce:package": "npx vsce package",
     "vsce:publish": "npx vsce publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "docs:dev": "vitepress dev doc",
     "docs:build": "vitepress build doc",
     "docs:preview": "vitepress preview doc"
@@ -291,7 +350,8 @@
     "typescript-eslint": "^8.62.1",
     "vite": "^6.4.3",
     "vite-plugin-obfuscator": "^1.0.5",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vitest": "^2.1.9"
   },
   "dependencies": {
     "@sveltejs/acorn-typescript": "^1.0.11",

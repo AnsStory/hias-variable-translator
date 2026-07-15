@@ -11,10 +11,11 @@ import {
   getConsoleLogTemplate,
   parseConsoleLogTemplate,
   buildConsoleLogRegex,
+  buildCommentConsoleLogRegex,
   hasSnippetSyntax,
   isConsoleLogCopyToClipboardEnabled,
   getConsoleLogClipboardPattern,
-  extractClipboardText
+  extractClipboardText,
 } from './config'
 
 /**
@@ -104,7 +105,7 @@ export async function handleInsertConsoleLog(): Promise<void> {
     // 普通模式：直接插入文本
     await editor.edit((editBuilder) => {
       for (const insertion of insertions) {
-        let consoleLogContent = parseConsoleLogTemplate(insertion.selectedText, template)
+        const consoleLogContent = parseConsoleLogTemplate(insertion.selectedText, template)
         const text = `${insertion.indent}console.log(${consoleLogContent})\n`
         const insertPosition = new vscode.Position(insertion.line, 0)
         editBuilder.insert(insertPosition, text)
@@ -116,10 +117,15 @@ export async function handleInsertConsoleLog(): Promise<void> {
   if (isConsoleLogCopyToClipboardEnabled() && insertions.length > 0) {
     const extractTemplate = getConsoleLogClipboardPattern()
     if (extractTemplate) {
-      const clipboardText = extractClipboardText(insertions[0].selectedText, extractTemplate)
+      // 构建完整的 console.log 语句（去除 snippet 语法）
+      const firstInsertion = insertions[0]
+      let consoleLogContent = parseConsoleLogTemplate(firstInsertion.selectedText, template)
+      // 移除 snippet 占位符（${n:placeholder} → placeholder，$n → 空）
+      consoleLogContent = consoleLogContent.replace(/\$\{(\d+):([^}]+)\}/g, '$2').replace(/\$\d+/g, '')
+      const fullLine = `console.log(${consoleLogContent})`
+      const clipboardText = extractClipboardText(firstInsertion.selectedText, extractTemplate, fullLine)
       if (clipboardText) {
         await vscode.env.clipboard.writeText(clipboardText)
-        // vscode.window.showInformationMessage(`已复制到剪贴板: ${clipboardText}`)
       }
     }
   }
@@ -159,18 +165,21 @@ export async function handleDeleteConsoleLog(): Promise<void> {
   }
 
   // 从后往前删除，避免行号偏移
-  await editor.edit((editBuilder) => {
+  const success = await editor.edit((editBuilder) => {
     for (let i = linesToDelete.length - 1; i >= 0; i--) {
       const range = new vscode.Range(new vscode.Position(linesToDelete[i], 0), new vscode.Position(linesToDelete[i] + 1, 0))
       editBuilder.delete(range)
     }
   })
 
-  vscode.window.showInformationMessage(`已删除 ${linesToDelete.length} 行 console.log`)
+  if (success) {
+    vscode.window.showInformationMessage(`已删除 ${linesToDelete.length} 行 console.log`)
+  }
 }
 
 /**
  * 处理注释 console.log
+ * 使用批量 WorkspaceEdit 操作，避免逐行调用 VSCode 命令
  */
 export async function handleCommentConsoleLog(): Promise<void> {
   // 检查配置是否启用
@@ -187,6 +196,9 @@ export async function handleCommentConsoleLog(): Promise<void> {
   const template = getConsoleLogTemplate()
   const regex = buildConsoleLogRegex(template)
 
+  // 保存用户当前选区
+  const savedSelections = editor.selections.map((s) => new vscode.Selection(s.anchor, s.active))
+
   // 收集需要注释的行
   const linesToComment: number[] = []
 
@@ -202,23 +214,32 @@ export async function handleCommentConsoleLog(): Promise<void> {
     return
   }
 
-  // 注释行
-  await editor.edit((editBuilder) => {
-    for (const lineIndex of linesToComment) {
-      const line = document.lineAt(lineIndex)
-      const indent = getLineIndent(line.text)
-      const content = line.text.trim()
-      const newText = `${indent}// ${content}\n`
-      const range = new vscode.Range(new vscode.Position(lineIndex, 0), new vscode.Position(lineIndex + 1, 0))
-      editBuilder.replace(range, newText)
-    }
-  })
+  // 批量操作：在每行的缩进后插入 "// "
+  const workspaceEdit = new vscode.WorkspaceEdit()
+  const edits: vscode.TextEdit[] = []
 
-  vscode.window.showInformationMessage(`已注释 ${linesToComment.length} 行 console.log`)
+  for (const lineIndex of linesToComment) {
+    const line = document.lineAt(lineIndex)
+    // 找到行内容的起始位置（跳过空白字符）
+    const firstNonWhitespace = line.firstNonWhitespaceCharacterIndex
+    const insertPos = new vscode.Position(lineIndex, firstNonWhitespace)
+    edits.push(vscode.TextEdit.insert(insertPos, '// '))
+  }
+
+  workspaceEdit.set(document.uri, edits)
+  const success = await vscode.workspace.applyEdit(workspaceEdit)
+
+  // 恢复用户选区
+  editor.selections = savedSelections
+
+  if (success) {
+    vscode.window.showInformationMessage(`已注释 ${linesToComment.length} 行 console.log`)
+  }
 }
 
 /**
  * 处理取消注释 console.log
+ * 使用批量 WorkspaceEdit 操作，支持 // 和块注释两种注释形式
  */
 export async function handleUncommentConsoleLog(): Promise<void> {
   // 检查配置是否启用
@@ -233,22 +254,21 @@ export async function handleUncommentConsoleLog(): Promise<void> {
 
   const document = editor.document
   const template = getConsoleLogTemplate()
-  const regex = buildConsoleLogRegex(template)
+  const commentRegex = buildCommentConsoleLogRegex(template)
 
-  // 收集需要取消注释的行
-  const linesToUncomment: number[] = []
+  // 保存用户当前选区
+  const savedSelections = editor.selections.map((s) => new vscode.Selection(s.anchor, s.active))
+
+  // 收集需要取消注释的行及对应的注释类型
+  const linesToUncomment: Array<{ line: number; type: 'line' | 'block' }> = []
 
   for (let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i)
-    const trimmed = line.text.trim()
-
-    // 检查是否是注释行
-    if (trimmed.startsWith('//')) {
-      const uncommented = trimmed.slice(2).trim()
-      // 检查取消注释后是否匹配
-      if (regex.test(uncommented)) {
-        linesToUncomment.push(i)
-      }
+    const match = commentRegex.exec(line.text)
+    if (match) {
+      // 判断是块注释还是行注释：块注释的匹配中包含 /* 和 */
+      const isBlock = match[0].includes('/*') && match[0].includes('*/')
+      linesToUncomment.push({ line: i, type: isBlock ? 'block' : 'line' })
     }
   }
 
@@ -257,18 +277,53 @@ export async function handleUncommentConsoleLog(): Promise<void> {
     return
   }
 
-  // 取消注释
-  await editor.edit((editBuilder) => {
-    for (const lineIndex of linesToUncomment) {
-      const line = document.lineAt(lineIndex)
-      const trimmed = line.text.trim()
-      const uncommented = trimmed.slice(2).trim()
-      const indent = getLineIndent(line.text)
-      const newText = `${indent}${uncommented}\n`
-      const range = new vscode.Range(new vscode.Position(lineIndex, 0), new vscode.Position(lineIndex + 1, 0))
-      editBuilder.replace(range, newText)
-    }
-  })
+  // 批量操作：移除注释符号
+  const workspaceEdit = new vscode.WorkspaceEdit()
+  const edits: vscode.TextEdit[] = []
 
-  vscode.window.showInformationMessage(`已取消注释 ${linesToUncomment.length} 行 console.log`)
+  for (const { line: lineIndex, type } of linesToUncomment) {
+    const line = document.lineAt(lineIndex)
+    const text = line.text
+
+    if (type === 'block') {
+      // 块注释 /* ... */：移除 /* 和 */
+      // 移除 /* （包括后面的空格）
+      const openMatch = /\/\*\s*/.exec(text)
+      if (openMatch) {
+        const openStart = line.firstNonWhitespaceCharacterIndex + openMatch.index
+        edits.push(
+          vscode.TextEdit.delete(new vscode.Range(new vscode.Position(lineIndex, openStart), new vscode.Position(lineIndex, openStart + openMatch[0].length)))
+        )
+      }
+      // 移除 */（包括前面的空格）
+      const closeMatch = /\s*\*\//.exec(text)
+      if (closeMatch) {
+        const closeStart = text.indexOf(closeMatch[0])
+        edits.push(
+          vscode.TextEdit.delete(
+            new vscode.Range(new vscode.Position(lineIndex, closeStart), new vscode.Position(lineIndex, closeStart + closeMatch[0].length))
+          )
+        )
+      }
+    } else {
+      // 行注释 //：移除 // 及其后的一个空格
+      const firstNonWs = line.firstNonWhitespaceCharacterIndex
+      const afterWs = text.slice(firstNonWs)
+      if (afterWs.startsWith('// ')) {
+        edits.push(vscode.TextEdit.delete(new vscode.Range(new vscode.Position(lineIndex, firstNonWs), new vscode.Position(lineIndex, firstNonWs + 3))))
+      } else if (afterWs.startsWith('//')) {
+        edits.push(vscode.TextEdit.delete(new vscode.Range(new vscode.Position(lineIndex, firstNonWs), new vscode.Position(lineIndex, firstNonWs + 2))))
+      }
+    }
+  }
+
+  workspaceEdit.set(document.uri, edits)
+  const success = await vscode.workspace.applyEdit(workspaceEdit)
+
+  // 恢复用户选区
+  editor.selections = savedSelections
+
+  if (success) {
+    vscode.window.showInformationMessage(`已取消注释 ${linesToUncomment.length} 行 console.log`)
+  }
 }

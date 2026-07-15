@@ -101,18 +101,25 @@ export function getConsoleLogClipboardPattern(): string | null {
  * 从选中文本解析剪贴板提取模板，返回要复制的文本
  * @param selectedText 选中的文本
  * @param extractTemplate 提取模板
+ * @param fullLine 完整的 console.log 语句（如 `console.log(obj, \`obj\`)`）
  * @returns 解析后的文本
  */
-export function extractClipboardText(selectedText: string, extractTemplate: string): string {
-  return parseConsoleLogTemplate(selectedText, extractTemplate)
+export function extractClipboardText(selectedText: string, extractTemplate: string, fullLine?: string): string {
+  // 先处理 ${line} 变量（完整的 console.log 语句）
+  let result = extractTemplate
+  if (fullLine !== undefined) {
+    result = result.replace(/\$\{line\}/g, fullLine)
+  }
+  // 再处理其他模板变量
+  return parseConsoleLogTemplate(selectedText, result)
 }
 
 /**
- * 构建 console.log 匹配正则
+ * 构建 console.log 内容匹配模式（无锚点）
  * @param template 模板字符串
- * @returns 匹配正则表达式
+ * @returns 匹配 console.log(...) 内部内容的正则源字符串
  */
-export function buildConsoleLogRegex(template: string): RegExp {
+function buildConsoleLogPattern(template: string): string {
   // 先清理 snippet 语法，再替换模板变量为占位符
   let cleanTemplate = template
   // 移除 ${n:placeholder}，只保留 placeholder
@@ -121,18 +128,35 @@ export function buildConsoleLogRegex(template: string): RegExp {
   cleanTemplate = cleanTemplate.replace(/\$\d+/g, '')
 
   // 替换模板变量为占位符，再转义特殊字符
-  let pattern = cleanTemplate
-    // 替换模板变量为占位符
+  const pattern = cleanTemplate
     .replace(/\$\{value\}/g, '§VALUE§')
     .replace(/\$\{name:[^}]+\}/g, '§NAME_FORMAT§')
     .replace(/\$\{name\}/g, '§NAME§')
-    // 转义特殊字符（不包括 §）
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    // 将占位符替换为正则匹配模式
     .replace(/§VALUE§/g, '.+')
     .replace(/§NAME_FORMAT§/g, '.+')
     .replace(/§NAME§/g, '.+')
 
-  // 构建完整的正则表达式
-  return new RegExp(`^\\s*console\\.log\\(${pattern}\\)\\s*$`)
+  return `console\\.log\\(${pattern}\\)`
+}
+
+/**
+ * 构建 console.log 匹配正则
+ * @param template 模板字符串
+ * @returns 匹配正则表达式
+ */
+export function buildConsoleLogRegex(template: string): RegExp {
+  return new RegExp(`^\\s*${buildConsoleLogPattern(template)}\\s*$`)
+}
+
+/**
+ * 构建注释形式的 console.log 匹配正则
+ * 支持: // console.log(...) 或 # console.log(...) 或块注释
+ * @param template 模板字符串
+ * @returns 匹配注释形式的正则表达式
+ */
+export function buildCommentConsoleLogRegex(template: string): RegExp {
+  const base = buildConsoleLogPattern(template)
+  // 匹配单行注释（// 和 #）以及块注释
+  return new RegExp(`^\\s*(?:(?://|#)\\s*${base}|/\\*\\s*${base}\\s*\\*/)`)
 }

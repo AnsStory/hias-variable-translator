@@ -71,7 +71,7 @@ Final clipboard retains user selected format
 **Notes**:
 - Only valid within 1 minute
 - Deletes the translated file, not the original file
-- Recursively deletes empty directories
+- Only cleans up directories created by translation (determined by comparing paths before and after translation, preserving user's existing directories)
 
 ### Alt+Shift+D - Toggle File Translation
 

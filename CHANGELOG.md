@@ -136,6 +136,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Console log management commands (insert/delete/comment/uncomment)
 - Console.log shortcut (Ctrl+Alt+L)
 
+## [0.1.14] - 2026-07-15
+
+### Added
+
+- Request timeout control (10s) for all translation services via shared `fetchWithTimeout` utility
+- Global translation timeout (10s) with automatic fallback to pinyin
+- OpenAI: configurable `baseUrl` and `model` for third-party compatible APIs
+- DeepLX: async health check mechanism (60s cache) for accurate availability detection
+- DeepLX: configurable `baseUrl` for custom service endpoints
+- Tencent: configurable `region` (default: ap-guangzhou)
+- Pinyin service: extended support for Japanese (hiragana/katakana) and Korean (syllables/letters) characters
+- Status bar now displays current translation service name
+- Editor right-click context menu: translate selection, translate & copy, undo translation, switch service
+- Vitest testing framework with 208 unit tests across 9 test files
+
+### Changed
+
+- Improved Disposable leak: config listener properly registered to extension context
+- `initTranslateModule` disposes old instances before creating new ones
+- `registerConfigListener` now returns Disposable for proper cleanup
+- ESLint: enabled `no-explicit-any` warning
+- `.vscodeignore`: exclude `*.vsix` old packages
+- `category` changed from `Other` to `Formatters`
+
+### Fixed
+
+- QuickPick dispose leak: format picker properly releases resources on hide
+- File translation picker focus stealing: added `waitForFileReady` polling with focus buffer
+- DeepLX health check race condition: added `_healthCheckPromise` to prevent concurrent checks
+- Translator concurrency control: `_translating` flag prevents duplicate requests
+- Global translation timeout: `Promise.race` with 10s timeout prevents stuck translations
+- Defensive pinyin fallback: null check + try/catch ensures last-resort translation never crashes
+- AbortError detection: compatible with both DOMException and Node.js Error.code
+- Safe error message extraction: prevents `[object Object]` in error dialogs
+- Non-English character notification: shows info message when pure English text is detected
+- Google/Bing API error handling: enhanced with HTTP status codes and JSON parse safety
+- Config value validation: `getServicePriority` and `getClipboardFormats` filter invalid values
+- Undo translation directory cleanup: uses path comparison (original vs translated) to identify translation-created directories, so user's existing directories (e.g., `src/`) are never removed even if empty
+- Async `cleanupEmptyDirs`: converted from sync fs to async fs/promises for non-blocking operation
+- Activation strategy: `onStartupFinished` for reliable file event listener registration
+
+## [0.1.13] - 2026-07-09
+
+### Changed
+
+- Bug fixes and stability improvements
+
 ## [0.1.12] - 2026-07-09
 
 ### Added

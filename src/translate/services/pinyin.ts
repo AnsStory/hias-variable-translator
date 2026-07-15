@@ -93,12 +93,20 @@ export class PinyinService implements ITranslationService {
   }
 
   /**
-   * 检测字符是否为中文
+   * 检测字符是否为中文/日文/韩文
    * @param char 要检测的字符
-   * @returns 是否为中文
+   * @returns 是否为CJK字符
    */
   private isChinese(char: string): boolean {
     const code = char.charCodeAt(0)
-    return code >= 0x4e00 && code <= 0x9fff
+    return (
+      (code >= 0x4e00 && code <= 0x9fff) || // CJK 统一汉字
+      (code >= 0x3400 && code <= 0x4dbf) || // CJK 扩展 A
+      (code >= 0x3040 && code <= 0x309f) || // 日文平假名
+      (code >= 0x30a0 && code <= 0x30ff) || // 日文片假名
+      (code >= 0xac00 && code <= 0xd7af) || // 韩文音节
+      (code >= 0x1100 && code <= 0x11ff) || // 韩文字母
+      (code >= 0xf900 && code <= 0xfaff) // CJK 兼容汉字
+    )
   }
 }

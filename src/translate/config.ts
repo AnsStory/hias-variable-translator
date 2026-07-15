@@ -6,6 +6,9 @@
 import * as vscode from 'vscode'
 import { TranslationServiceType, TranslationServiceConfig } from './services'
 
+/** 有效的翻译服务类型列表 */
+const VALID_SERVICE_TYPES: TranslationServiceType[] = ['copilot', 'openai', 'google', 'bing', 'deeplx', 'baidu', 'tencent', 'pinyin']
+
 /**
  * 配置管理器
  */
@@ -74,8 +77,11 @@ export class ConfigManager {
   static getServicePriority(): TranslationServiceType[] {
     const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
     const priorityStr = config.get<string>('servicePriority', 'copilot,openai,google,bing,deeplx,baidu,tencent')
-    // 解析逗号分隔的字符串
-    return priorityStr.split(',').map((s) => s.trim()) as TranslationServiceType[]
+    // 解析逗号分隔的字符串，并过滤无效的服务类型
+    return priorityStr
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => VALID_SERVICE_TYPES.includes(s as TranslationServiceType)) as TranslationServiceType[]
   }
 
   /**
@@ -84,13 +90,15 @@ export class ConfigManager {
    * @returns 是否已配置
    */
   static isServiceConfigured(service: TranslationServiceType): boolean {
-    if (service === 'copilot' || service === 'pinyin' || service === 'google' || service === 'deeplx') {
+    if (service === 'copilot' || service === 'pinyin' || service === 'deeplx') {
       return true // 这些服务不需要配置
     }
 
     const servicesConfig = this.getServicesConfig()
 
     switch (service) {
+      case 'google':
+        return !!servicesConfig.google?.apiKey
       case 'openai':
         return !!servicesConfig.openai?.apiKey
       case 'baidu':
@@ -119,7 +127,10 @@ export class ConfigManager {
    */
   static getClipboardFormats(): string[] {
     const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
-    return config.get<string[]>('clipboardFormats', [])
+    const formats = config.get<string[]>('clipboardFormats', [])
+    // 过滤无效的格式值
+    const validFormats = ['camelCase', 'PascalCase', 'snake_case', 'CONSTANT_CASE', 'param-case', 'Header-Case', 'Capital Case', 'no case', 'originalValue']
+    return formats.filter((f) => validFormats.includes(f))
   }
 
   /**

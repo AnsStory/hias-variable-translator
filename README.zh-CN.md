@@ -29,6 +29,12 @@ npm run lint
 # 代码格式化
 npm run format
 
+# 运行测试
+npm run test
+
+# 测试监听模式
+npm run test:watch
+
 # 打包插件
 npm run vsce:package
 ```
@@ -68,9 +74,10 @@ npm run docs:preview
 │   │   ├── undoManager.ts        # 撤回管理（1分钟缓存）
 │   │   └── services/             # 翻译服务实现
 │   │       ├── index.ts          # 服务接口定义
+│   │       ├── utils.ts          # 共享工具（fetchWithTimeout, isAbortError等）
 │   │       ├── pinyin.ts         # 拼音服务（降级方案）
 │   │       ├── openai.ts         # OpenAI服务
-│   │       ├── google.ts         # Google翻译服务
+│   │       ├── google.ts         # Google翻译服务（官方 Cloud Translation API）
 │   │       ├── bing.ts           # Bing翻译服务
 │   │       ├── deeplx.ts         # DeepLX服务
 │   │       ├── baidu.ts          # 百度翻译服务
@@ -80,6 +87,9 @@ npm run docs:preview
 │       ├── handler.ts            # console.log操作处理
 │       ├── config.ts             # 打印模块配置
 │       └── ast.ts                # AST解析，确定插入位置
+├── tests/                        # 单元测试（Vitest, 208个测试用例）
+│   ├── print/                    # 打印模块测试
+│   └── translate/                # 翻译模块测试
 ├── package.json                  # 插件配置
 ├── tsconfig.json                 # TypeScript 配置
 ├── vite.config.ts                # Vite 构建配置

@@ -5,6 +5,7 @@
 
 import * as crypto from 'crypto'
 import { ITranslationService, TranslationResult } from './index'
+import { fetchWithTimeout } from './utils'
 
 export class TencentService implements ITranslationService {
   readonly type = 'tencent' as const
@@ -12,10 +13,12 @@ export class TencentService implements ITranslationService {
 
   private secretId: string
   private secretKey: string
+  private region: string
 
-  constructor(secretId: string, secretKey: string) {
+  constructor(secretId: string, secretKey: string, region: string = 'ap-guangzhou') {
     this.secretId = secretId
     this.secretKey = secretKey
+    this.region = region
   }
 
   /**
@@ -56,7 +59,7 @@ export class TencentService implements ITranslationService {
     const service = 'tmt'
     const action = 'TextTranslate'
     const version = '2018-03-21'
-    const region = 'ap-guangzhou'
+    const region = this.region
 
     // 构建请求体
     const payload = JSON.stringify({
@@ -95,7 +98,7 @@ export class TencentService implements ITranslationService {
     const authorization = `${algorithm} Credential=${this.secretId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`
 
     // 发送请求
-    const response = await fetch('https://tmt.tencentcloudapi.com', {
+    const response = await fetchWithTimeout('https://tmt.tencentcloudapi.com', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

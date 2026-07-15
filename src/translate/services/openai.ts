@@ -4,15 +4,20 @@
  */
 
 import { ITranslationService, TranslationResult } from './index'
+import { fetchWithTimeout } from './utils'
 
 export class OpenAIService implements ITranslationService {
   readonly type = 'openai' as const
   readonly name = 'ChatGPT / OpenAI'
 
   private apiKey: string
+  private baseUrl: string
+  private model: string
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, baseUrl: string = 'https://api.openai.com', model: string = 'gpt-3.5-turbo') {
     this.apiKey = apiKey
+    this.baseUrl = baseUrl.replace(/\/$/, '')
+    this.model = model
   }
 
   /**
@@ -50,14 +55,14 @@ export class OpenAIService implements ITranslationService {
    * @returns 翻译结果
    */
   private async callOpenAIAPI(text: string): Promise<string> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetchWithTimeout(`${this.baseUrl}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: this.model,
         messages: [
           {
             role: 'system',

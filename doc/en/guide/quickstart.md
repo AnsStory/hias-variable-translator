@@ -59,6 +59,7 @@ npm run build
 | Shortcut | Function |
 |----------|----------|
 | `Alt+Shift+T` | Translate selected text |
+| `Alt+Shift+C` | Translate and copy to clipboard |
 | `Alt+Shift+Z` | Undo file translation |
 | `Alt+Shift+D` | Toggle file translation |
 | `Alt+Shift+S` | Switch translation service |

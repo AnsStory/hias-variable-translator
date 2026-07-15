@@ -13,9 +13,9 @@ export default tseslint.config(
     },
     rules: {
       'prettier/prettier': 'warn',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 'off',
       'no-control-regex': 'off',
       'no-useless-escape': 'warn',

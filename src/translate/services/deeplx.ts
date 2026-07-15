@@ -4,15 +4,50 @@
  */
 
 import { ITranslationService, TranslationResult } from './index'
+import { fetchWithTimeout } from './utils'
 
 export class DeepLXService implements ITranslationService {
   readonly type = 'deeplx' as const
   readonly name = 'DeepLX'
 
   private baseUrl: string
+  private _available: boolean = true
+  private _lastHealthCheck: number = 0
+  private _healthCheckPromise: Promise<void> | null = null
+  private static readonly HEALTH_CHECK_INTERVAL = 60_000
 
   constructor(baseUrl: string = 'http://127.0.0.1:1188') {
     this.baseUrl = baseUrl
+  }
+
+  /**
+   * 异步健康检查（缓存结果，60秒内不重复检查）
+   */
+  private async checkHealth(): Promise<void> {
+    const now = Date.now()
+    if (now - this._lastHealthCheck < DeepLXService.HEALTH_CHECK_INTERVAL) return
+    // 防止并发健康检查
+    if (this._healthCheckPromise) return this._healthCheckPromise
+    this._lastHealthCheck = now
+    this._healthCheckPromise = (async () => {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000)
+        await fetch(`${this.baseUrl}/translate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'ping', source_lang: 'EN', target_lang: 'EN' }),
+          signal: controller.signal,
+        })
+        clearTimeout(timeoutId)
+        this._available = true
+      } catch {
+        this._available = false
+      } finally {
+        this._healthCheckPromise = null
+      }
+    })()
+    return this._healthCheckPromise
   }
 
   /**
@@ -41,7 +76,8 @@ export class DeepLXService implements ITranslationService {
    * @returns 是否可用
    */
   isAvailable(): boolean {
-    return true // 假设本地服务始终可用
+    this.checkHealth() // 触发异步健康检查（有缓存）
+    return this._available
   }
 
   /**
@@ -50,7 +86,7 @@ export class DeepLXService implements ITranslationService {
    * @returns 翻译结果
    */
   private async callDeepLXAPI(text: string): Promise<string> {
-    const response = await fetch(`${this.baseUrl}/translate`, {
+    const response = await fetchWithTimeout(`${this.baseUrl}/translate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
