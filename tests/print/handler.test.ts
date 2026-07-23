@@ -244,6 +244,70 @@ describe('handleInsertConsoleLog - 插入 console.log', () => {
   })
 })
 
+describe('handleInsertConsoleLog - 插入行缩进对齐', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    globalThis.__mockEditor = undefined
+    mockConfig = {
+      enableConsoleLog: true,
+      consoleLogTemplate: '"${value}", ${value}',
+      consoleLogCopyToClipboard: false,
+      consoleLogClipboardPattern: '${value}',
+    }
+  })
+
+  // 构造一个能捕获 editBuilder.insert 调用的编辑器（普通模式）
+  function editorWithCapture(lines: string[], selLine: number, selChar: number, selectedText: string) {
+    const inserted: Array<{ line: number; text: string }> = []
+    const document = {
+      fileName: 'test.ts',
+      lineCount: lines.length,
+      lineAt: (i: number) => new MockTextLine(lines[i], i),
+      getText: (sel?: any) => (sel ? selectedText : lines.join('\n')),
+      uri: { fsPath: 'test.ts' },
+    }
+    const editor = {
+      document,
+      selections: [new MockSelection(new MockPosition(selLine, 0), new MockPosition(selLine, selChar))],
+      edit: vi.fn((cb: Function) => {
+        cb({ insert: (pos: MockPosition, text: string) => inserted.push({ line: pos.line, text }), delete: vi.fn() })
+        return Promise.resolve(true)
+      }),
+    }
+    return { editor, inserted }
+  }
+
+  it('插入到函数体内部 - 缩进与函数体首行对齐', async () => {
+    const lines = ['function greet(name) {', '  return name', '}']
+    const { editor, inserted } = editorWithCapture(lines, 0, 18, 'name')
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(1)
+    // 插入到第 1 行（函数体首行），缩进应为两个空格，与 return name 对齐
+    expect(inserted[0].line).toBe(1)
+    expect(inserted[0].text.startsWith('  console.log(')).toBe(true)
+  })
+
+  it('插入到循环体内部 - 缩进与循环体首行对齐', async () => {
+    const lines = ['for (const item of list) {', '  handle(item)', '}']
+    const { editor, inserted } = editorWithCapture(lines, 0, 13, 'item')
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(1)
+    expect(inserted[0].text.startsWith('  console.log(')).toBe(true)
+  })
+
+  it('顶层语句之后插入 - 无缩进', async () => {
+    const lines = ['const x = 1', 'const y = 2']
+    const { editor, inserted } = editorWithCapture(lines, 0, 7, 'x')
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(1)
+    expect(inserted[0].line).toBe(1)
+    expect(inserted[0].text.startsWith('console.log(')).toBe(true)
+  })
+})
+
 describe('handleDeleteConsoleLog - 删除 console.log', () => {
   beforeEach(() => {
     vi.clearAllMocks()

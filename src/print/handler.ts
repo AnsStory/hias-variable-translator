@@ -60,15 +60,21 @@ export async function handleInsertConsoleLog(): Promise<void> {
       insertLine = selectionLine + 1
     }
 
-    // 获取插入位置所在行的缩进
-    let indent: string
-    if (insertLine > 0) {
-      const prevLine = editor.document.lineAt(Math.min(insertLine - 1, editor.document.lineCount - 1))
-      indent = getLineIndent(prevLine.text)
-    } else {
-      const currentLine = editor.document.lineAt(selectionLine)
-      indent = getLineIndent(currentLine.text)
+    // 计算插入行缩进：
+    // - 「上一行」适用于「语句之后插入」（上一行即被打印的语句）
+    // - 「插入点当前所在行」（将被下移的那行）适用于「插入到刚打开的块体内部」（如函数体/循环体首行）
+    // 取两者中缩进更深者，避免块体内部插入时少一层缩进
+    const lineCount = editor.document.lineCount
+    const aboveIndent =
+      insertLine > 0 ? getLineIndent(editor.document.lineAt(Math.min(insertLine - 1, lineCount - 1)).text) : getLineIndent(editor.document.lineAt(selectionLine).text)
+    let atIndent = ''
+    if (insertLine >= 0 && insertLine < lineCount) {
+      const atText = editor.document.lineAt(insertLine).text
+      if (atText.trim().length > 0) {
+        atIndent = getLineIndent(atText)
+      }
     }
+    const indent = atIndent.length > aboveIndent.length ? atIndent : aboveIndent
 
     insertions.push({
       line: insertLine,

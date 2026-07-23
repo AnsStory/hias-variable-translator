@@ -152,13 +152,74 @@ const getFullExpressionEnd = (expr: ASTNode): number => {
   return maxEnd
 }
 
+/* ───────── 行号计算（与 VSCode 行模型一致：\r\n | \r | \n） ───────── */
+
+/** 行起始偏移缓存（同一次 findInsertionLine 调用内会多次复用同一份 code） */
+let _lineStartsCode = ''
+let _lineStartsCache: number[] = []
+
+/**
+ * 计算每一行的起始字节偏移
+ * 换行符识别规则与 VSCode 编辑器模型保持一致：\r\n、\r、\n
+ * 注意：不把 U+2028 / U+2029 视为换行（acorn 会，但 VSCode 不会），
+ * 否则计算出的行号会与最终插入坐标产生偏差
+ * @param code 源代码字符串
+ * @returns 每行起始偏移量数组
+ */
+const computeLineStarts = (code: string): number[] => {
+  const starts = [0]
+  for (let i = 0; i < code.length; i++) {
+    const c = code.charCodeAt(i)
+    if (c === 10) {
+      starts.push(i + 1)
+    } else if (c === 13) {
+      if (code.charCodeAt(i + 1) === 10) i++
+      starts.push(i + 1)
+    }
+  }
+  return starts
+}
+
+/** 获取（并缓存）指定源代码的行起始偏移数组 */
+const getLineStarts = (code: string): number[] => {
+  if (code !== _lineStartsCode) {
+    _lineStartsCode = code
+    _lineStartsCache = computeLineStarts(code)
+  }
+  return _lineStartsCache
+}
+
 /**
  * 将字节偏移量转换为行号（0-based）
+ * 使用与 VSCode 一致的换行规则，通过二分查找定位，避免大文件下逐字符切片的性能问题
  * @param code 源代码字符串
  * @param offset 字节偏移量
  * @returns 行号（0-based）
  */
-const offsetToLine = (code: string, offset: number): number => code.slice(0, offset).split('\n').length - 1
+const offsetToLine = (code: string, offset: number): number => {
+  const starts = getLineStarts(code)
+  let lo = 0,
+    hi = starts.length - 1
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1
+    if (starts[mid] <= offset) lo = mid
+    else hi = mid - 1
+  }
+  return lo
+}
+
+/**
+ * 获取指定行的原始文本（含行尾换行符），换行规则与 offsetToLine 保持一致
+ * @param code 源代码字符串
+ * @param lineIndex 行号（0-based）
+ * @returns 行文本
+ */
+const lineTextAt = (code: string, lineIndex: number): string => {
+  const starts = getLineStarts(code)
+  const start = starts[lineIndex] ?? code.length
+  const end = starts[lineIndex + 1] ?? code.length
+  return code.slice(start, end)
+}
 
 /**
  * 从 loc 中提取行号
@@ -248,19 +309,22 @@ const extractSvelteScript = (source: string, selectionLine?: number): ExtractedS
 /* ───────── AST 解析与位置调整 ───────── */
 
 /**
- * 递归调整 AST 节点的位置信息，将 script 块内的偏移转换为原始文件的绝对位置
+ * 递归调整 AST 节点的位置信息：
+ * 1) 将 script 块内的偏移转换为原始文件的绝对偏移（byteOffset）
+ * 2) 依据调整后的偏移，用与 VSCode 一致的换行规则重新计算 loc 行号，
+ *    以消除 acorn 对 U+2028/U+2029/单独 \r 的换行判定与实际插入坐标不一致的问题
  * @param node AST 节点
- * @param lineOffset 行偏移量
+ * @param code 原始完整文件内容（用于行号换算）
  * @param byteOffset 字节偏移量
  * @returns 调整后的节点
  */
-const adjustASTLocations = (node: ASTNode, lineOffset: number, byteOffset: number): ASTNode => {
+const adjustASTLocations = (node: ASTNode, code: string, byteOffset: number): ASTNode => {
   if (typeof node.start === 'number') node.start += byteOffset
   if (typeof node.end === 'number') node.end += byteOffset
   if (node.loc) {
     node.loc = {
-      start: { line: node.loc.start.line + lineOffset, column: node.loc.start.column },
-      end: { line: node.loc.end.line + lineOffset, column: node.loc.end.column },
+      start: { line: offsetToLine(code, node.start) + 1, column: node.loc.start.column },
+      end: { line: offsetToLine(code, node.end) + 1, column: node.loc.end.column },
     }
   }
   for (const key in node) {
@@ -268,9 +332,9 @@ const adjustASTLocations = (node: ASTNode, lineOffset: number, byteOffset: numbe
     const v = (node as Record<string, unknown>)[key]
     if (Array.isArray(v))
       v.forEach((item) => {
-        if (item && typeof item === 'object' && 'type' in item) adjustASTLocations(item as ASTNode, lineOffset, byteOffset)
+        if (item && typeof item === 'object' && 'type' in item) adjustASTLocations(item as ASTNode, code, byteOffset)
       })
-    else if (v && typeof v === 'object' && 'type' in v) adjustASTLocations(v as ASTNode, lineOffset, byteOffset)
+    else if (v && typeof v === 'object' && 'type' in v) adjustASTLocations(v as ASTNode, code, byteOffset)
   }
   return node
 }
@@ -298,7 +362,8 @@ export function parseCode(code: string, selectionLine: number, fileExtension?: s
   try {
     const parser = acorn.Parser.extend(tsPlugin({ jsx: ext === '.jsx' || ext === '.tsx' || ext === '.astro' })) as any
     let ast = parser.parse(codeToParse, { ecmaVersion: 'latest', sourceType: 'module', locations: true }) as ASTNode
-    if (lineOffset || byteOffset) ast = adjustASTLocations(ast, lineOffset, byteOffset)
+    // 始终调整位置：即便非模板文件（byteOffset=0），也需按 VSCode 行规则重算 loc 行号
+    ast = adjustASTLocations(ast, code, byteOffset)
     return { ast, lineOffset }
   } catch {
     return null
@@ -371,7 +436,16 @@ const createIdentifierSearcher = (code: string) => {
       const pname = `#${(node as Record<string, unknown>).name}`
       if (pname === name) return true
     }
-    if (node.type === 'MemberExpression' && node.start !== undefined && node.end !== undefined && code.slice(node.start, node.end).includes(name)) return true
+    // 成员路径（含 .）按整体文本精确匹配，避免 `token` 误匹配 `this.tokenValue`；
+    // 普通标识符由上面的 Identifier 递归覆盖，无需在此按子串匹配
+    if (
+      name.includes('.') &&
+      node.type === 'MemberExpression' &&
+      node.start !== undefined &&
+      node.end !== undefined &&
+      code.slice(node.start, node.end) === name
+    )
+      return true
     for (const key in node) {
       if (SKIP_KEYS.has(key)) continue
       const v = (node as Record<string, unknown>)[key]
@@ -448,6 +522,10 @@ export interface InsertionResult {
  * @returns 插入位置结果，line 为 -1 时表示未匹配
  */
 export function findInsertionLine(code: string, variableName: string, selectionLine: number, fileExtension?: string): InsertionResult {
+  // 选区可能带有首尾空白或换行（拖拽/三击选中很常见），统一裁剪后再匹配，
+  // 否则精确场景的 `id.name === variableName` 全部失配，会掉进兜底逻辑导致定位错误
+  variableName = variableName.trim()
+  if (!variableName) return { line: selectionLine + 1 }
   const result = parseCode(code, selectionLine, fileExtension)
   if (!result) return { line: selectionLine + 1 }
   const { ast } = result
@@ -585,7 +663,7 @@ const checkFunctionParameter = (ast: ASTNode, code: string, selectionLine: numbe
     if (body?.type === 'BlockStatement') {
       // 处理空函数体 {}：大括号在行尾时插入下一行，否则插入当前行
       const braceLine = offsetToLine(code, body.start)
-      const text = code.split('\n')[braceLine] ?? ''
+      const text = lineTextAt(code, braceLine)
       result = { line: text.trim().endsWith('{') ? braceLine + 1 : braceLine }
     } else if (body?.loc) {
       // 表达式体：插入到表达式结束之后
@@ -1190,7 +1268,7 @@ const checkPrimitiveAssignment = (ast: ASTNode, code: string, selectionLine: num
           const body = (parent as Record<string, unknown>).body as ASTNode | undefined
           if (body?.type === 'BlockStatement') {
             const braceLine = offsetToLine(code, body.start)
-            const text = code.split('\n')[braceLine] ?? ''
+            const text = lineTextAt(code, braceLine)
             result = { line: text.trim().endsWith('{') ? braceLine + 1 : braceLine }
           } else if (body?.loc) {
             result = { line: lineFromLoc(body.loc, 'end') + 1 }
@@ -1280,12 +1358,19 @@ const checkWithinReturnStatement = (ast: ASTNode, code: string, selectionLine: n
   const wanted = variableName.trim()
   const parentMap = buildParentMap(ast)
 
-  // 找到选中行上的标识符节点，用于判断是否嵌套在 return 内的回调中
+  // 找到选中行上的匹配节点，用于判断是否嵌套在 return 内的回调中
+  // 需同时覆盖标识符（如 token）与成员表达式（如 this.token / obj.prop），
+  // 与 hasRef 的匹配方式保持一致，避免成员表达式被漏判导致误命中 return 场景
   const selectionNodes: ASTNode[] = []
   walkAST(ast, (node) => {
-    if (!ID_TYPES.has(node.type)) return
-    const name = node.type === 'PrivateIdentifier' ? `#${(node as Record<string, unknown>).name}` : (node as Record<string, unknown>).name
-    if (name !== wanted) return
+    let matched = false
+    if (ID_TYPES.has(node.type)) {
+      const name = node.type === 'PrivateIdentifier' ? `#${(node as Record<string, unknown>).name}` : (node as Record<string, unknown>).name
+      matched = name === wanted
+    } else if (node.type === 'MemberExpression' && node.start !== undefined && node.end !== undefined) {
+      matched = code.slice(node.start, node.end) === wanted
+    }
+    if (!matched) return
     if (node.start === undefined || node.end === undefined) return
     const sl = offsetToLine(code, node.start)
     const el = offsetToLine(code, node.end)
