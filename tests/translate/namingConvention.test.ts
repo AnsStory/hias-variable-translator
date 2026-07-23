@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { convertToFormat, splitIntoWords, NamingFormat } from '../../src/translate/namingConvention'
+import { convertToFormat, splitIntoWords, splitIntoWordsForFileName, NamingFormat } from '../../src/translate/namingConvention'
 
 describe('convertToFormat - 命名格式转换', () => {
   const words = ['hello', 'world']
@@ -140,6 +140,44 @@ describe('splitIntoWords + convertToFormat - 端到端转换', () => {
     expect(convertToFormat(words, 'camelCase')).toBe('userName')
     expect(convertToFormat(words, 'PascalCase')).toBe('UserName')
     expect(convertToFormat(words, 'snake_case')).toBe('user_name')
+  })
+})
+
+describe('splitIntoWordsForFileName - 文件名专用分割（字符净化）', () => {
+  it('词内撇号删除 - 保留单词完整性', () => {
+    expect(splitIntoWordsForFileName("user's")).toEqual(['users'])
+    expect(splitIntoWordsForFileName("user's data")).toEqual(['users', 'data'])
+    expect(splitIntoWordsForFileName("don't stop")).toEqual(['dont', 'stop'])
+  })
+
+  it('多种撇号变体 - 统一删除', () => {
+    expect(splitIntoWordsForFileName('it’s ＇fine` now')).toEqual(['its', 'fine', 'now'])
+  })
+
+  it('标点符号 - 视作分隔符', () => {
+    expect(splitIntoWordsForFileName('hello, world!')).toEqual(['hello', 'world'])
+    expect(splitIntoWordsForFileName('user (full) name')).toEqual(['user', 'full', 'name'])
+    expect(splitIntoWordsForFileName('a/b:c')).toEqual(['a', 'b', 'c'])
+  })
+
+  it('数字保留 - 不被过滤', () => {
+    expect(splitIntoWordsForFileName('version 2 test')).toEqual(['version', '2', 'test'])
+  })
+
+  it('驼峰/下划线/连字符 - 兼容原有拆分', () => {
+    expect(splitIntoWordsForFileName('helloWorld_test-case')).toEqual(['hello', 'World', 'test', 'case'])
+  })
+
+  it('纯符号 - 返回空数组（触发回退原名）', () => {
+    expect(splitIntoWordsForFileName('***')).toEqual([])
+    expect(splitIntoWordsForFileName("'''")).toEqual([])
+  })
+
+  it('端到端 - 带撇号转各命名格式', () => {
+    const words = splitIntoWordsForFileName("user's profile")
+    expect(convertToFormat(words, 'camelCase')).toBe('usersProfile')
+    expect(convertToFormat(words, 'snake_case')).toBe('users_profile')
+    expect(convertToFormat(words, 'param-case')).toBe('users-profile')
   })
 })
 

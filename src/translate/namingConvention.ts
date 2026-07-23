@@ -167,3 +167,23 @@ export function splitIntoWords(text: string): string[] {
   // 分割并过滤空字符串
   return normalizedWords.split(/\s+/).filter((word) => word.length > 0)
 }
+
+/**
+ * 将翻译后的文本按单词分割（文件/文件夹名专用）
+ * 相比 splitIntoWords 额外做字符净化，确保结果符合文件命名规范；
+ * 仅用于文件/文件夹创建，不影响文件内容（文本）的翻译。
+ * - 词内撇号（' ' ＇ `）直接删除，保留单词完整性（如 user's → users）
+ * - 其余所有非字母数字字符统一视作分隔符
+ * @param text 翻译后的文本
+ * @returns 单词列表
+ */
+export function splitIntoWordsForFileName(text: string): string[] {
+  // 词内撇号直接删除，避免单词被拆碎（user's → users）
+  const noApostrophe = text.replace(/['’＇`]/g, '')
+  // 处理驼峰命名
+  const camelCaseWords = noApostrophe.replace(/([a-z])([A-Z])/g, '$1 $2')
+  // 其余所有非字母数字字符统一视作分隔符
+  const normalizedWords = camelCaseWords.replace(/[^a-zA-Z0-9]+/g, ' ')
+  // 分割并过滤空字符串
+  return normalizedWords.split(/\s+/).filter((word) => word.length > 0)
+}

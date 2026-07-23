@@ -30,7 +30,7 @@ The following options can be configured in VSCode settings:
 
 - **Type**: `boolean`
 - **Default**: `false`
-- **Description**: Whether to automatically copy translation results to clipboard after translation
+- **Description**: Whether to automatically copy translation results to clipboard after translation (applies to both selected-text translation and file path translation)
 
 ```json
 {

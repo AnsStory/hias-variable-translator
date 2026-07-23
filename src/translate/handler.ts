@@ -8,7 +8,7 @@ import * as path from 'path'
 import * as fs from 'fs/promises'
 import { existsSync } from 'fs'
 import { containsNonEnglish } from './chineseDetector'
-import { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords } from './namingConvention'
+import { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords, splitIntoWordsForFileName } from './namingConvention'
 import { Translator } from './translator'
 import { UndoManager } from './undoManager'
 import { ConfigManager } from './config'
@@ -390,11 +390,18 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
         // 翻译非英文部分
         const result = await translator.translate(dotPart)
         if (result.success) {
-          const words = splitIntoWords(result.translatedText)
+          // 文件名专用净化：去除撇号等非法字符
+          const words = splitIntoWordsForFileName(result.translatedText)
           const translated = convertToFormat(words, format)
-          translatedDotParts.push(translated)
-          lastTranslatedPart = translated
-          lastOriginalPart = dotPart
+          if (translated) {
+            translatedDotParts.push(translated)
+            lastTranslatedPart = translated
+            lastOriginalPart = dotPart
+          } else {
+            // 净化后无有效单词，回退使用原始名称，避免空或非法文件名
+            translatedDotParts.push(dotPart)
+            lastOriginalPart = dotPart
+          }
         } else {
           translatedDotParts.push(dotPart)
           lastOriginalPart = dotPart
@@ -415,9 +422,13 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
     if (containsNonEnglish(extContent)) {
       const result = await translator.translate(extContent)
       if (result.success) {
-        const words = splitIntoWords(result.translatedText)
+        // 文件名专用净化：去除撇号等非法字符
+        const words = splitIntoWordsForFileName(result.translatedText)
         const translated = convertToFormat(words, format)
-        translatedExt = '.' + translated
+        // 净化后无有效单词则保持原扩展名（translatedExt 已初始化为 ext）
+        if (translated) {
+          translatedExt = '.' + translated
+        }
       }
     }
   }
@@ -454,19 +465,30 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
     const createdDirs = getTranslationCreatedDirs(filePath, finalPath)
     undoManager.addRecord(filePath, finalPath, createdDirs)
 
-    // 复制到剪贴板（复制"最后一个"翻译结果）
-    if (lastTranslatedPart && lastOriginalPart && containsNonEnglish(lastOriginalPart)) {
-      const copyCount = await copyFileTranslationToClipboard(lastOriginalPart, lastTranslatedPart, format)
-      if (copyCount > 0) {
-        showFileClipboardStatus(lastOriginalPart, lastTranslatedPart, format, copyCount)
-      }
-    }
-
-    // 文件才需要关闭窗口和打开新文件
+    // 文件才需要关闭原窗口（打开翻译后的文件放到剪贴板写入之后）
     if (!isDirectory) {
       // 关闭原始文件窗口（如果已打开）
       await closeEditorForFile(filePath)
-      // 打开翻译后的文件
+    }
+
+    // 复制到剪贴板（复用文本翻译的剪贴板逻辑：根据 variableTranslator.clipboardFormats 配置复制"最后一个"翻译结果）
+    // 关键：必须在"打开翻译后的文件之前"完成多条写入。copyFileTranslationToClipboard 会按 clipboardFormats
+    // 逐条写入系统剪贴板历史（Win+V），若此时 showTextDocument 打开新编辑器造成窗口焦点抖动，
+    // Windows 剪贴板历史服务会丢失快速连续写入中的中间项，表现为"只剩最后一条（如 beautiful）"。
+    if (lastTranslatedPart && lastOriginalPart && containsNonEnglish(lastOriginalPart)) {
+      // 等待关闭原编辑器后焦点稳定，确保多条剪贴板写入被系统历史逐条记录
+      await new Promise((resolve) => setTimeout(resolve, 150))
+      const copyCount = await copyFileTranslationToClipboard(lastOriginalPart, lastTranslatedPart, format)
+      if (copyCount > 0) {
+        showFileClipboardStatus(lastOriginalPart, lastTranslatedPart, format, copyCount)
+      } else {
+        // 未启用剪贴板复制，只复制用户选择的格式（lastTranslatedPart 已按 format 转换）
+        await vscode.env.clipboard.writeText(lastTranslatedPart)
+      }
+    }
+
+    // 最后再打开翻译后的文件：放在剪贴板写入之后，避免新编辑器打开打断剪贴板历史逐条记录
+    if (!isDirectory) {
       await vscode.window.showTextDocument(vscode.Uri.file(finalPath))
     }
   } catch (error) {

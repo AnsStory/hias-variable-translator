@@ -5,7 +5,8 @@
 
 import * as vscode from 'vscode'
 import * as path from 'path'
-import { findInsertionLine, getLineIndent } from './ast'
+import { getLineIndent, parseCode, isTemplateExtension } from './ast'
+import { planInsertions } from './locator'
 import {
   isConsoleLogEnabled,
   getConsoleLogTemplate,
@@ -37,104 +38,157 @@ export async function handleInsertConsoleLog(): Promise<void> {
   const fullText = editor.document.getText()
   const useSnippet = hasSnippetSyntax(template)
   const fileExtension = path.extname(editor.document.fileName)
+  const lineCount = editor.document.lineCount
 
-  // 收集所有需要插入的信息
-  const insertions: Array<{
-    line: number
-    indent: string
-    selectedText: string
-  }> = []
+  // 每个选区的元信息（索引与 selections 对齐）：携带选中文本、活动行与选区起止 offset，供定位器消费。
+  const selMeta = selections.map((selection) => ({
+    selectedText: editor.document.getText(selection),
+    selectionLine: selection.active.line,
+    selectionRange: {
+      startOffset: editor.document.offsetAt(selection.start),
+      endOffset: editor.document.offsetAt(selection.end),
+    },
+  }))
 
-  for (const selection of selections) {
-    const selectedText = editor.document.getText(selection)
-    if (!selectedText) {
-      continue
-    }
+  // 解析 AST（offset 经 adjustASTLocations 已换算为全文档绝对坐标）：
+  // - 非模板文件：忽略 selectionLine，全量解析一次跨选区复用；
+  // - 模板文件（Vue/HTML/Svelte/Astro）：按首个非空选区所在行提取对应 <script> 块；
+  //   落在其它 script 块的选区解析不出 target → 走最小回退（多块 + 跨块多选罕见）。
+  const templateFile = isTemplateExtension(fileExtension)
+  const firstSelLine = selMeta.find((m) => m.selectedText)?.selectionLine ?? 0
+  const parsed = parseCode(fullText, templateFile ? firstSelLine : 0, fileExtension)
 
-    const selectionLine = selection.active.line
+  // 缩进单位（仅用于空块展开 / 补块的「深一层」渲染；复制现成行缩进时不需）
+  const tabSize = typeof editor.options?.tabSize === 'number' ? editor.options.tabSize : 2
+  const unit = editor.options?.insertSpaces === false ? '\t' : ' '.repeat(tabSize)
+  const lineIndentAt = (offset: number) => getLineIndent(editor.document.lineAt(Math.min(editor.document.positionAt(offset).line, lineCount - 1)).text)
 
-    // 使用 AST 解析确定正确的插入位置
-    const insertResult = findInsertionLine(fullText, selectedText, selectionLine, fileExtension)
-    let insertLine = insertResult.line
-    if (insertLine === -1) {
-      insertLine = selectionLine + 1
-    }
+  // 剪贴板复制（去除 snippet 占位符后写入）
+  const copyLog = async (selectedText: string) => {
+    if (!isConsoleLogCopyToClipboardEnabled()) return
+    const extractTemplate = getConsoleLogClipboardPattern()
+    if (!extractTemplate) return
+    let content = parseConsoleLogTemplate(selectedText, template)
+    content = content.replace(/\$\{(\d+):([^}]+)\}/g, '$2').replace(/\$\d+/g, '')
+    const clipboardText = extractClipboardText(selectedText, extractTemplate, `console.log(${content})`)
+    if (clipboardText) await vscode.env.clipboard.writeText(clipboardText)
+  }
 
-    // 计算插入行缩进：
-    // - 「上一行」适用于「语句之后插入」（上一行即被打印的语句）
-    // - 「插入点当前所在行」（将被下移的那行）适用于「插入到刚打开的块体内部」（如函数体/循环体首行）
-    // 取两者中缩进更深者，避免块体内部插入时少一层缩进
-    const lineCount = editor.document.lineCount
-    const aboveIndent =
-      insertLine > 0 ? getLineIndent(editor.document.lineAt(Math.min(insertLine - 1, lineCount - 1)).text) : getLineIndent(editor.document.lineAt(selectionLine).text)
-    let atIndent = ''
-    if (insertLine >= 0 && insertLine < lineCount) {
-      const atText = editor.document.lineAt(insertLine).text
-      if (atText.trim().length > 0) {
-        atIndent = getLineIndent(atText)
-      }
-    }
-    const indent = atIndent.length > aboveIndent.length ? atIndent : aboveIndent
+  // 每条编辑拆成 prefix + content + suffix：content 为 console.log 实参（可能含 snippet tab stop），
+  // prefix/suffix 为字面脚手架（snippet 模式下需转义），便于两种应用方式共用。
+  type AnchorEdit = { start: number; end: number; prefix: string; content: string; suffix: string; selectedText: string }
+  const anchorEdits: AnchorEdit[] = []
 
-    insertions.push({
-      line: insertLine,
-      indent: indent,
-      selectedText: selectedText,
+  // 行首 offset（或文件末尾非行首 AFTER）：行首直插、末尾另起一行无尾换行
+  const pushLineStart = (offset: number, indent: string, selectedText: string) => {
+    const atStart = offset === 0 || fullText[offset - 1] === '\n'
+    anchorEdits.push({
+      start: offset,
+      end: offset,
+      prefix: atStart ? `${indent}console.log(` : `\n${indent}console.log(`,
+      content: parseConsoleLogTemplate(selectedText, template),
+      suffix: atStart ? ')\n' : ')',
+      selectedText,
     })
   }
 
-  if (insertions.length === 0) {
-    return
+  // 无法解析出锚点的选区（空选区 / 无法解析 / 无法安全补块）→ 最小回退：
+  // 在选中行的下一行、复制选中行缩进插入（静默降级）
+  const pushFallback = (selectedText: string, selectionLine: number) => {
+    if (!selectedText) return
+    const indent = getLineIndent(editor.document.lineAt(Math.min(selectionLine, lineCount - 1)).text)
+    const off = Math.min(editor.document.offsetAt(new vscode.Position(selectionLine + 1, 0)), fullText.length)
+    pushLineStart(off, indent, selectedText)
   }
 
-  // 按行号降序排序，避免行号偏移问题
-  insertions.sort((a, b) => b.line - a.line)
+  if (parsed) {
+    // ── 锚定规划 + 原始坐标原子编辑 ──
+    // 全部编辑（普通插入 / 空块展开 / 补块 wrap / 回退）均以原始 code 坐标表达，
+    // 交由同一次 editor.edit（或 WorkspaceEdit）原子合并，无需 normalize 后重解析。
+    const plan = planInsertions(
+      parsed.ast,
+      fullText,
+      selMeta.map((m) => m.selectionRange)
+    )
+
+    for (const ins of plan.insertions) {
+      const meta = selMeta[ins.selectionIndex]
+      if (!meta.selectedText) continue
+      const content = parseConsoleLogTemplate(meta.selectedText, template)
+      if (ins.normalize) {
+        // 补块 wrap：替换原始体区间 [bodyStart,bodyEnd] 为多行块（内含 console.log + 原体）
+        const bi = lineIndentAt(ins.normalize.bodyStart)
+        const body = fullText.slice(ins.normalize.bodyStart, ins.normalize.bodyEnd)
+        const lead = ins.normalize.kind === 'wrap-expr-return' ? 'return ' : ''
+        anchorEdits.push({
+          start: ins.normalize.bodyStart,
+          end: ins.normalize.bodyEnd,
+          prefix: `{\n${bi}${unit}console.log(`,
+          content,
+          suffix: `)\n${bi}${unit}${lead}${body}\n${bi}}`,
+          selectedText: meta.selectedText,
+        })
+      } else if (ins.indentOneLevelDeeper) {
+        // 空块 {}：offset 落在 `{` 之后，展开为多行并把 log 落块内
+        const bi = lineIndentAt(ins.indentRef)
+        anchorEdits.push({
+          start: ins.offset,
+          end: ins.offset,
+          prefix: `\n${bi}${unit}console.log(`,
+          content,
+          suffix: `)\n${bi}`,
+          selectedText: meta.selectedText,
+        })
+      } else {
+        // 行首 offset（AFTER / BEFORE / BLOCK_HEAD 非空块）或文件末尾 AFTER：复制 indentRef 行缩进
+        pushLineStart(ins.offset, lineIndentAt(ins.indentRef), meta.selectedText)
+      }
+    }
+    // 无法解析 / 无法安全补块 → 最小回退（SKIP / 重叠丢弃静默省略）
+    for (const idx of plan.fallbacks) {
+      pushFallback(selMeta[idx].selectedText, selMeta[idx].selectionLine)
+    }
+  } else {
+    // 解析失败：全部选区走最小回退
+    for (const meta of selMeta) pushFallback(meta.selectedText, meta.selectionLine)
+  }
+
+  if (anchorEdits.length === 0) return
+  // 应用顺序按 offset 降序，避免前序编辑移位后序坐标；同 offset 保持规划器给定的稳定序
+  anchorEdits.sort((a, b) => b.start - a.start)
 
   if (useSnippet) {
-    // Snippet 模式：使用 WorkspaceEdit + SnippetTextEdit 支持多位置 snippet
+    const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/\$/g, '\\$').replace(/}/g, '\\}')
     const workspaceEdit = new vscode.WorkspaceEdit()
-    const snippetEdits: vscode.SnippetTextEdit[] = []
-
-    for (const insertion of insertions) {
-      const consoleLogContent = parseConsoleLogTemplate(insertion.selectedText, template)
-      const snippetText = `${insertion.indent}console.log(${consoleLogContent})\n`
-
-      const range = new vscode.Range(new vscode.Position(insertion.line, 0), new vscode.Position(insertion.line, 0))
-      const snippetString = new vscode.SnippetString(snippetText)
-      snippetEdits.push(vscode.SnippetTextEdit.insert(range.start, snippetString))
-    }
-
-    // 使用 set 方法应用 snippet 编辑
+    const snippetEdits = anchorEdits.map((e) => {
+      // 模板把最终光标 $0 置于实参末尾时，将其移到闭合括号 ) 之后（语句尾），
+      // 否则光标会停在 console.log(... $0) 括号内；仅迁移结尾的 $0，中间的 $0 按用户意图保留。
+      let content = e.content
+      let suffix = esc(e.suffix)
+      if (/\$0\s*$/.test(content) && e.suffix.startsWith(')')) {
+        content = content.replace(/\$0(\s*)$/, '$1')
+        suffix = ')' + '$0' + esc(e.suffix.slice(1))
+      }
+      const snippet = new vscode.SnippetString(esc(e.prefix) + content + suffix)
+      const startPos = editor.document.positionAt(e.start)
+      return e.start === e.end
+        ? vscode.SnippetTextEdit.insert(startPos, snippet)
+        : vscode.SnippetTextEdit.replace(new vscode.Range(startPos, editor.document.positionAt(e.end)), snippet)
+    })
     workspaceEdit.set(editor.document.uri, snippetEdits)
     await vscode.workspace.applyEdit(workspaceEdit)
   } else {
-    // 普通模式：直接插入文本
     await editor.edit((editBuilder) => {
-      for (const insertion of insertions) {
-        const consoleLogContent = parseConsoleLogTemplate(insertion.selectedText, template)
-        const text = `${insertion.indent}console.log(${consoleLogContent})\n`
-        const insertPosition = new vscode.Position(insertion.line, 0)
-        editBuilder.insert(insertPosition, text)
+      for (const e of anchorEdits) {
+        const startPos = editor.document.positionAt(e.start)
+        const text = e.prefix + e.content + e.suffix
+        if (e.start === e.end) editBuilder.insert(startPos, text)
+        else editBuilder.replace(new vscode.Range(startPos, editor.document.positionAt(e.end)), text)
       }
     })
   }
 
-  // 复制到剪贴板逻辑
-  if (isConsoleLogCopyToClipboardEnabled() && insertions.length > 0) {
-    const extractTemplate = getConsoleLogClipboardPattern()
-    if (extractTemplate) {
-      // 构建完整的 console.log 语句（去除 snippet 语法）
-      const firstInsertion = insertions[0]
-      let consoleLogContent = parseConsoleLogTemplate(firstInsertion.selectedText, template)
-      // 移除 snippet 占位符（${n:placeholder} → placeholder，$n → 空）
-      consoleLogContent = consoleLogContent.replace(/\$\{(\d+):([^}]+)\}/g, '$2').replace(/\$\d+/g, '')
-      const fullLine = `console.log(${consoleLogContent})`
-      const clipboardText = extractClipboardText(firstInsertion.selectedText, extractTemplate, fullLine)
-      if (clipboardText) {
-        await vscode.env.clipboard.writeText(clipboardText)
-      }
-    }
-  }
+  await copyLog(anchorEdits[0].selectedText)
 }
 
 /**

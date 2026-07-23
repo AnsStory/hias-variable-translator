@@ -1,64 +1,75 @@
 /**
  * AST 模块扩展测试
- * 测试 Svelte/Astro/HTML 文件支持、TypeScript 特殊语法、getLineIndent 等
+ * 测试 Svelte/Astro/HTML 模板文件支持（经锚定引擎）、getLineIndent、parseCode 等
  */
 
 import { describe, it, expect } from 'vitest'
-import { findInsertionLine, getLineIndent, parseCode } from '../../src/print/ast'
+import { getLineIndent, parseCode, offsetToLine } from '../../src/print/ast'
+import { computeInsertionAnchor } from '../../src/print/locator'
 
-function getInsertLine(code: string, variableName: string, selectionLine: number, fileExtension?: string): number {
-  return findInsertionLine(code, variableName, selectionLine, fileExtension).line
+/**
+ * 走锚定引擎，用子串定位选区返回插入行号。
+ * 模板文件按选区所在行提取对应 <script> 块；parseCode 已把 script 内偏移 rebase 为
+ * 全文档绝对 offset，故选区用全文档 indexOf 即与 AST 对齐。解析失败/空选区/SKIP/需补块返回 -1。
+ */
+function anchorLine(code: string, selText: string, ext?: string, occurrence = 0): number {
+  let idx = -1
+  for (let i = 0; i <= occurrence; i++) idx = code.indexOf(selText, idx + 1)
+  if (idx < 0) throw new Error(`未找到子串: ${selText}`)
+  const selectionLine = code.slice(0, idx).split('\n').length - 1
+  const parsed = parseCode(code, selectionLine, ext)
+  if (!parsed) return -1
+  const anchor = computeInsertionAnchor(parsed.ast, code, { startOffset: idx, endOffset: idx + selText.length })
+  if (!anchor || anchor.placement === 'SKIP' || anchor.needsNormalize) return -1
+  let line = offsetToLine(code, anchor.offset)
+  // AFTER_STMT 落末行且无尾随换行时 offset==code.length，log 实际渲染在新增行
+  if (anchor.placement === 'AFTER_STMT' && anchor.offset >= code.length && !code.endsWith('\n')) line += 1
+  return line
 }
 
-// ========== Svelte 文件支持 ==========
-describe('findInsertionLine - Svelte 文件', () => {
+// ========== Svelte 文件支持（模板 → 锚定引擎） ==========
+describe('锚定引擎 - Svelte 文件', () => {
   it('Svelte script 标签 - 变量赋值', () => {
     const code = `<script>
   const obj = {
     name: '张三'
   }
 </script>`
-    expect(getInsertLine(code, 'obj', 1, '.svelte')).toBe(4)
+    expect(anchorLine(code, 'obj', '.svelte')).toBe(4)
   })
 
   it('Svelte script lang="ts" - 函数调用', () => {
     const code = `<script lang="ts">
   const data = fetchData()
 </script>`
-    expect(getInsertLine(code, 'data', 1, '.svelte')).toBe(2)
+    expect(anchorLine(code, 'data', '.svelte')).toBe(2)
   })
 
-  it('Svelte 无 script 标签 - 返回 selectionLine + 1', () => {
+  it('Svelte 无 script 标签 - parseCode 返回 null（handler 走最小回退）', () => {
     const code = `<div>Hello</div>`
-    // 无 script 标签时 parseCode 返回 null，findInsertionLine 回退
-    expect(getInsertLine(code, 'x', 0, '.svelte')).toBe(1)
+    expect(parseCode(code, 0, '.svelte')).toBeNull()
   })
 })
 
 // ========== Astro 文件支持 ==========
-describe('findInsertionLine - Astro 文件', () => {
-  it('Astro frontmatter - 变量赋值', () => {
+describe('锚定引擎 - Astro 文件', () => {
+  it('Astro script 块 - 变量赋值', () => {
     const code = `<script>
   const config = {
     title: 'Hello'
   }
 </script>`
-    expect(getInsertLine(code, 'config', 1, '.astro')).toBe(4)
-  })
-
-  it('Astro JSX 支持', () => {
-    const code = `const items = [1, 2, 3]`
-    expect(getInsertLine(code, 'items', 0, '.astro')).toBe(1)
+    expect(anchorLine(code, 'config', '.astro')).toBe(4)
   })
 })
 
 // ========== HTML 文件支持 ==========
-describe('findInsertionLine - HTML 文件', () => {
+describe('锚定引擎 - HTML 文件', () => {
   it('HTML script 标签 - 变量赋值', () => {
     const code = `<script>
   const result = compute()
 </script>`
-    expect(getInsertLine(code, 'result', 1, '.html')).toBe(2)
+    expect(anchorLine(code, 'result', '.html')).toBe(2)
   })
 
   it('HTML 多个 script 标签 - 定位到正确的 script', () => {
@@ -69,65 +80,8 @@ describe('findInsertionLine - HTML 文件', () => {
 <script>
   const second = 2
 </script>`
-    // 选中 second（第 5 行），应定位到第二个 script
-    expect(getInsertLine(code, 'second', 5, '.html')).toBe(6)
-  })
-})
-
-// ========== TypeScript 特殊语法扩展 ==========
-describe('findInsertionLine - TypeScript 高级语法', () => {
-  it('泛型函数调用', () => {
-    const code = `const result = fetchData<string>()`
-    expect(getInsertLine(code, 'result', 0)).toBe(1)
-  })
-
-  it('非空断言 !', () => {
-    const code = `const value = getValue()!`
-    expect(getInsertLine(code, 'value', 0)).toBe(1)
-  })
-
-  it('TSAsExpression 嵌套', () => {
-    const code = `const obj = (fn() as Type) as OtherType`
-    expect(getInsertLine(code, 'obj', 0)).toBe(1)
-  })
-
-  it('interface 声明 - 不影响后续变量', () => {
-    const code = `interface User {
-  name: string
-}
-const user: User = { name: 'test' }`
-    expect(getInsertLine(code, 'user', 3)).toBe(4)
-  })
-
-  it('enum 声明 - 不影响后续变量', () => {
-    const code = `enum Status {
-  Active,
-  Inactive
-}
-const status = Status.Active`
-    expect(getInsertLine(code, 'status', 4)).toBe(5)
-  })
-
-  it('class 私有字段 #field', () => {
-    const code = `class MyClass {
-  #count = 0
-}`
-    expect(getInsertLine(code, '#count', 1)).toBe(2)
-  })
-
-  it('解构赋值 + 函数调用', () => {
-    const code = `const { data, error } = await fetch()`
-    expect(getInsertLine(code, 'data', 0)).toBe(1)
-  })
-
-  it('标签模板字符串 html``', () => {
-    const code = 'const msg = html`<div>${name}</div>`'
-    expect(getInsertLine(code, 'msg', 0)).toBe(1)
-  })
-
-  it('import 解构', () => {
-    const code = `import { ref, computed } from 'vue'`
-    expect(getInsertLine(code, 'ref', 0)).toBe(1)
+    // 选中 second（第 5 行），应定位到第二个 script，插到第 6 行
+    expect(anchorLine(code, 'second', '.html')).toBe(6)
   })
 })
 
@@ -215,49 +169,5 @@ const x = 1
   it('Vue 无 script - 返回 null', () => {
     const result = parseCode('<div>no script</div>', 0, '.vue')
     expect(result).toBeNull()
-  })
-})
-
-// ========== 复杂场景组合 ==========
-describe('findInsertionLine - 复杂场景', () => {
-  it('嵌套函数 - 外层变量', () => {
-    const code = `function outer() {
-  const data = fetch()
-  function inner() {
-    return data
-  }
-}`
-    expect(getInsertLine(code, 'data', 1)).toBe(2)
-  })
-
-  it('链式调用', () => {
-    const code = `const result = arr
-  .filter(x => x > 0)
-  .map(x => x * 2)`
-    expect(getInsertLine(code, 'result', 0)).toBe(3)
-  })
-
-  it('await 表达式', () => {
-    const code = `async function test() {
-  const data = await fetchData()
-}`
-    expect(getInsertLine(code, 'data', 1)).toBe(2)
-  })
-
-  it('switch 语句内', () => {
-    const code = `switch (type) {
-  case 'a':
-    break
-}`
-    expect(getInsertLine(code, 'type', 0)).toBe(0)
-  })
-
-  it('try/catch 内', () => {
-    const code = `try {
-  const result = risky()
-} catch (e) {
-  console.error(e)
-}`
-    expect(getInsertLine(code, 'result', 1)).toBe(2)
   })
 })

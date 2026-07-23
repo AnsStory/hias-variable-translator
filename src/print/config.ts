@@ -1,6 +1,6 @@
 /**
  * 打印模块配置
- * 管理 console.log 相关配置
+ * 读取 console.log 相关配置，并提供模板解析与匹配正则构建
  */
 
 import * as vscode from 'vscode'

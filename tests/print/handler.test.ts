@@ -82,6 +82,7 @@ const MockTextEdit = {
 // Mock SnippetTextEdit
 const MockSnippetTextEdit = {
   insert: vi.fn((pos: MockPosition, snippet: MockSnippetString) => ({ type: 'snippet', pos, snippet })),
+  replace: vi.fn((range: MockRange, snippet: MockSnippetString) => ({ type: 'snippet-replace', range, snippet })),
 }
 
 // Mock WorkspaceEdit
@@ -94,6 +95,14 @@ class MockWorkspaceEdit {
 
 // 创建 mock 文档
 function createMockDocument(lines: string[], fileName = 'test.ts') {
+  // offsetAt：行首偏移 = 前置各行长度之和 + 换行符数；再加列偏移
+  const offsetAt = vi.fn((position: any) => {
+    let offset = 0
+    for (let i = 0; i < position.line && i < lines.length; i++) {
+      offset += lines[i].length + 1 // +1 为换行符
+    }
+    return offset + position.character
+  })
   return {
     fileName,
     lineCount: lines.length,
@@ -102,6 +111,15 @@ function createMockDocument(lines: string[], fileName = 'test.ts') {
       if (!selection) return lines.join('\n')
       // 获取选区文本 - 简化处理：返回当前行文本
       return lines[selection.active.line] || ''
+    }),
+    offsetAt,
+    positionAt: vi.fn((offset: number) => {
+      let remaining = offset
+      for (let i = 0; i < lines.length; i++) {
+        if (remaining <= lines[i].length) return new MockPosition(i, remaining)
+        remaining -= lines[i].length + 1
+      }
+      return new MockPosition(lines.length - 1, 0)
     }),
     uri: { fsPath: fileName },
   }
@@ -121,7 +139,7 @@ function createMockEditor(lines: string[], selections: Array<[number, number]>, 
   return {
     document,
     selections: mockSelections,
-    edit: vi.fn((callback: Function) => {
+    edit: vi.fn((callback: (editBuilder: any) => void) => {
       const editBuilder = {
         insert: vi.fn(),
         delete: vi.fn(),
@@ -242,9 +260,30 @@ describe('handleInsertConsoleLog - 插入 console.log', () => {
 
     expect(editor.edit).toHaveBeenCalled()
   })
+
+  it('阶段 0 offset 边界贯通 - 每个选区都按 start/end 计算 offset', async () => {
+    const lines = ['const a = 1', 'const b = 2']
+    const editor = createMockEditor(lines, [
+      [0, 6],
+      [1, 6],
+    ])
+    let callCount = 0
+    editor.document.getText = vi.fn((sel?: any) => {
+      if (!sel) return lines.join('\n')
+      callCount++
+      return callCount === 1 ? 'a' : 'b'
+    })
+    globalThis.__mockEditor = editor
+
+    await handleInsertConsoleLog()
+
+    // 信息不再丢失：每个选区都对 start 与 end 各调一次 offsetAt（两选区共 4 次）
+    const offsetAt = editor.document.offsetAt as unknown as { mock: { calls: unknown[] } }
+    expect(offsetAt.mock.calls.length).toBe(4)
+  })
 })
 
-describe('handleInsertConsoleLog - 插入行缩进对齐', () => {
+describe('handleInsertConsoleLog - anchor 引擎（阶段 3c offset + indentRef 路径）', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     globalThis.__mockEditor = undefined
@@ -256,55 +295,197 @@ describe('handleInsertConsoleLog - 插入行缩进对齐', () => {
     }
   })
 
-  // 构造一个能捕获 editBuilder.insert 调用的编辑器（普通模式）
-  function editorWithCapture(lines: string[], selLine: number, selChar: number, selectedText: string) {
+  // 精确控制选区起止列（行内 startChar..endChar），getText 按 offset 切真子串，positionAt 真实反算
+  function anchorEditor(lines: string[], selLine: number, startChar: number, endChar: number) {
     const inserted: Array<{ line: number; text: string }> = []
+    const replaced: Array<{ startLine: number; endLine: number; text: string }> = []
+    const text = lines.join('\n')
+    const offsetAt = (pos: any) => {
+      let o = 0
+      for (let i = 0; i < pos.line && i < lines.length; i++) o += lines[i].length + 1
+      return o + pos.character
+    }
     const document = {
       fileName: 'test.ts',
       lineCount: lines.length,
       lineAt: (i: number) => new MockTextLine(lines[i], i),
-      getText: (sel?: any) => (sel ? selectedText : lines.join('\n')),
+      getText: (sel?: any) => (sel ? text.slice(offsetAt(sel.start), offsetAt(sel.end)) : text),
+      offsetAt,
+      positionAt: (offset: number) => {
+        let remaining = offset
+        for (let i = 0; i < lines.length; i++) {
+          if (remaining <= lines[i].length) return new MockPosition(i, remaining)
+          remaining -= lines[i].length + 1
+        }
+        return new MockPosition(lines.length - 1, 0)
+      },
       uri: { fsPath: 'test.ts' },
     }
     const editor = {
       document,
-      selections: [new MockSelection(new MockPosition(selLine, 0), new MockPosition(selLine, selChar))],
-      edit: vi.fn((cb: Function) => {
-        cb({ insert: (pos: MockPosition, text: string) => inserted.push({ line: pos.line, text }), delete: vi.fn() })
+      selections: [new MockSelection(new MockPosition(selLine, startChar), new MockPosition(selLine, endChar))],
+      edit: vi.fn((cb: (editBuilder: any) => void) => {
+        cb({
+          insert: (pos: MockPosition, t: string) => inserted.push({ line: pos.line, text: t }),
+          replace: (range: MockRange, t: string) => replaced.push({ startLine: range.start.line, endLine: range.end.line, text: t }),
+          delete: vi.fn(),
+        })
+        return Promise.resolve(true)
+      }),
+    }
+    return { editor, inserted, replaced }
+  }
+
+  it('AFTER_STMT：顶层赋值后插入下一行、无缩进', async () => {
+    const lines = ['const x = 1', 'const y = 2']
+    const { editor, inserted } = anchorEditor(lines, 0, 6, 7) // 选中 'x'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(1)
+    expect(inserted[0].line).toBe(1)
+    expect(inserted[0].text.startsWith('console.log(')).toBe(true)
+  })
+
+  it('BLOCK_HEAD：函数参数 → 插入体首行、缩进与 indentRef（return 行）对齐', async () => {
+    const lines = ['function greet(name) {', '  return name', '}']
+    const { editor, inserted } = anchorEditor(lines, 0, 15, 19) // 选中参数 'name'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(1)
+    expect(inserted[0].line).toBe(1)
+    expect(inserted[0].text.startsWith('  console.log(')).toBe(true)
+  })
+
+  it('BEFORE_STMT：return 实参 → 插入到 return 行前、同缩进', async () => {
+    const lines = ['function f() {', '  return total', '}']
+    const { editor, inserted } = anchorEditor(lines, 1, 9, 14) // 选中 'total'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(1)
+    expect(inserted[0].line).toBe(1) // 插到 return 行之前
+    expect(inserted[0].text.startsWith('  console.log(')).toBe(true)
+  })
+
+  it('SKIP：类字段 → 静默不插入（不调用 edit）', async () => {
+    const lines = ['class C {', '  config = new Foo()', '}']
+    const { editor, inserted } = anchorEditor(lines, 1, 2, 8) // 选中字段名 'config'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(0)
+    expect(editor.edit).not.toHaveBeenCalled()
+  })
+
+  it('normalize wrap-expr-return：箭头表达式体参数 → 补块 wrap（console.log + return 原体）', async () => {
+    const lines = ['const f = (num) => num + 1']
+    const { editor, inserted, replaced } = anchorEditor(lines, 0, 11, 14) // 选中参数 'num'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    // 不再回退行插入，而是原坐标 replace 体区间为多行块
+    expect(inserted.length).toBe(0)
+    expect(replaced.length).toBe(1)
+    expect(replaced[0].text.startsWith('{')).toBe(true)
+    expect(replaced[0].text.trimEnd().endsWith('}')).toBe(true)
+    expect(replaced[0].text).toContain('console.log(')
+    expect(replaced[0].text).toContain('return num + 1')
+  })
+
+  it('空块 {}：函数参数 → 展开为多行并把 log 落块内（插入于 `{` 之后）', async () => {
+    const lines = ['function f(a) {}']
+    const { editor, inserted, replaced } = anchorEditor(lines, 0, 11, 12) // 选中参数 'a'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(replaced.length).toBe(0)
+    expect(inserted.length).toBe(1)
+    expect(inserted[0].text.startsWith('\n')).toBe(true) // 新开一行
+    expect(inserted[0].text).toContain('console.log(')
+  })
+
+  it('normalize wrap-stmt：无花括号 for 体 → 补块 wrap（console.log + 原语句）', async () => {
+    const lines = ['for (let i = 0; i < n; i++) doThing(i)']
+    const { editor, inserted, replaced } = anchorEditor(lines, 0, 9, 10) // 选中 for-init 'i'
+    globalThis.__mockEditor = editor
+    await handleInsertConsoleLog()
+    expect(inserted.length).toBe(0)
+    expect(replaced.length).toBe(1)
+    expect(replaced[0].text.startsWith('{')).toBe(true)
+    expect(replaced[0].text.trimEnd().endsWith('}')).toBe(true)
+    expect(replaced[0].text).toContain('console.log(')
+    expect(replaced[0].text).toContain('doThing(i)')
+    expect(replaced[0].text).not.toContain('return ') // 语句体不加 return
+  })
+
+  // 多选批量：selections 为 [line, startChar, endChar][]，getText 按 offset 切真子串
+  function anchorEditorMulti(lines: string[], sels: Array<[number, number, number]>) {
+    const inserted: Array<{ line: number; text: string }> = []
+    const text = lines.join('\n')
+    const offsetAt = (pos: any) => {
+      let o = 0
+      for (let i = 0; i < pos.line && i < lines.length; i++) o += lines[i].length + 1
+      return o + pos.character
+    }
+    const document = {
+      fileName: 'test.ts',
+      lineCount: lines.length,
+      lineAt: (i: number) => new MockTextLine(lines[i], i),
+      getText: (sel?: any) => (sel ? text.slice(offsetAt(sel.start), offsetAt(sel.end)) : text),
+      offsetAt,
+      positionAt: (offset: number) => {
+        let remaining = offset
+        for (let i = 0; i < lines.length; i++) {
+          if (remaining <= lines[i].length) return new MockPosition(i, remaining)
+          remaining -= lines[i].length + 1
+        }
+        return new MockPosition(lines.length - 1, 0)
+      },
+      uri: { fsPath: 'test.ts' },
+    }
+    const editor = {
+      document,
+      selections: sels.map(([l, s, e]) => new MockSelection(new MockPosition(l, s), new MockPosition(l, e))),
+      edit: vi.fn((cb: (editBuilder: any) => void) => {
+        cb({ insert: (pos: MockPosition, t: string) => inserted.push({ line: pos.line, text: t }), delete: vi.fn() })
         return Promise.resolve(true)
       }),
     }
     return { editor, inserted }
   }
 
-  it('插入到函数体内部 - 缩进与函数体首行对齐', async () => {
-    const lines = ['function greet(name) {', '  return name', '}']
-    const { editor, inserted } = editorWithCapture(lines, 0, 18, 'name')
+  it('多选 · 同 offset（同函数两参数）→ 两条插入均落体首行、稳定不丢弃（§2.9 ②）', async () => {
+    const lines = ['function g(a, b) {', '  return a', '}']
+    const { editor, inserted } = anchorEditorMulti(lines, [
+      [0, 11, 12], // 参数 a
+      [0, 14, 15], // 参数 b
+    ])
     globalThis.__mockEditor = editor
     await handleInsertConsoleLog()
-    expect(inserted.length).toBe(1)
-    // 插入到第 1 行（函数体首行），缩进应为两个空格，与 return name 对齐
-    expect(inserted[0].line).toBe(1)
-    expect(inserted[0].text.startsWith('  console.log(')).toBe(true)
+    expect(inserted.length).toBe(2)
+    expect(inserted.every((i) => i.line === 1)).toBe(true)
+    expect(inserted.every((i) => i.text.startsWith('  console.log('))).toBe(true)
   })
 
-  it('插入到循环体内部 - 缩进与循环体首行对齐', async () => {
-    const lines = ['for (const item of list) {', '  handle(item)', '}']
-    const { editor, inserted } = editorWithCapture(lines, 0, 13, 'item')
+  it('多选 · 互不重叠两顶层语句 → 两条独立插入（整批规划）', async () => {
+    const lines = ['const x = 1', 'const y = 2', 'const z = 3']
+    const { editor, inserted } = anchorEditorMulti(lines, [
+      [0, 6, 7], // x
+      [1, 6, 7], // y
+    ])
     globalThis.__mockEditor = editor
     await handleInsertConsoleLog()
-    expect(inserted.length).toBe(1)
-    expect(inserted[0].text.startsWith('  console.log(')).toBe(true)
+    expect(inserted.length).toBe(2)
+    expect(inserted.map((i) => i.line).sort((p, q) => p - q)).toEqual([1, 2])
   })
 
-  it('顶层语句之后插入 - 无缩进', async () => {
-    const lines = ['const x = 1', 'const y = 2']
-    const { editor, inserted } = editorWithCapture(lines, 0, 7, 'x')
+  it('多选 · SKIP 类字段 + 方法内参数 → 仅方法内插入、SKIP 静默省略（§2.9 分流）', async () => {
+    const lines = ['class C {', '  f = 1', '  m(p) {', '    return p', '  }', '}']
+    const { editor, inserted } = anchorEditorMulti(lines, [
+      [1, 2, 3], // 类字段 f → SKIP
+      [2, 4, 5], // 方法参数 p → BLOCK_HEAD
+    ])
     globalThis.__mockEditor = editor
     await handleInsertConsoleLog()
     expect(inserted.length).toBe(1)
-    expect(inserted[0].line).toBe(1)
-    expect(inserted[0].text.startsWith('console.log(')).toBe(true)
+    expect(inserted[0].line).toBe(3) // 落方法体 return 行
+    expect(inserted[0].text.startsWith('    console.log(')).toBe(true)
   })
 })
 

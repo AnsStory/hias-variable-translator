@@ -58,6 +58,24 @@ Handling: Degrade to next service by priority → All services failed → Auto-d
 All translation services have **10-second timeout control**, and global translation timeout is also 10 seconds. On timeout, automatically degrades to the next service, ultimately falling back to pinyin.
 :::
 
+### Copy to Clipboard
+
+After file path translation, the plugin reuses the "Translate and Copy" (Alt+Shift+C) clipboard logic and writes the translation of the **last directory/file name segment** (without extension) to the clipboard, also following the `clipboardFormats` configuration.
+
+```
+Input: 你好/世界/美好.js
+Translation: hello/world/beautiful.js
+Copied content: beautiful (translation of the last segment)
+```
+
+- `copyToClipboard` enabled with `clipboardFormats` set: writes each format to clipboard history in reordered order (the selected format goes first)
+- `copyToClipboard` disabled or `clipboardFormats` empty: falls back to copying only the single selected format
+- `originalValue` copies the original text of that segment before translation (e.g., `美好`)
+
+::: tip Multiple formats rely on clipboard history (Win+V)
+Multiple formats are written to the clipboard history one by one. You must enable the system clipboard history (press **Win+V** on Windows) to see all formats; a plain `Ctrl+V` only pastes the **current clipboard** (i.e., the format you selected). File translation now performs the clipboard writes **before opening the translated file**, avoiding focus churn from the new editor that would drop intermediate history entries.
+:::
+
 ### Configuration
 
 This feature can be enabled/disabled in settings:
@@ -164,7 +182,7 @@ Current clipboard: userName (user selected format)
 | `param-case` | Hyphen separated |
 | `Header-Case` | Header case |
 | `no case` | Space separated |
-| `` | Original text before translation (the Chinese text you selected) |
+| `originalValue` | Original text before translation (the Chinese text you selected) |
 
 ---
 
