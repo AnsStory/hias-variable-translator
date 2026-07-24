@@ -471,10 +471,8 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean): Promi
       await closeEditorForFile(filePath)
     }
 
-    // 复制到剪贴板（复用文本翻译的剪贴板逻辑：根据 variableTranslator.clipboardFormats 配置复制"最后一个"翻译结果）
-    // 关键：必须在"打开翻译后的文件之前"完成多条写入。copyFileTranslationToClipboard 会按 clipboardFormats
+    // 复制到剪贴板（根据 variableTranslator.clipboardFormats 配置复制"最后一个"翻译结果）
     // 逐条写入系统剪贴板历史（Win+V），若此时 showTextDocument 打开新编辑器造成窗口焦点抖动，
-    // Windows 剪贴板历史服务会丢失快速连续写入中的中间项，表现为"只剩最后一条（如 beautiful）"。
     if (lastTranslatedPart && lastOriginalPart && containsNonEnglish(lastOriginalPart)) {
       // 等待关闭原编辑器后焦点稳定，确保多条剪贴板写入被系统历史逐条记录
       await new Promise((resolve) => setTimeout(resolve, 150))
@@ -572,28 +570,42 @@ function getTranslationCreatedDirs(originalPath: string, translatedPath: string)
  */
 async function cleanupEmptyDirs(dirPath: string, workspaceRoot?: string, onlyNonEnglish: boolean = true): Promise<void> {
   try {
-    if (workspaceRoot && dirPath.startsWith(workspaceRoot)) {
-      const relativePath = path.relative(workspaceRoot, dirPath)
-      const parts = relativePath.split(/[/\\]/)
+    if (!workspaceRoot) {
+      return
+    }
 
-      // 从最深的目录开始，逐级向上检查并删除空目录
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const part = parts[i]
-        if (onlyNonEnglish && !containsNonEnglish(part)) {
-          continue
-        }
-        const fullPath = path.join(workspaceRoot, ...parts.slice(0, i + 1))
-        try {
-          const stat = await fs.stat(fullPath)
-          if (stat.isDirectory()) {
-            const files = await fs.readdir(fullPath)
-            if (files.length === 0) {
-              await fs.rmdir(fullPath)
-            }
+    // 归一化为相对路径以判定目录是否处于工作区子树内。
+    // 采用 path.relative 而非 dirPath.startsWith(workspaceRoot)：win32 下 path.relative 按大小写不敏感比较，
+    // 可规避 VSCode 将 URI 盘符归一化为小写（d:）与实际 fsPath（D:）不一致时字符串前缀匹配失效的问题。
+    // 相对路径为空（同一目录）、以 '..' 开头（位于工作区之外）或为绝对路径（跨盘符）时，判定越界并直接返回。
+    const relativePath = path.relative(workspaceRoot, dirPath)
+    if (!relativePath || relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+      return
+    }
+
+    // 按分隔符拆分为各级目录段，兼容 posix('/') 与 win32('\\') 两种分隔符。
+    const parts = relativePath.split(/[/\\]/)
+
+    // 自叶子目录向根方向逐级回溯：先删深层空目录，使其父级在下一轮迭代中也可能变为空目录被回收。
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const part = parts[i]
+      // onlyNonEnglish 为 true 时跳过纯 ASCII 目录段，仅清理含非英文字符的目录（避免误删用户既有的英文目录）。
+      if (onlyNonEnglish && !containsNonEnglish(part)) {
+        continue
+      }
+      // 由工作区根 + 前 i+1 段重建绝对路径，规避直接字符串拼接导致的分隔符/盘符不一致。
+      const fullPath = path.join(workspaceRoot, ...parts.slice(0, i + 1))
+      try {
+        const stat = await fs.stat(fullPath)
+        // 仅当目标为目录且 readdir 返回空列表（无任何条目）时才执行 rmdir，确保非空目录不被删除。
+        if (stat.isDirectory()) {
+          const files = await fs.readdir(fullPath)
+          if (files.length === 0) {
+            await fs.rmdir(fullPath)
           }
-        } catch {
-          // 忽略错误（目录可能已被删除或无权限）
         }
+      } catch {
+        // 忽略错误（目录可能已被删除或无权限）
       }
     }
   } catch {
