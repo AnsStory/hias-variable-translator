@@ -98,6 +98,12 @@
         "key": "alt+shift+z"
       },
       {
+        "command": "variableTranslator.undoTranslation",
+        "key": "ctrl+z",
+        "mac": "cmd+z",
+        "when": "variableTranslator.canUndoFile && !inputFocus"
+      },
+      {
         "command": "variableTranslator.toggleFileTranslation",
         "key": "alt+shift+d"
       },

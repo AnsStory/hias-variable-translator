@@ -2,28 +2,46 @@
 layout: home
 
 hero:
-  name: Variable Translator
-  text: VSCode Translation Plugin
-  tagline: Automatically detect and translate any non-English characters to English
+  name: variable-translator
+  text: Variable Translation for VSCode
+  tagline: Auto-detect any non-English text and translate it into properly-cased English names
+  image:
+    src: /logo.svg
+    alt: variable-translator
   actions:
     - theme: brand
       text: Quick Start
-      link: /en/guide/
+      link: /en/guide/quickstart
+    - theme: alt
+      text: Features
+      link: /en/guide/features
     - theme: alt
       text: GitHub
       link: https://github.com/AnsStory/hias-variable-translator
 
 features:
-  - title: Multi-language Support
-    details: Auto-detect Chinese, Japanese, Korean, Russian and any other non-English characters
-  - title: File Path Translation
-    details: Automatically translate non-English characters in file paths when creating new files
-  - title: Text Translation
-    details: One-click translate and replace selected text
-  - title: Multiple Naming Formats
-    details: Support camelCase, PascalCase, snake_case and 8 other naming formats
-  - title: Multiple Translation Services
-    details: Support Pinyin, OpenAI, Google, Bing, Baidu, Tencent and 7 other services
-  - title: One-click Undo
-    details: Undo translations within 1 minute, automatically clean up files and directories
+  - icon: 🌏
+    title: Automatic Language Detection
+    details: Detects Chinese, Japanese, Korean, Russian and any other non-English characters — no source language required
+  - icon: 📁
+    title: File Path Translation
+    details: Automatically translates non-English file/folder names on creation, with nested directories and name-conflict handling
+  - icon: ✏️
+    title: Selection Translation
+    details: Select text and press Alt+Shift+T to translate and replace in place — perfect for naming variables, functions and classes
+  - icon: 📋
+    title: Translate & Copy
+    details: Alt+Shift+C writes the translation in multiple naming formats to the clipboard history (retrieve all via Win+V)
+  - icon: 🔤
+    title: 8 Naming Formats
+    details: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case and no case
+  - icon: 🔀
+    title: Multi-Service Fallback
+    details: OpenAI, Google, Bing, DeepLX, Baidu and Tencent with priority-based fallback, ending in a Pinyin safety net
+  - icon: ↩️
+    title: One-Key Undo
+    details: Alt+Shift+Z (or Ctrl+Z in the Explorer) undoes a file translation within 1 minute and cleans up directories created by translation
+  - icon: 🧩
+    title: Zero Configuration
+    details: Works out of the box — the default Pinyin service needs no API key, and DeepLX is free with a local deployment
 ---

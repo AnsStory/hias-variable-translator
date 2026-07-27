@@ -2,22 +2,24 @@
 
 ## Feature 1: File Path Translation
 
-### Use Case
+### Scenario
 
-Users create new files in VSCode explorer with paths containing any non-English characters. The plugin automatically detects the language and translates to English.
+Create a new file/folder in the VSCode Explorer with a path containing any non-English characters — the extension detects the language and translates it into English.
 
-### Operation Flow
+### Workflow
 
 ```
-Right-click new file → Enter path → Enter → Select format → Enter → Auto translate and create
+Create file → enter path → Enter → pick a naming format → Enter → translated & created
 ```
+
+If you press `Esc` to cancel the format picker, the original file/folder is **kept as-is** without translation.
 
 ### Example
 
 ```
 Input: 用户名称/测试文件/测试.test.js
 
-Format selection:
+Format options:
 - camelCase:      userName/testFile/test.test.js
 - PascalCase:     UserName/TestFile/Test.test.js
 - snake_case:     user_name/test_file/test.test.js
@@ -26,59 +28,60 @@ Format selection:
 - Header-Case:    User-Name/Test-File/Test.test.js
 ```
 
-### Undo Feature
+### Undo
 
 ```
-Press Alt+Shift+Z → Delete translated file/directory → Auto-clean empty directories → Close editor window for that file
+Press Alt+Shift+Z → translated file/directories deleted → empty directories cleaned up → editor tab closed
 ```
 
-**Undo Rules**:
-- Undo operation directly deletes the translated file, not restoring to original non-English path
-- Automatically cleans up only directories created by translation: determined by comparing paths before and after translation; identical prefix segments (e.g., `src/`) belong to the user and are never cleaned
-- Only closes the editor window for the deleted file, not other open files
-- **Can undo within 1 minute**, after which the undo cache is automatically cleared
+**Undo rules**:
+- Undo deletes the translated file; it does not restore the original non-English path
+- Only directories created by the translation are cleaned: the extension compares the paths before and after translation, so unchanged prefix segments (e.g. `src/`) are treated as pre-existing and never removed
+- Only the editor tab of the deleted file is closed; other open files are untouched
+- Undo is available for **1 minute**; the undo record is cleared automatically afterwards
+- Within that minute, `Ctrl+Z` also triggers undo when focus is outside text input areas (e.g. the Explorer); `Ctrl+Z` in the editor keeps its native text undo behavior
 
-> Example: typing `你好/世界/美好.test.js` under `src/` translates to `src/hello/world/beautiful.test.js`; undoing will remove `hello/world/` and `hello/`, but `src/` is preserved regardless of whether it is empty.
+> Example: entering `你好/世界/美好.test.js` under `src/`, translated to `src/hello/world/beautiful.test.js`. Undoing removes `hello/world/` and `hello/`, but `src/` is kept whether empty or not.
 
-### Filename Conflict Handling
-
-```
-Scenario: Target file already exists (e.g., test.test.js exists)
-Handling: Automatically add suffix (e.g., test_1.test.js) and prompt user
-```
-
-### Translation Failure Degradation
+### File Name Conflicts
 
 ```
-Scenario: Translation API call fails (network error, quota exhausted, etc.)
-Handling: Degrade to next service by priority → All services failed → Auto-degrade to pinyin translation
+Scenario: the target file already exists (e.g. test.test.js)
+Behavior: a numeric suffix is appended automatically (e.g. test_1.test.js) with a notification
 ```
 
-::: tip Timeout Protection
-All translation services have **10-second timeout control**, and global translation timeout is also 10 seconds. On timeout, automatically degrades to the next service, ultimately falling back to pinyin.
+### Translation Failure Fallback
+
+```
+Scenario: the translation API call fails (network error, quota exhausted, etc.)
+Behavior: fall back to the next service by priority → all services fail → fall back to Pinyin
+```
+
+::: tip Timeout protection
+Every translation service has a **10-second timeout**, and the global translation timeout is also 10 seconds. On timeout the extension falls back to the next service, ending with Pinyin — so file creation always succeeds.
 :::
 
 ### Copy to Clipboard
 
-After file path translation, the plugin reuses the "Translate and Copy" (Alt+Shift+C) clipboard logic and writes the translation of the **last directory/file name segment** (without extension) to the clipboard, also following the `clipboardFormats` configuration.
+After a file path translation, the extension reuses the "Translate & Copy" (`Alt+Shift+C`) clipboard logic: the translation of the **last path segment** (without extension) is written to the clipboard, honoring the `clipboardFormats` setting.
 
 ```
 Input: 你好/世界/美好.js
-Translation: hello/world/beautiful.js
-Copied content: beautiful (translation of the last segment)
+Translated: hello/world/beautiful.js
+Copied: beautiful (translation of the last segment)
 ```
 
-- `copyToClipboard` enabled with `clipboardFormats` set: writes each format to clipboard history in reordered order (the selected format goes first)
-- `copyToClipboard` disabled or `clipboardFormats` empty: falls back to copying only the single selected format
-- `originalValue` copies the original text of that segment before translation (e.g., `美好`)
+- With `copyToClipboard` enabled and `clipboardFormats` configured: each format is written to the clipboard history in order (the format you picked goes first)
+- Otherwise: only the single format you picked is copied as a fallback
+- `originalValue` copies the pre-translation text of that segment (e.g. `美好`)
 
 ::: tip Multiple formats rely on clipboard history (Win+V)
-Multiple formats are written to the clipboard history one by one. You must enable the system clipboard history (press **Win+V** on Windows) to see all formats; a plain `Ctrl+V` only pastes the **current clipboard** (i.e., the format you selected). File translation now performs the clipboard writes **before opening the translated file**, avoiding focus churn from the new editor that would drop intermediate history entries.
+Formats are written to the clipboard history **one by one**. Enable the system clipboard history (press **Win+V** on Windows) to access all of them; a plain `Ctrl+V` only pastes the **current clipboard** (the format you picked). The clipboard writes happen **before** the translated file is opened, so a focus change from the new editor cannot drop intermediate history entries.
 :::
 
-### Configuration
+### Setting
 
-This feature can be enabled/disabled in settings:
+This feature can be toggled in settings, or quickly via `Alt+Shift+D`:
 
 ```json
 {
@@ -88,25 +91,25 @@ This feature can be enabled/disabled in settings:
 
 ---
 
-## Feature 2: Selected Text Translation
+## Feature 2: Selection Translation
 
-### Use Case
+### Scenario
 
-Users write non-English characters in any file, select them and translate via shortcut.
+Write non-English text anywhere, select it and translate-and-replace via shortcut — ideal for naming variables, functions and classes.
 
-### Operation Flow
+### Workflow
 
 ```
-Select text → Press Alt+Shift+T → Select format → Enter → Replace with English
+Select text → press Alt+Shift+T → pick a naming format → Enter → replaced with English
 ```
 
 ### Example
 
 ```
-Select: 用户名称
-Press: Alt+Shift+T
+Selected: 用户名称
+Pressed: Alt+Shift+T
 
-Format selection:
+Format options:
 - camelCase:      userName
 - PascalCase:     UserName
 - snake_case:     user_name
@@ -119,40 +122,40 @@ Format selection:
 
 ### Undo
 
-After text translation, use VSCode's built-in `Ctrl+Z` to undo the replacement. For file path translation undo, use `Alt+Shift+Z` (see Feature 1).
+Use VSCode's built-in `Ctrl+Z` to undo the replacement. To undo a file path translation, use `Alt+Shift+Z`, or press `Ctrl+Z` while focus is in the Explorer or another non-text-input area (see Feature 1).
 
 ---
 
-## Feature 3: Translate and Copy to Clipboard
+## Feature 3: Translate & Copy to Clipboard
 
-### Use Case
+### Scenario
 
-Users write non-English characters in any file, select them and translate via shortcut, then copy multiple formats to clipboard history.
+Select non-English text and copy its translation in multiple naming formats to the clipboard history — the original text is **not replaced**. Great for drafting names in comments/docs first, then pasting the English into code.
 
-### Operation Flow
+### Workflow
 
 ```
-Select text → Press Alt+Shift+C → Select format → Translation result copied to clipboard
+Select text → press Alt+Shift+C → pick a naming format → translation copied to clipboard
 ```
 
 ### Example
 
 ```
-Select: 用户名称
-Press: Alt+Shift+C
-Select format: camelCase
+Selected: 用户名称
+Pressed: Alt+Shift+C
+Picked format: camelCase
 
 Configured clipboardFormats: ["originalValue", "camelCase", "snake_case"]
 
-Copied to clipboard history:
-- 用户名称 (original value, the text before translation)
+Written to clipboard history:
+- 用户名称 (originalValue, the pre-translation text)
 - userName (camelCase)
 - user_name (snake_case)
 
-Current clipboard: userName (user selected format)
+Current clipboard: userName (the format you picked)
 ```
 
-### Configuration
+### Settings
 
 ```json
 {
@@ -171,37 +174,54 @@ Current clipboard: userName (user selected format)
 }
 ```
 
-### clipboardFormats Options
+### clipboardFormats Values
 
 | Value | Description |
 |-------|-------------|
 | `camelCase` | Lower camel case |
 | `PascalCase` | Upper camel case |
-| `snake_case` | Underscore separated |
-| `CONSTANT_CASE` | Constant case |
-| `param-case` | Hyphen separated |
-| `Header-Case` | Header case |
-| `no case` | Space separated |
-| `originalValue` | Original text before translation (the Chinese text you selected) |
+| `snake_case` | Underscore-separated |
+| `CONSTANT_CASE` | Constant style |
+| `param-case` | Hyphen-separated |
+| `Header-Case` | Capitalized hyphen-separated |
+| `Capital Case` | Capitalized space-separated |
+| `no case` | Space-separated |
+| `originalValue` | The pre-translation text (what you selected) |
 
 ---
 
-## Naming Format Description
+## Feature 4: Switch Translation Service
+
+Press `Alt+Shift+S` or use the editor context menu to switch between:
+
+- Pinyin (zero configuration, default)
+- ChatGPT / OpenAI
+- Google Translate
+- Bing / Azure Translator
+- DeepLX
+- Baidu Translate
+- Tencent Translator
+
+Picking a service that is not yet configured prompts you to open the settings. See [Translation Services](/en/guide/services).
+
+---
+
+## Naming Formats
 
 ### File Translation Formats
 
 | Format | Example | Description |
 |--------|---------|-------------|
-| camelCase | userName | Lower camel case, first letter lowercase |
-| PascalCase | UserName | Upper camel case, first letter uppercase |
-| snake_case | user_name | Underscore separated, all lowercase |
-| CONSTANT_CASE | USER_NAME | Underscore separated, all uppercase |
-| param-case | user-name | Hyphen separated, all lowercase |
-| Header-Case | User-Name | Hyphen separated, first letter uppercase |
+| camelCase | userName | Lower camel case |
+| PascalCase | UserName | Upper camel case |
+| snake_case | user_name | Underscore-separated, lowercase |
+| CONSTANT_CASE | USER_NAME | Underscore-separated, uppercase |
+| param-case | user-name | Hyphen-separated, lowercase |
+| Header-Case | User-Name | Hyphen-separated, capitalized |
 
-### Selected Text Translation Additional Formats
+### Additional Formats for Selection Translation
 
 | Format | Example | Description |
 |--------|---------|-------------|
-| Capital Case | User Name | First letter uppercase, space separated |
-| no case | user name | All lowercase, space separated |
+| Capital Case | User Name | Space-separated, capitalized |
+| no case | user name | Space-separated, lowercase |

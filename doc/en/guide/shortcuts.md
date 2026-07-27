@@ -1,24 +1,29 @@
 # Shortcuts
 
-| Shortcut (Windows/Linux) | Shortcut (macOS) | Function | Description |
-|--------------------------|------------------|----------|-------------|
-| `Alt+Shift+T` | `Option+Shift+T` | Translate selected text | Translate non-English text selected in editor |
-| `Alt+Shift+C` | `Option+Shift+C` | Translate and copy to clipboard | Copy multiple formats to clipboard history after translation |
-| `Alt+Shift+Z` | `Option+Shift+Z` | Undo file translation | Delete translated file/directory (valid within 1 minute) |
-| `Alt+Shift+D` | `Option+Shift+D` | Toggle file translation | Enable/disable file path translation feature |
-| `Alt+Shift+S` | `Option+Shift+S` | Switch translation service | Select different translation service |
+| Shortcut (Windows/Linux) | Shortcut (macOS) | Feature | Description |
+|--------------------------|------------------|---------|-------------|
+| `Alt+Shift+T` | `Option+Shift+T` | Translate selection | Translate and replace selected non-English text |
+| `Alt+Shift+C` | `Option+Shift+C` | Translate & copy | Copy multiple formats to the clipboard history, without replacing |
+| `Alt+Shift+Z` | `Option+Shift+Z` | Undo file translation | Delete the translated file/directories (within 1 minute) |
+| `Ctrl+Z` | `Cmd+Z` | Undo file translation (conditional) | Only within 1 minute and when focus is outside text input areas (e.g. the Explorer); `Ctrl+Z` in the editor keeps its native text undo |
+| `Alt+Shift+D` | `Option+Shift+D` | Toggle file translation | Enable/disable file path translation |
+| `Alt+Shift+S` | `Option+Shift+S` | Switch translation service | Switch between 7 services |
 
-## Shortcut Details
+These commands are also available in the editor context menu (translate/copy require a selection).
 
-### Alt+Shift+T - Translate Selected Text
+## Details
 
-**How to use**:
-1. Select non-English text in editor
+### Alt+Shift+T - Translate Selection
+
+**Requires**: editor focused with a selection.
+
+**Usage**:
+1. Select non-English text in the editor
 2. Press `Alt+Shift+T`
-3. Select translation format
-4. Text is automatically replaced with English
+3. Pick a naming format
+4. The text is replaced with English
 
-**Supported Formats**:
+**Formats**:
 - camelCase
 - PascalCase
 - snake_case
@@ -28,90 +33,102 @@
 - Capital Case
 - no case
 
-### Alt+Shift+C - Translate and Copy to Clipboard
+Use VSCode's built-in `Ctrl+Z` to undo the replacement.
 
-**How to use**:
-1. Select non-English text in editor
+### Alt+Shift+C - Translate & Copy to Clipboard
+
+**Requires**: editor focused with a selection.
+
+**Usage**:
+1. Select non-English text in the editor
 2. Press `Alt+Shift+C`
-3. Select translation format
-4. Translation result is copied to clipboard history
+3. Pick a naming format
+4. The translation is copied to the clipboard history; the original text is untouched
 
-**Configuration Example**:
+**Example settings**:
 ```json
 {
   "variableTranslator.copyToClipboard": true,
   "variableTranslator.clipboardFormats": [
-    "camelCase",
     "originalValue",
-    "PascalCase",
-    "no case",
-    "snake_case",
-    "CONSTANT_CASE",
-    "param-case",
-    "Header-Case",
-    "Capital Case",
+    "camelCase",
+    "snake_case"
   ]
 }
 ```
 
-**Effect**: After translating "用户名称", clipboard history will contain:
-- `用户名称` (original value)
-- `world` (camelCase)
-- `world` (snake_case)
+**Result**: selecting `用户名称` and picking camelCase writes to the clipboard history:
+- `用户名称` (originalValue, the original text)
+- `userName` (camelCase)
+- `user_name` (snake_case)
 
-Final clipboard retains user selected format
+The current clipboard holds the format you picked (`userName`); use **Win+V** clipboard history to access the rest.
 
-### Alt+Shift+Z - Undo File Translation
+### Alt+Shift+Z / Ctrl+Z - Undo File Translation
 
-**How to use**:
-1. After creating a file, press `Alt+Shift+Z`
-2. Translated file is deleted
-3. Related editor window is closed
+**Usage**:
+1. Press `Alt+Shift+Z` after a file translation (or `Ctrl+Z` when focus is in the Explorer or another non-text-input area)
+2. The translated file is deleted
+3. The related editor tab is closed
 
 **Notes**:
-- Only valid within 1 minute
-- Deletes the translated file, not the original file
-- Only cleans up directories created by translation (determined by comparing paths before and after translation, preserving user's existing directories)
+- Valid for **1 minute** only; the undo record is cleared afterwards
+- `Ctrl+Z` only triggers the undo when a valid undo record exists and focus is outside text input areas; `Ctrl+Z` in the editor always keeps VSCode's native text undo
+- After a successful undo and until the 1-minute window ends, pressing `Ctrl+Z` again shows "no undoable translation record" instead of falling through to VSCode's native file undo (whose "create original file" entry became stale after the translation rename and would error)
+- Deletes the translated file — it does not restore the original non-English path
+- Only directories created by the translation are cleaned up (determined by comparing paths before/after translation; pre-existing directories are never removed)
 
 ### Alt+Shift+D - Toggle File Translation
 
-**How to use**:
+**Usage**:
 1. Press `Alt+Shift+D`
-2. Status bar shows current status
+2. The status bar shows the current state
 
-**Status Description**:
-- Enabled: File Translation: Enabled ✓
-- Disabled: File Translation: Disabled ✗
+**States**:
+- On: 文件翻译：已开启 ✓
+- Off: 文件翻译：已关闭 ✗
+
+Equivalent to changing the `variableTranslator.enableFileTranslation` setting.
 
 ### Alt+Shift+S - Switch Translation Service
 
-**How to use**:
+**Usage**:
 1. Press `Alt+Shift+S`
-2. Select the translation service to use
+2. Pick a service
 
-**Available Services**:
-- VS Code Copilot
+**Available services**:
+- Pinyin (zero configuration, default)
 - ChatGPT / OpenAI
-- Google Translation
+- Google Translate
 - Bing / Azure Translator
 - DeepLX
-- Baidu Translation
-- Tencent Translation
+- Baidu Translate
+- Tencent Translator
 
-## Status Bar Display
+Picking an unconfigured service prompts you to open the settings.
 
-### File Translation Switch Status
+## Status Bar
 
-```
-When toggling Alt+Shift+D:
-- Enabled: File Translation: Enabled ✓
-- Disabled: File Translation: Disabled ✗
-- Display time: Disappears after 2-3 seconds
-```
-
-### Current Translation Service
+### File Translation State
 
 ```
-Status bar display:
-[Copilot] File Translation: Enabled ✓
+Shown when toggling with Alt+Shift+D:
+- On:  文件翻译：已开启 ✓
+- Off: 文件翻译：已关闭 ✗
+- Disappears automatically after 2-3 seconds
 ```
+
+### Current Service
+
+```
+Status bar:
+[拼音] 文件翻译：已开启 ✓
+```
+
+## Rebinding Shortcuts
+
+If a shortcut conflicts with another extension:
+
+1. Press `Ctrl+K Ctrl+S` to open Keyboard Shortcuts
+2. Search for `variableTranslator`
+3. Double-click a command to rebind it

@@ -1,385 +1,42 @@
 <!DOCTYPE html>
 <html lang="en-US" dir="ltr">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Features | variable-translator</title>
-  <meta name="description" content="VSCode 插件 - 将非英文字符翻译为英文">
-  <meta name="generator" content="VitePress v1.6.4">
-  <link rel="preload stylesheet" href="/hias-variable-translator/assets/style.Cde52Y-R.css" as="style">
-  <link rel="preload stylesheet" href="/hias-variable-translator/vp-icons.css" as="style">
-
-  <script type="module" src="/hias-variable-translator/assets/app.Bs_QjQg6.js"></script>
-  <link rel="preload" href="/hias-variable-translator/assets/inter-roman-latin.Di8DUHzh.woff2" as="font"
-    type="font/woff2" crossorigin="">
-  <link rel="modulepreload" href="/hias-variable-translator/assets/chunks/theme.CDUHLXGg.js">
-  <link rel="modulepreload" href="/hias-variable-translator/assets/chunks/framework.D46keoNO.js">
-  <link rel="modulepreload" href="/hias-variable-translator/assets/en_guide_features.md.BCHNwFw4.lean.js">
-  <link rel="icon" type="image/png" href="/hias-variable-translator/favicon.png">
-  <script
-    id="check-dark-mode">(() => { const e = localStorage.getItem("vitepress-theme-appearance") || "auto", a = window.matchMedia("(prefers-color-scheme: dark)").matches; (!e || e === "auto" ? a : e === "dark") && document.documentElement.classList.add("dark") })();</script>
-  <script
-    id="check-mac-os">document.documentElement.classList.toggle("mac", /Mac|iPhone|iPod|iPad/i.test(navigator.platform));</script>
-</head>
-
-<body>
-  <div id="app">
-    <div class="Layout" data-v-5d98c3a5><!--[--><!--]--><!--[--><span tabindex="-1" data-v-0b0ada53></span><a
-        href="#VPContent" class="VPSkipLink visually-hidden" data-v-0b0ada53>Skip to content</a><!--]--><!---->
-      <header class="VPNav" data-v-5d98c3a5 data-v-ae24b3ad>
-        <div class="VPNavBar" data-v-ae24b3ad data-v-6aa21345>
-          <div class="wrapper" data-v-6aa21345>
-            <div class="container" data-v-6aa21345>
-              <div class="title" data-v-6aa21345>
-                <div class="VPNavBarTitle has-sidebar" data-v-6aa21345 data-v-1168a8e4><a class="title"
-                    href="/hias-variable-translator/en/" data-v-1168a8e4><!--[--><!--]--><!--[--><img
-                      class="VPImage logo" src="/hias-variable-translator/logo.svg" alt data-v-8426fc1a><!--]--><span
-                      data-v-1168a8e4>Variable Translator</span><!--[--><!--]--></a></div>
-              </div>
-              <div class="content" data-v-6aa21345>
-                <div class="content-body" data-v-6aa21345><!--[--><!--]-->
-                  <div class="VPNavBarSearch search" data-v-6aa21345><!--[--><!---->
-                    <div id="local-search"><button type="button" class="DocSearch DocSearch-Button"
-                        aria-label="搜索文档"><span class="DocSearch-Button-Container"><span
-                            class="vp-icon DocSearch-Search-Icon"></span><span
-                            class="DocSearch-Button-Placeholder">搜索文档</span></span><span
-                          class="DocSearch-Button-Keys"><kbd class="DocSearch-Button-Key"></kbd><kbd
-                            class="DocSearch-Button-Key">K</kbd></span></button></div><!--]-->
-                  </div>
-                  <nav aria-labelledby="main-nav-aria-label" class="VPNavBarMenu menu" data-v-6aa21345 data-v-dc692963>
-                    <span id="main-nav-aria-label" class="visually-hidden" data-v-dc692963> Main Navigation
-                    </span><!--[--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/hias-variable-translator/en/"
-                      tabindex="0" data-v-dc692963 data-v-e56f3d57><!--[--><span
-                        data-v-e56f3d57>Home</span><!--]--></a><!--]--><!--[--><a class="VPLink link VPNavBarMenuLink"
-                      href="/hias-variable-translator/en/guide/" tabindex="0" data-v-dc692963
-                      data-v-e56f3d57><!--[--><span data-v-e56f3d57>Guide</span><!--]--></a><!--]--><!--[--><a
-                      class="VPLink link VPNavBarMenuLink" href="/hias-variable-translator/en/guide/config" tabindex="0"
-                      data-v-dc692963 data-v-e56f3d57><!--[--><span
-                        data-v-e56f3d57>Config</span><!--]--></a><!--]--><!--[--><a
-                      class="VPLink link vp-external-link-icon VPNavBarMenuLink"
-                      href="https://github.com/AnsStory/hias-variable-translator" target="_blank" rel="noreferrer"
-                      tabindex="0" data-v-dc692963 data-v-e56f3d57><!--[--><span
-                        data-v-e56f3d57>GitHub</span><!--]--></a><!--]--><!--]--></nav>
-                  <div class="VPFlyout VPNavBarTranslations translations" data-v-6aa21345 data-v-88af2de4
-                    data-v-cf11d7a2><button type="button" class="button" aria-haspopup="true" aria-expanded="false"
-                      aria-label="Change language" data-v-cf11d7a2><span class="text" data-v-cf11d7a2><span
-                          class="vpi-languages option-icon" data-v-cf11d7a2></span><!----><span
-                          class="vpi-chevron-down text-icon" data-v-cf11d7a2></span></span></button>
-                    <div class="menu" data-v-cf11d7a2>
-                      <div class="VPMenu" data-v-cf11d7a2 data-v-b98bc113><!----><!--[--><!--[-->
-                        <div class="items" data-v-88af2de4>
-                          <p class="title" data-v-88af2de4>English</p><!--[-->
-                          <div class="VPMenuLink" data-v-88af2de4 data-v-35975db6><a class="VPLink link"
-                              href="/hias-variable-translator/guide/features" data-v-35975db6><!--[--><span
-                                data-v-35975db6>中文</span><!--]--></a></div><!--]-->
-                        </div><!--]--><!--]-->
-                      </div>
-                    </div>
-                  </div>
-                  <div class="VPNavBarAppearance appearance" data-v-6aa21345 data-v-6c893767><button
-                      class="VPSwitch VPSwitchAppearance" type="button" role="switch" title aria-checked="false"
-                      data-v-6c893767 data-v-5337faa4 data-v-1d5665e3><span class="check" data-v-1d5665e3><span
-                          class="icon" data-v-1d5665e3><!--[--><span class="vpi-sun sun" data-v-5337faa4></span><span
-                            class="vpi-moon moon" data-v-5337faa4></span><!--]--></span></span></button></div>
-                  <div class="VPSocialLinks VPNavBarSocialLinks social-links" data-v-6aa21345 data-v-0394ad82
-                    data-v-7bc22406><!--[--><a class="VPSocialLink no-icon"
-                      href="https://github.com/AnsStory/hias-variable-translator" aria-label="github" target="_blank"
-                      rel="noopener" data-v-7bc22406 data-v-bd121fe5><span class="vpi-social-github"></span></a><!--]-->
-                  </div>
-                  <div class="VPFlyout VPNavBarExtra extra" data-v-6aa21345 data-v-bb2aa2f0 data-v-cf11d7a2><button
-                      type="button" class="button" aria-haspopup="true" aria-expanded="false"
-                      aria-label="extra navigation" data-v-cf11d7a2><span class="vpi-more-horizontal icon"
-                        data-v-cf11d7a2></span></button>
-                    <div class="menu" data-v-cf11d7a2>
-                      <div class="VPMenu" data-v-cf11d7a2 data-v-b98bc113><!----><!--[--><!--[-->
-                        <div class="group translations" data-v-bb2aa2f0>
-                          <p class="trans-title" data-v-bb2aa2f0>English</p><!--[-->
-                          <div class="VPMenuLink" data-v-bb2aa2f0 data-v-35975db6><a class="VPLink link"
-                              href="/hias-variable-translator/guide/features" data-v-35975db6><!--[--><span
-                                data-v-35975db6>中文</span><!--]--></a></div><!--]-->
-                        </div>
-                        <div class="group" data-v-bb2aa2f0>
-                          <div class="item appearance" data-v-bb2aa2f0>
-                            <p class="label" data-v-bb2aa2f0>Appearance</p>
-                            <div class="appearance-action" data-v-bb2aa2f0><button class="VPSwitch VPSwitchAppearance"
-                                type="button" role="switch" title aria-checked="false" data-v-bb2aa2f0 data-v-5337faa4
-                                data-v-1d5665e3><span class="check" data-v-1d5665e3><span class="icon"
-                                    data-v-1d5665e3><!--[--><span class="vpi-sun sun" data-v-5337faa4></span><span
-                                      class="vpi-moon moon" data-v-5337faa4></span><!--]--></span></span></button></div>
-                          </div>
-                        </div>
-                        <div class="group" data-v-bb2aa2f0>
-                          <div class="item social-links" data-v-bb2aa2f0>
-                            <div class="VPSocialLinks social-links-list" data-v-bb2aa2f0 data-v-7bc22406><!--[--><a
-                                class="VPSocialLink no-icon" href="https://github.com/AnsStory/hias-variable-translator"
-                                aria-label="github" target="_blank" rel="noopener" data-v-7bc22406 data-v-bd121fe5><span
-                                  class="vpi-social-github"></span></a><!--]--></div>
-                          </div>
-                        </div><!--]--><!--]-->
-                      </div>
-                    </div>
-                  </div><!--[--><!--]--><button type="button" class="VPNavBarHamburger hamburger"
-                    aria-label="mobile navigation" aria-expanded="false" aria-controls="VPNavScreen" data-v-6aa21345
-                    data-v-e5dd9c1c><span class="container" data-v-e5dd9c1c><span class="top"
-                        data-v-e5dd9c1c></span><span class="middle" data-v-e5dd9c1c></span><span class="bottom"
-                        data-v-e5dd9c1c></span></span></button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="divider" data-v-6aa21345>
-            <div class="divider-line" data-v-6aa21345></div>
-          </div>
-        </div><!---->
-      </header>
-      <div class="VPLocalNav has-sidebar empty" data-v-5d98c3a5 data-v-a6f0e41e>
-        <div class="container" data-v-a6f0e41e><button class="menu" aria-expanded="false" aria-controls="VPSidebarNav"
-            data-v-a6f0e41e><span class="vpi-align-left menu-icon" data-v-a6f0e41e></span><span class="menu-text"
-              data-v-a6f0e41e>Menu</span></button>
-          <div class="VPLocalNavOutlineDropdown" style="--vp-vh:0px;" data-v-a6f0e41e data-v-8a42e2b4><button
-              data-v-8a42e2b4>Return to top</button><!----></div>
-        </div>
-      </div>
-      <aside class="VPSidebar" data-v-5d98c3a5 data-v-319d5ca6>
-        <div class="curtain" data-v-319d5ca6></div>
-        <nav class="nav" id="VPSidebarNav" aria-labelledby="sidebar-aria-label" tabindex="-1" data-v-319d5ca6><span
-            class="visually-hidden" id="sidebar-aria-label" data-v-319d5ca6> Sidebar Navigation
-          </span><!--[--><!--]--><!--[-->
-          <div class="no-transition group" data-v-c40bc020>
-            <section class="VPSidebarItem level-0 has-active" data-v-c40bc020 data-v-b3fd67f8>
-              <div class="item" role="button" tabindex="0" data-v-b3fd67f8>
-                <div class="indicator" data-v-b3fd67f8></div>
-                <h2 class="text" data-v-b3fd67f8>Guide</h2><!---->
-              </div>
-              <div class="items" data-v-b3fd67f8><!--[-->
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>Introduction</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div>
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/quickstart" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>Quick Start</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div>
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/features" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>Features</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div>
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/config" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>Configuration</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div>
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/services" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>Translation Services</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div>
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/shortcuts" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>Shortcuts</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div>
-                <div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8>
-                  <div class="item" data-v-b3fd67f8>
-                    <div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link"
-                      href="/hias-variable-translator/en/guide/faq" data-v-b3fd67f8><!--[-->
-                      <p class="text" data-v-b3fd67f8>FAQ</p><!--]-->
-                    </a><!---->
-                  </div><!---->
-                </div><!--]-->
-              </div>
-            </section>
-          </div><!--]--><!--[--><!--]-->
-        </nav>
-      </aside>
-      <div class="VPContent has-sidebar" id="VPContent" data-v-5d98c3a5 data-v-1428d186>
-        <div class="VPDoc has-sidebar has-aside" data-v-1428d186 data-v-39a288b8><!--[--><!--]-->
-          <div class="container" data-v-39a288b8>
-            <div class="aside" data-v-39a288b8>
-              <div class="aside-curtain" data-v-39a288b8></div>
-              <div class="aside-container" data-v-39a288b8>
-                <div class="aside-content" data-v-39a288b8>
-                  <div class="VPDocAside" data-v-39a288b8 data-v-3f215769><!--[--><!--]--><!--[--><!--]-->
-                    <nav aria-labelledby="doc-outline-aria-label" class="VPDocAsideOutline" data-v-3f215769
-                      data-v-a5bbad30>
-                      <div class="content" data-v-a5bbad30>
-                        <div class="outline-marker" data-v-a5bbad30></div>
-                        <div aria-level="2" class="outline-title" id="doc-outline-aria-label" role="heading"
-                          data-v-a5bbad30>On this page</div>
-                        <ul class="VPDocOutlineItem root" data-v-a5bbad30 data-v-b933a997><!--[--><!--]--></ul>
-                      </div>
-                    </nav><!--[--><!--]-->
-                    <div class="spacer" data-v-3f215769></div><!--[--><!--]--><!----><!--[--><!--]--><!--[--><!--]-->
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="content" data-v-39a288b8>
-              <div class="content-container" data-v-39a288b8><!--[--><!--]-->
-                <main class="main" data-v-39a288b8>
-                  <div style="position:relative;" class="vp-doc _hias-variable-translator_en_guide_features"
-                    data-v-39a288b8>
-                    <div>
-                      <h1 id="features" tabindex="-1">Features <a class="header-anchor" href="#features"
-                          aria-label="Permalink to &quot;Features&quot;">​</a></h1>
-                      <h2 id="feature-1-file-path-translation" tabindex="-1">Feature 1: File Path Translation <a
-                          class="header-anchor" href="#feature-1-file-path-translation"
-                          aria-label="Permalink to &quot;Feature 1: File Path Translation&quot;">​</a></h2>
-                      <h3 id="use-case" tabindex="-1">Use Case <a class="header-anchor" href="#use-case"
-                          aria-label="Permalink to &quot;Use Case&quot;">​</a></h3>
-                      <p>Users create new files in VSCode explorer with paths containing any non-English characters. The
-                        plugin automatically detects the language and translates to English.</p>
-                      <h3 id="operation-flow" tabindex="-1">Operation Flow <a class="header-anchor"
-                          href="#operation-flow" aria-label="Permalink to &quot;Operation Flow&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code"
-                          tabindex="0"><code><span class="line"><span>Right-click new file → Enter path → Enter → Select format → Enter → Auto translate and create</span></span></code></pre>
-                      </div>
-                      <h3 id="example" tabindex="-1">Example <a class="header-anchor" href="#example"
-                          aria-label="Permalink to &quot;Example&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Input: 用户名称/测试文件/测试.test.js</span></span>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Features | variable-translator</title>
+    <meta name="description" content="VSCode 插件 - 将非英文字符翻译为英文">
+    <meta name="generator" content="VitePress v1.6.4">
+    <link rel="preload stylesheet" href="/hias-variable-translator/assets/style.Cde52Y-R.css" as="style">
+    <link rel="preload stylesheet" href="/hias-variable-translator/vp-icons.css" as="style">
+    
+    <script type="module" src="/hias-variable-translator/assets/app.BfY33LR-.js"></script>
+    <link rel="preload" href="/hias-variable-translator/assets/inter-roman-latin.Di8DUHzh.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="modulepreload" href="/hias-variable-translator/assets/chunks/theme.lfAP4lB5.js">
+    <link rel="modulepreload" href="/hias-variable-translator/assets/chunks/framework.D46keoNO.js">
+    <link rel="modulepreload" href="/hias-variable-translator/assets/en_guide_features.md.D-EiGM3d.lean.js">
+    <link rel="icon" type="image/png" href="/hias-variable-translator/favicon.png">
+    <script id="check-dark-mode">(()=>{const e=localStorage.getItem("vitepress-theme-appearance")||"auto",a=window.matchMedia("(prefers-color-scheme: dark)").matches;(!e||e==="auto"?a:e==="dark")&&document.documentElement.classList.add("dark")})();</script>
+    <script id="check-mac-os">document.documentElement.classList.toggle("mac",/Mac|iPhone|iPod|iPad/i.test(navigator.platform));</script>
+  </head>
+  <body>
+    <div id="app"><div class="Layout" data-v-5d98c3a5><!--[--><!--]--><!--[--><span tabindex="-1" data-v-0b0ada53></span><a href="#VPContent" class="VPSkipLink visually-hidden" data-v-0b0ada53>Skip to content</a><!--]--><!----><header class="VPNav" data-v-5d98c3a5 data-v-ae24b3ad><div class="VPNavBar" data-v-ae24b3ad data-v-6aa21345><div class="wrapper" data-v-6aa21345><div class="container" data-v-6aa21345><div class="title" data-v-6aa21345><div class="VPNavBarTitle has-sidebar" data-v-6aa21345 data-v-1168a8e4><a class="title" href="/hias-variable-translator/en/" data-v-1168a8e4><!--[--><!--]--><!--[--><img class="VPImage logo" src="/hias-variable-translator/logo.svg" alt data-v-8426fc1a><!--]--><span data-v-1168a8e4>Variable Translator</span><!--[--><!--]--></a></div></div><div class="content" data-v-6aa21345><div class="content-body" data-v-6aa21345><!--[--><!--]--><div class="VPNavBarSearch search" data-v-6aa21345><!--[--><!----><div id="local-search"><button type="button" class="DocSearch DocSearch-Button" aria-label="搜索文档"><span class="DocSearch-Button-Container"><span class="vp-icon DocSearch-Search-Icon"></span><span class="DocSearch-Button-Placeholder">搜索文档</span></span><span class="DocSearch-Button-Keys"><kbd class="DocSearch-Button-Key"></kbd><kbd class="DocSearch-Button-Key">K</kbd></span></button></div><!--]--></div><nav aria-labelledby="main-nav-aria-label" class="VPNavBarMenu menu" data-v-6aa21345 data-v-dc692963><span id="main-nav-aria-label" class="visually-hidden" data-v-dc692963> Main Navigation </span><!--[--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/hias-variable-translator/en/" tabindex="0" data-v-dc692963 data-v-e56f3d57><!--[--><span data-v-e56f3d57>Home</span><!--]--></a><!--]--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/hias-variable-translator/en/guide/" tabindex="0" data-v-dc692963 data-v-e56f3d57><!--[--><span data-v-e56f3d57>Guide</span><!--]--></a><!--]--><!--[--><a class="VPLink link VPNavBarMenuLink" href="/hias-variable-translator/en/guide/config" tabindex="0" data-v-dc692963 data-v-e56f3d57><!--[--><span data-v-e56f3d57>Config</span><!--]--></a><!--]--><!--[--><a class="VPLink link vp-external-link-icon VPNavBarMenuLink" href="https://github.com/AnsStory/hias-variable-translator" target="_blank" rel="noreferrer" tabindex="0" data-v-dc692963 data-v-e56f3d57><!--[--><span data-v-e56f3d57>GitHub</span><!--]--></a><!--]--><!--]--></nav><div class="VPFlyout VPNavBarTranslations translations" data-v-6aa21345 data-v-88af2de4 data-v-cf11d7a2><button type="button" class="button" aria-haspopup="true" aria-expanded="false" aria-label="Change language" data-v-cf11d7a2><span class="text" data-v-cf11d7a2><span class="vpi-languages option-icon" data-v-cf11d7a2></span><!----><span class="vpi-chevron-down text-icon" data-v-cf11d7a2></span></span></button><div class="menu" data-v-cf11d7a2><div class="VPMenu" data-v-cf11d7a2 data-v-b98bc113><!----><!--[--><!--[--><div class="items" data-v-88af2de4><p class="title" data-v-88af2de4>English</p><!--[--><div class="VPMenuLink" data-v-88af2de4 data-v-35975db6><a class="VPLink link" href="/hias-variable-translator/guide/features" data-v-35975db6><!--[--><span data-v-35975db6>中文</span><!--]--></a></div><!--]--></div><!--]--><!--]--></div></div></div><div class="VPNavBarAppearance appearance" data-v-6aa21345 data-v-6c893767><button class="VPSwitch VPSwitchAppearance" type="button" role="switch" title aria-checked="false" data-v-6c893767 data-v-5337faa4 data-v-1d5665e3><span class="check" data-v-1d5665e3><span class="icon" data-v-1d5665e3><!--[--><span class="vpi-sun sun" data-v-5337faa4></span><span class="vpi-moon moon" data-v-5337faa4></span><!--]--></span></span></button></div><div class="VPSocialLinks VPNavBarSocialLinks social-links" data-v-6aa21345 data-v-0394ad82 data-v-7bc22406><!--[--><a class="VPSocialLink no-icon" href="https://github.com/AnsStory/hias-variable-translator" aria-label="github" target="_blank" rel="noopener" data-v-7bc22406 data-v-bd121fe5><span class="vpi-social-github"></span></a><!--]--></div><div class="VPFlyout VPNavBarExtra extra" data-v-6aa21345 data-v-bb2aa2f0 data-v-cf11d7a2><button type="button" class="button" aria-haspopup="true" aria-expanded="false" aria-label="extra navigation" data-v-cf11d7a2><span class="vpi-more-horizontal icon" data-v-cf11d7a2></span></button><div class="menu" data-v-cf11d7a2><div class="VPMenu" data-v-cf11d7a2 data-v-b98bc113><!----><!--[--><!--[--><div class="group translations" data-v-bb2aa2f0><p class="trans-title" data-v-bb2aa2f0>English</p><!--[--><div class="VPMenuLink" data-v-bb2aa2f0 data-v-35975db6><a class="VPLink link" href="/hias-variable-translator/guide/features" data-v-35975db6><!--[--><span data-v-35975db6>中文</span><!--]--></a></div><!--]--></div><div class="group" data-v-bb2aa2f0><div class="item appearance" data-v-bb2aa2f0><p class="label" data-v-bb2aa2f0>Appearance</p><div class="appearance-action" data-v-bb2aa2f0><button class="VPSwitch VPSwitchAppearance" type="button" role="switch" title aria-checked="false" data-v-bb2aa2f0 data-v-5337faa4 data-v-1d5665e3><span class="check" data-v-1d5665e3><span class="icon" data-v-1d5665e3><!--[--><span class="vpi-sun sun" data-v-5337faa4></span><span class="vpi-moon moon" data-v-5337faa4></span><!--]--></span></span></button></div></div></div><div class="group" data-v-bb2aa2f0><div class="item social-links" data-v-bb2aa2f0><div class="VPSocialLinks social-links-list" data-v-bb2aa2f0 data-v-7bc22406><!--[--><a class="VPSocialLink no-icon" href="https://github.com/AnsStory/hias-variable-translator" aria-label="github" target="_blank" rel="noopener" data-v-7bc22406 data-v-bd121fe5><span class="vpi-social-github"></span></a><!--]--></div></div></div><!--]--><!--]--></div></div></div><!--[--><!--]--><button type="button" class="VPNavBarHamburger hamburger" aria-label="mobile navigation" aria-expanded="false" aria-controls="VPNavScreen" data-v-6aa21345 data-v-e5dd9c1c><span class="container" data-v-e5dd9c1c><span class="top" data-v-e5dd9c1c></span><span class="middle" data-v-e5dd9c1c></span><span class="bottom" data-v-e5dd9c1c></span></span></button></div></div></div></div><div class="divider" data-v-6aa21345><div class="divider-line" data-v-6aa21345></div></div></div><!----></header><div class="VPLocalNav has-sidebar empty" data-v-5d98c3a5 data-v-a6f0e41e><div class="container" data-v-a6f0e41e><button class="menu" aria-expanded="false" aria-controls="VPSidebarNav" data-v-a6f0e41e><span class="vpi-align-left menu-icon" data-v-a6f0e41e></span><span class="menu-text" data-v-a6f0e41e>Menu</span></button><div class="VPLocalNavOutlineDropdown" style="--vp-vh:0px;" data-v-a6f0e41e data-v-8a42e2b4><button data-v-8a42e2b4>Return to top</button><!----></div></div></div><aside class="VPSidebar" data-v-5d98c3a5 data-v-319d5ca6><div class="curtain" data-v-319d5ca6></div><nav class="nav" id="VPSidebarNav" aria-labelledby="sidebar-aria-label" tabindex="-1" data-v-319d5ca6><span class="visually-hidden" id="sidebar-aria-label" data-v-319d5ca6> Sidebar Navigation </span><!--[--><!--]--><!--[--><div class="no-transition group" data-v-c40bc020><section class="VPSidebarItem level-0 has-active" data-v-c40bc020 data-v-b3fd67f8><div class="item" role="button" tabindex="0" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><h2 class="text" data-v-b3fd67f8>Guide</h2><!----></div><div class="items" data-v-b3fd67f8><!--[--><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>Introduction</p><!--]--></a><!----></div><!----></div><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/quickstart" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>Quick Start</p><!--]--></a><!----></div><!----></div><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/features" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>Features</p><!--]--></a><!----></div><!----></div><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/config" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>Configuration</p><!--]--></a><!----></div><!----></div><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/services" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>Translation Services</p><!--]--></a><!----></div><!----></div><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/shortcuts" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>Shortcuts</p><!--]--></a><!----></div><!----></div><div class="VPSidebarItem level-1 is-link" data-v-b3fd67f8><div class="item" data-v-b3fd67f8><div class="indicator" data-v-b3fd67f8></div><a class="VPLink link link" href="/hias-variable-translator/en/guide/faq" data-v-b3fd67f8><!--[--><p class="text" data-v-b3fd67f8>FAQ</p><!--]--></a><!----></div><!----></div><!--]--></div></section></div><!--]--><!--[--><!--]--></nav></aside><div class="VPContent has-sidebar" id="VPContent" data-v-5d98c3a5 data-v-1428d186><div class="VPDoc has-sidebar has-aside" data-v-1428d186 data-v-39a288b8><!--[--><!--]--><div class="container" data-v-39a288b8><div class="aside" data-v-39a288b8><div class="aside-curtain" data-v-39a288b8></div><div class="aside-container" data-v-39a288b8><div class="aside-content" data-v-39a288b8><div class="VPDocAside" data-v-39a288b8 data-v-3f215769><!--[--><!--]--><!--[--><!--]--><nav aria-labelledby="doc-outline-aria-label" class="VPDocAsideOutline" data-v-3f215769 data-v-a5bbad30><div class="content" data-v-a5bbad30><div class="outline-marker" data-v-a5bbad30></div><div aria-level="2" class="outline-title" id="doc-outline-aria-label" role="heading" data-v-a5bbad30>On this page</div><ul class="VPDocOutlineItem root" data-v-a5bbad30 data-v-b933a997><!--[--><!--]--></ul></div></nav><!--[--><!--]--><div class="spacer" data-v-3f215769></div><!--[--><!--]--><!----><!--[--><!--]--><!--[--><!--]--></div></div></div></div><div class="content" data-v-39a288b8><div class="content-container" data-v-39a288b8><!--[--><!--]--><main class="main" data-v-39a288b8><div style="position:relative;" class="vp-doc _hias-variable-translator_en_guide_features" data-v-39a288b8><div><h1 id="features" tabindex="-1">Features <a class="header-anchor" href="#features" aria-label="Permalink to &quot;Features&quot;">​</a></h1><h2 id="feature-1-file-path-translation" tabindex="-1">Feature 1: File Path Translation <a class="header-anchor" href="#feature-1-file-path-translation" aria-label="Permalink to &quot;Feature 1: File Path Translation&quot;">​</a></h2><h3 id="scenario" tabindex="-1">Scenario <a class="header-anchor" href="#scenario" aria-label="Permalink to &quot;Scenario&quot;">​</a></h3><p>Create a new file/folder in the VSCode Explorer with a path containing any non-English characters — the extension detects the language and translates it into English.</p><h3 id="workflow" tabindex="-1">Workflow <a class="header-anchor" href="#workflow" aria-label="Permalink to &quot;Workflow&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Create file → enter path → Enter → pick a naming format → Enter → translated &amp; created</span></span></code></pre></div><p>If you press <code>Esc</code> to cancel the format picker, the original file/folder is <strong>kept as-is</strong> without translation.</p><h3 id="example" tabindex="-1">Example <a class="header-anchor" href="#example" aria-label="Permalink to &quot;Example&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Input: 用户名称/测试文件/测试.test.js</span></span>
 <span class="line"><span></span></span>
-<span class="line"><span>Format selection:</span></span>
+<span class="line"><span>Format options:</span></span>
 <span class="line"><span>- camelCase:      userName/testFile/test.test.js</span></span>
 <span class="line"><span>- PascalCase:     UserName/TestFile/Test.test.js</span></span>
 <span class="line"><span>- snake_case:     user_name/test_file/test.test.js</span></span>
 <span class="line"><span>- CONSTANT_CASE:  USER_NAME/TEST_FILE/TEST.test.js</span></span>
 <span class="line"><span>- param-case:     user-name/test-file/test.test.js</span></span>
-<span class="line"><span>- Header-Case:    User-Name/Test-File/Test.test.js</span></span></code></pre>
-                      </div>
-                      <h3 id="undo-feature" tabindex="-1">Undo Feature <a class="header-anchor" href="#undo-feature"
-                          aria-label="Permalink to &quot;Undo Feature&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code"
-                          tabindex="0"><code><span class="line"><span>Press Alt+Shift+Z → Delete translated file/directory → Auto-clean empty directories → Close editor window for that file</span></span></code></pre>
-                      </div>
-                      <p><strong>Undo Rules</strong>:</p>
-                      <ul>
-                        <li>Undo operation directly deletes the translated file, not restoring to original non-English
-                          path</li>
-                        <li>Automatically cleans up only directories created by translation: determined by comparing
-                          paths before and after translation; identical prefix segments (e.g., <code>src/</code>) belong
-                          to the user and are never cleaned</li>
-                        <li>Only closes the editor window for the deleted file, not other open files</li>
-                        <li><strong>Can undo within 1 minute</strong>, after which the undo cache is automatically
-                          cleared</li>
-                      </ul>
-                      <blockquote>
-                        <p>Example: typing <code>你好/世界/美好.test.js</code> under <code>src/</code> translates to
-                          <code>src/hello/world/beautiful.test.js</code>; undoing will remove <code>hello/world/</code>
-                          and <code>hello/</code>, but <code>src/</code> is preserved regardless of whether it is empty.
-                        </p>
-                      </blockquote>
-                      <h3 id="filename-conflict-handling" tabindex="-1">Filename Conflict Handling <a
-                          class="header-anchor" href="#filename-conflict-handling"
-                          aria-label="Permalink to &quot;Filename Conflict Handling&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code"
-                          tabindex="0"><code><span class="line"><span>Scenario: Target file already exists (e.g., test.test.js exists)</span></span>
-<span class="line"><span>Handling: Automatically add suffix (e.g., test_1.test.js) and prompt user</span></span></code></pre>
-                      </div>
-                      <h3 id="translation-failure-degradation" tabindex="-1">Translation Failure Degradation <a
-                          class="header-anchor" href="#translation-failure-degradation"
-                          aria-label="Permalink to &quot;Translation Failure Degradation&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code"
-                          tabindex="0"><code><span class="line"><span>Scenario: Translation API call fails (network error, quota exhausted, etc.)</span></span>
-<span class="line"><span>Handling: Degrade to next service by priority → All services failed → Auto-degrade to pinyin translation</span></span></code></pre>
-                      </div>
-                      <div class="tip custom-block">
-                        <p class="custom-block-title">Timeout Protection</p>
-                        <p>All translation services have <strong>10-second timeout control</strong>, and global
-                          translation timeout is also 10 seconds. On timeout, automatically degrades to the next
-                          service, ultimately falling back to pinyin.</p>
-                      </div>
-                      <h3 id="copy-to-clipboard" tabindex="-1">Copy to Clipboard <a class="header-anchor"
-                          href="#copy-to-clipboard" aria-label="Permalink to &quot;Copy to Clipboard&quot;">​</a></h3>
-                      <p>After file path translation, the plugin reuses the &quot;Translate and Copy&quot; (Alt+Shift+C)
-                        clipboard logic and writes the translation of the <strong>last directory/file name
-                          segment</strong> (without extension) to the clipboard, also following the
-                        <code>clipboardFormats</code> configuration.</p>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Input: 你好/世界/美好.js</span></span>
-<span class="line"><span>Translation: hello/world/beautiful.js</span></span>
-<span class="line"><span>Copied content: beautiful (translation of the last segment)</span></span></code></pre>
-                      </div>
-                      <ul>
-                        <li><code>copyToClipboard</code> enabled with <code>clipboardFormats</code> set: writes each
-                          format to clipboard history in reordered order (the selected format goes first)</li>
-                        <li><code>copyToClipboard</code> disabled or <code>clipboardFormats</code> empty: falls back to
-                          copying only the single selected format</li>
-                        <li><code>originalValue</code> copies the original text of that segment before translation
-                          (e.g., <code>美好</code>)</li>
-                      </ul>
-                      <div class="tip custom-block">
-                        <p class="custom-block-title">Multiple formats rely on clipboard history (Win+V)</p>
-                        <p>Multiple formats are written to the clipboard history one by one. You must enable the system
-                          clipboard history (press <strong>Win+V</strong> on Windows) to see all formats; a plain
-                          <code>Ctrl+V</code> only pastes the <strong>current clipboard</strong> (i.e., the format you
-                          selected). File translation now performs the clipboard writes <strong>before opening the
-                            translated file</strong>, avoiding focus churn from the new editor that would drop
-                          intermediate history entries.</p>
-                      </div>
-                      <h3 id="configuration" tabindex="-1">Configuration <a class="header-anchor" href="#configuration"
-                          aria-label="Permalink to &quot;Configuration&quot;">​</a></h3>
-                      <p>This feature can be enabled/disabled in settings:</p>
-                      <div class="language-json vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang">json</span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">{</span></span>
+<span class="line"><span>- Header-Case:    User-Name/Test-File/Test.test.js</span></span></code></pre></div><h3 id="undo" tabindex="-1">Undo <a class="header-anchor" href="#undo" aria-label="Permalink to &quot;Undo&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Press Alt+Shift+Z → translated file/directories deleted → empty directories cleaned up → editor tab closed</span></span></code></pre></div><p><strong>Undo rules</strong>:</p><ul><li>Undo deletes the translated file; it does not restore the original non-English path</li><li>Only directories created by the translation are cleaned: the extension compares the paths before and after translation, so unchanged prefix segments (e.g. <code>src/</code>) are treated as pre-existing and never removed</li><li>Only the editor tab of the deleted file is closed; other open files are untouched</li><li>Undo is available for <strong>1 minute</strong>; the undo record is cleared automatically afterwards</li><li>Within that minute, <code>Ctrl+Z</code> also triggers undo when focus is outside text input areas (e.g. the Explorer); <code>Ctrl+Z</code> in the editor keeps its native text undo behavior</li></ul><blockquote><p>Example: entering <code>你好/世界/美好.test.js</code> under <code>src/</code>, translated to <code>src/hello/world/beautiful.test.js</code>. Undoing removes <code>hello/world/</code> and <code>hello/</code>, but <code>src/</code> is kept whether empty or not.</p></blockquote><h3 id="file-name-conflicts" tabindex="-1">File Name Conflicts <a class="header-anchor" href="#file-name-conflicts" aria-label="Permalink to &quot;File Name Conflicts&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Scenario: the target file already exists (e.g. test.test.js)</span></span>
+<span class="line"><span>Behavior: a numeric suffix is appended automatically (e.g. test_1.test.js) with a notification</span></span></code></pre></div><h3 id="translation-failure-fallback" tabindex="-1">Translation Failure Fallback <a class="header-anchor" href="#translation-failure-fallback" aria-label="Permalink to &quot;Translation Failure Fallback&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Scenario: the translation API call fails (network error, quota exhausted, etc.)</span></span>
+<span class="line"><span>Behavior: fall back to the next service by priority → all services fail → fall back to Pinyin</span></span></code></pre></div><div class="tip custom-block"><p class="custom-block-title">Timeout protection</p><p>Every translation service has a <strong>10-second timeout</strong>, and the global translation timeout is also 10 seconds. On timeout the extension falls back to the next service, ending with Pinyin — so file creation always succeeds.</p></div><h3 id="copy-to-clipboard" tabindex="-1">Copy to Clipboard <a class="header-anchor" href="#copy-to-clipboard" aria-label="Permalink to &quot;Copy to Clipboard&quot;">​</a></h3><p>After a file path translation, the extension reuses the &quot;Translate &amp; Copy&quot; (<code>Alt+Shift+C</code>) clipboard logic: the translation of the <strong>last path segment</strong> (without extension) is written to the clipboard, honoring the <code>clipboardFormats</code> setting.</p><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Input: 你好/世界/美好.js</span></span>
+<span class="line"><span>Translated: hello/world/beautiful.js</span></span>
+<span class="line"><span>Copied: beautiful (translation of the last segment)</span></span></code></pre></div><ul><li>With <code>copyToClipboard</code> enabled and <code>clipboardFormats</code> configured: each format is written to the clipboard history in order (the format you picked goes first)</li><li>Otherwise: only the single format you picked is copied as a fallback</li><li><code>originalValue</code> copies the pre-translation text of that segment (e.g. <code>美好</code>)</li></ul><div class="tip custom-block"><p class="custom-block-title">Multiple formats rely on clipboard history (Win+V)</p><p>Formats are written to the clipboard history <strong>one by one</strong>. Enable the system clipboard history (press <strong>Win+V</strong> on Windows) to access all of them; a plain <code>Ctrl+V</code> only pastes the <strong>current clipboard</strong> (the format you picked). The clipboard writes happen <strong>before</strong> the translated file is opened, so a focus change from the new editor cannot drop intermediate history entries.</p></div><h3 id="setting" tabindex="-1">Setting <a class="header-anchor" href="#setting" aria-label="Permalink to &quot;Setting&quot;">​</a></h3><p>This feature can be toggled in settings, or quickly via <code>Alt+Shift+D</code>:</p><div class="language-json vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">json</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">{</span></span>
 <span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">  &quot;variableTranslator.enableFileTranslation&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">true</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">}</span></span></code></pre>
-                      </div>
-                      <hr>
-                      <h2 id="feature-2-selected-text-translation" tabindex="-1">Feature 2: Selected Text Translation <a
-                          class="header-anchor" href="#feature-2-selected-text-translation"
-                          aria-label="Permalink to &quot;Feature 2: Selected Text Translation&quot;">​</a></h2>
-                      <h3 id="use-case-1" tabindex="-1">Use Case <a class="header-anchor" href="#use-case-1"
-                          aria-label="Permalink to &quot;Use Case&quot;">​</a></h3>
-                      <p>Users write non-English characters in any file, select them and translate via shortcut.</p>
-                      <h3 id="operation-flow-1" tabindex="-1">Operation Flow <a class="header-anchor"
-                          href="#operation-flow-1" aria-label="Permalink to &quot;Operation Flow&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code"
-                          tabindex="0"><code><span class="line"><span>Select text → Press Alt+Shift+T → Select format → Enter → Replace with English</span></span></code></pre>
-                      </div>
-                      <h3 id="example-1" tabindex="-1">Example <a class="header-anchor" href="#example-1"
-                          aria-label="Permalink to &quot;Example&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Select: 用户名称</span></span>
-<span class="line"><span>Press: Alt+Shift+T</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">}</span></span></code></pre></div><hr><h2 id="feature-2-selection-translation" tabindex="-1">Feature 2: Selection Translation <a class="header-anchor" href="#feature-2-selection-translation" aria-label="Permalink to &quot;Feature 2: Selection Translation&quot;">​</a></h2><h3 id="scenario-1" tabindex="-1">Scenario <a class="header-anchor" href="#scenario-1" aria-label="Permalink to &quot;Scenario&quot;">​</a></h3><p>Write non-English text anywhere, select it and translate-and-replace via shortcut — ideal for naming variables, functions and classes.</p><h3 id="workflow-1" tabindex="-1">Workflow <a class="header-anchor" href="#workflow-1" aria-label="Permalink to &quot;Workflow&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Select text → press Alt+Shift+T → pick a naming format → Enter → replaced with English</span></span></code></pre></div><h3 id="example-1" tabindex="-1">Example <a class="header-anchor" href="#example-1" aria-label="Permalink to &quot;Example&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Selected: 用户名称</span></span>
+<span class="line"><span>Pressed: Alt+Shift+T</span></span>
 <span class="line"><span></span></span>
-<span class="line"><span>Format selection:</span></span>
+<span class="line"><span>Format options:</span></span>
 <span class="line"><span>- camelCase:      userName</span></span>
 <span class="line"><span>- PascalCase:     UserName</span></span>
 <span class="line"><span>- snake_case:     user_name</span></span>
@@ -387,49 +44,18 @@
 <span class="line"><span>- param-case:     user-name</span></span>
 <span class="line"><span>- Header-Case:    User-Name</span></span>
 <span class="line"><span>- Capital Case:   User Name</span></span>
-<span class="line"><span>- no case:        user name</span></span></code></pre>
-                      </div>
-                      <h3 id="undo" tabindex="-1">Undo <a class="header-anchor" href="#undo"
-                          aria-label="Permalink to &quot;Undo&quot;">​</a></h3>
-                      <p>After text translation, use VSCode&#39;s built-in <code>Ctrl+Z</code> to undo the replacement.
-                        For file path translation undo, use <code>Alt+Shift+Z</code> (see Feature 1).</p>
-                      <hr>
-                      <h2 id="feature-3-translate-and-copy-to-clipboard" tabindex="-1">Feature 3: Translate and Copy to
-                        Clipboard <a class="header-anchor" href="#feature-3-translate-and-copy-to-clipboard"
-                          aria-label="Permalink to &quot;Feature 3: Translate and Copy to Clipboard&quot;">​</a></h2>
-                      <h3 id="use-case-2" tabindex="-1">Use Case <a class="header-anchor" href="#use-case-2"
-                          aria-label="Permalink to &quot;Use Case&quot;">​</a></h3>
-                      <p>Users write non-English characters in any file, select them and translate via shortcut, then
-                        copy multiple formats to clipboard history.</p>
-                      <h3 id="operation-flow-2" tabindex="-1">Operation Flow <a class="header-anchor"
-                          href="#operation-flow-2" aria-label="Permalink to &quot;Operation Flow&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code"
-                          tabindex="0"><code><span class="line"><span>Select text → Press Alt+Shift+C → Select format → Translation result copied to clipboard</span></span></code></pre>
-                      </div>
-                      <h3 id="example-2" tabindex="-1">Example <a class="header-anchor" href="#example-2"
-                          aria-label="Permalink to &quot;Example&quot;">​</a></h3>
-                      <div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang"></span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Select: 用户名称</span></span>
-<span class="line"><span>Press: Alt+Shift+C</span></span>
-<span class="line"><span>Select format: camelCase</span></span>
+<span class="line"><span>- no case:        user name</span></span></code></pre></div><h3 id="undo-1" tabindex="-1">Undo <a class="header-anchor" href="#undo-1" aria-label="Permalink to &quot;Undo&quot;">​</a></h3><p>Use VSCode&#39;s built-in <code>Ctrl+Z</code> to undo the replacement. To undo a file path translation, use <code>Alt+Shift+Z</code>, or press <code>Ctrl+Z</code> while focus is in the Explorer or another non-text-input area (see Feature 1).</p><hr><h2 id="feature-3-translate-copy-to-clipboard" tabindex="-1">Feature 3: Translate &amp; Copy to Clipboard <a class="header-anchor" href="#feature-3-translate-copy-to-clipboard" aria-label="Permalink to &quot;Feature 3: Translate &amp; Copy to Clipboard&quot;">​</a></h2><h3 id="scenario-2" tabindex="-1">Scenario <a class="header-anchor" href="#scenario-2" aria-label="Permalink to &quot;Scenario&quot;">​</a></h3><p>Select non-English text and copy its translation in multiple naming formats to the clipboard history — the original text is <strong>not replaced</strong>. Great for drafting names in comments/docs first, then pasting the English into code.</p><h3 id="workflow-2" tabindex="-1">Workflow <a class="header-anchor" href="#workflow-2" aria-label="Permalink to &quot;Workflow&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Select text → press Alt+Shift+C → pick a naming format → translation copied to clipboard</span></span></code></pre></div><h3 id="example-2" tabindex="-1">Example <a class="header-anchor" href="#example-2" aria-label="Permalink to &quot;Example&quot;">​</a></h3><div class="language- vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang"></span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Selected: 用户名称</span></span>
+<span class="line"><span>Pressed: Alt+Shift+C</span></span>
+<span class="line"><span>Picked format: camelCase</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>Configured clipboardFormats: [&quot;originalValue&quot;, &quot;camelCase&quot;, &quot;snake_case&quot;]</span></span>
 <span class="line"><span></span></span>
-<span class="line"><span>Copied to clipboard history:</span></span>
-<span class="line"><span>- 用户名称 (original value, the text before translation)</span></span>
+<span class="line"><span>Written to clipboard history:</span></span>
+<span class="line"><span>- 用户名称 (originalValue, the pre-translation text)</span></span>
 <span class="line"><span>- userName (camelCase)</span></span>
 <span class="line"><span>- user_name (snake_case)</span></span>
 <span class="line"><span></span></span>
-<span class="line"><span>Current clipboard: userName (user selected format)</span></span></code></pre>
-                      </div>
-                      <h3 id="configuration-1" tabindex="-1">Configuration <a class="header-anchor"
-                          href="#configuration-1" aria-label="Permalink to &quot;Configuration&quot;">​</a></h3>
-                      <div class="language-json vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span
-                          class="lang">json</span>
-                        <pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">{</span></span>
+<span class="line"><span>Current clipboard: userName (the format you picked)</span></span></code></pre></div><h3 id="settings" tabindex="-1">Settings <a class="header-anchor" href="#settings" aria-label="Permalink to &quot;Settings&quot;">​</a></h3><div class="language-json vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">json</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">{</span></span>
 <span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">  &quot;variableTranslator.copyToClipboard&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">true</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">,</span></span>
 <span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">  &quot;variableTranslator.clipboardFormats&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">: [</span></span>
 <span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">    &quot;camelCase&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">,</span></span>
@@ -442,162 +68,8 @@
 <span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">    &quot;Header-Case&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">,</span></span>
 <span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">    &quot;Capital Case&quot;</span></span>
 <span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">  ]</span></span>
-<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">}</span></span></code></pre>
-                      </div>
-                      <h3 id="clipboardformats-options" tabindex="-1">clipboardFormats Options <a class="header-anchor"
-                          href="#clipboardformats-options"
-                          aria-label="Permalink to &quot;clipboardFormats Options&quot;">​</a></h3>
-                      <table tabindex="0">
-                        <thead>
-                          <tr>
-                            <th>Value</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>camelCase</code></td>
-                            <td>Lower camel case</td>
-                          </tr>
-                          <tr>
-                            <td><code>PascalCase</code></td>
-                            <td>Upper camel case</td>
-                          </tr>
-                          <tr>
-                            <td><code>snake_case</code></td>
-                            <td>Underscore separated</td>
-                          </tr>
-                          <tr>
-                            <td><code>CONSTANT_CASE</code></td>
-                            <td>Constant case</td>
-                          </tr>
-                          <tr>
-                            <td><code>param-case</code></td>
-                            <td>Hyphen separated</td>
-                          </tr>
-                          <tr>
-                            <td><code>Header-Case</code></td>
-                            <td>Header case</td>
-                          </tr>
-                          <tr>
-                            <td><code>no case</code></td>
-                            <td>Space separated</td>
-                          </tr>
-                          <tr>
-                            <td><code>originalValue</code></td>
-                            <td>Original text before translation (the Chinese text you selected)</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <hr>
-                      <h2 id="naming-format-description" tabindex="-1">Naming Format Description <a
-                          class="header-anchor" href="#naming-format-description"
-                          aria-label="Permalink to &quot;Naming Format Description&quot;">​</a></h2>
-                      <h3 id="file-translation-formats" tabindex="-1">File Translation Formats <a class="header-anchor"
-                          href="#file-translation-formats"
-                          aria-label="Permalink to &quot;File Translation Formats&quot;">​</a></h3>
-                      <table tabindex="0">
-                        <thead>
-                          <tr>
-                            <th>Format</th>
-                            <th>Example</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>camelCase</td>
-                            <td>userName</td>
-                            <td>Lower camel case, first letter lowercase</td>
-                          </tr>
-                          <tr>
-                            <td>PascalCase</td>
-                            <td>UserName</td>
-                            <td>Upper camel case, first letter uppercase</td>
-                          </tr>
-                          <tr>
-                            <td>snake_case</td>
-                            <td>user_name</td>
-                            <td>Underscore separated, all lowercase</td>
-                          </tr>
-                          <tr>
-                            <td>CONSTANT_CASE</td>
-                            <td>USER_NAME</td>
-                            <td>Underscore separated, all uppercase</td>
-                          </tr>
-                          <tr>
-                            <td>param-case</td>
-                            <td>user-name</td>
-                            <td>Hyphen separated, all lowercase</td>
-                          </tr>
-                          <tr>
-                            <td>Header-Case</td>
-                            <td>User-Name</td>
-                            <td>Hyphen separated, first letter uppercase</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <h3 id="selected-text-translation-additional-formats" tabindex="-1">Selected Text Translation
-                        Additional Formats <a class="header-anchor" href="#selected-text-translation-additional-formats"
-                          aria-label="Permalink to &quot;Selected Text Translation Additional Formats&quot;">​</a></h3>
-                      <table tabindex="0">
-                        <thead>
-                          <tr>
-                            <th>Format</th>
-                            <th>Example</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Capital Case</td>
-                            <td>User Name</td>
-                            <td>First letter uppercase, space separated</td>
-                          </tr>
-                          <tr>
-                            <td>no case</td>
-                            <td>user name</td>
-                            <td>All lowercase, space separated</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </main>
-                <footer class="VPDocFooter" data-v-39a288b8 data-v-e257564d><!--[--><!--]-->
-                  <div class="edit-info" data-v-e257564d><!---->
-                    <div class="last-updated" data-v-e257564d>
-                      <p class="VPLastUpdated" data-v-e257564d data-v-e98dd255>最后更新: <time
-                          datetime="2026-07-23T15:26:51.000Z" data-v-e98dd255></time></p>
-                    </div>
-                  </div>
-                  <nav class="prev-next" aria-labelledby="doc-footer-aria-label" data-v-e257564d><span
-                      class="visually-hidden" id="doc-footer-aria-label" data-v-e257564d>Pager</span>
-                    <div class="pager" data-v-e257564d><a class="VPLink link pager-link prev"
-                        href="/hias-variable-translator/en/guide/quickstart" data-v-e257564d><!--[--><span class="desc"
-                          data-v-e257564d>Previous page</span><span class="title" data-v-e257564d>Quick
-                          Start</span><!--]--></a></div>
-                    <div class="pager" data-v-e257564d><a class="VPLink link pager-link next"
-                        href="/hias-variable-translator/en/guide/config" data-v-e257564d><!--[--><span class="desc"
-                          data-v-e257564d>Next page</span><span class="title"
-                          data-v-e257564d>Configuration</span><!--]--></a></div>
-                  </nav>
-                </footer><!--[--><!--]-->
-              </div>
-            </div>
-          </div><!--[--><!--]-->
-        </div>
-      </div>
-      <footer class="VPFooter has-sidebar" data-v-5d98c3a5 data-v-e315a0ad>
-        <div class="container" data-v-e315a0ad>
-          <p class="message" data-v-e315a0ad>Released under the MIT License.</p>
-          <p class="copyright" data-v-e315a0ad>© 2026 Variable Translator</p>
-        </div>
-      </footer><!--[--><!--]-->
-    </div>
-  </div>
-  <script>window.__VP_HASH_MAP__ = JSON.parse("{\"en_guide_config.md\":\"CqNeO0Kw\",\"en_guide_faq.md\":\"BM25LceW\",\"en_guide_features.md\":\"BCHNwFw4\",\"en_guide_index.md\":\"gtW6U7yw\",\"en_guide_quickstart.md\":\"C5pUL_6a\",\"en_guide_services.md\":\"2u_bGmac\",\"en_guide_shortcuts.md\":\"CJrIuoPt\",\"en_index.md\":\"BiP1VVXK\",\"guide_config.md\":\"BhUYq4rg\",\"guide_faq.md\":\"CmIT1NM2\",\"guide_features.md\":\"BP6fxOox\",\"guide_index.md\":\"CNZ5OYQc\",\"guide_quickstart.md\":\"D4eRV0HO\",\"guide_services.md\":\"IzwRVgtr\",\"guide_shortcuts.md\":\"DDrGs7tu\",\"index.md\":\"BkoX07ae\",\"plans_打印定位逻辑重构计划.md\":\"8fz__2Md\",\"plans_打印需求计划.md\":\"BaF5251J\",\"plans_文件与变量翻译需求计划.md\":\"BV2OK5UF\"}"); window.__VP_SITE_DATA__ = JSON.parse("{\"lang\":\"en-US\",\"dir\":\"ltr\",\"title\":\"variable-translator\",\"description\":\"VSCode 插件 - 将非英文字符翻译为英文\",\"base\":\"/hias-variable-translator/\",\"head\":[],\"router\":{\"prefetchLinks\":true},\"appearance\":true,\"themeConfig\":{\"logo\":\"/logo.svg\",\"siteTitle\":\"Variable Translator\",\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/AnsStory\"}],\"search\":{\"provider\":\"local\",\"options\":{\"translations\":{\"button\":{\"buttonText\":\"搜索文档\",\"buttonAriaLabel\":\"搜索文档\"},\"modal\":{\"noResultsText\":\"没有找到结果\",\"resetButtonTitle\":\"清空搜索\",\"footer\":{\"selectText\":\"选择\",\"navigateText\":\"切换\"}}}}},\"lastUpdated\":{\"text\":\"最后更新\",\"formatOptions\":{\"dateStyle\":\"medium\",\"timeStyle\":\"short\"}},\"footer\":{\"message\":\"Released under the MIT License.\",\"copyright\":\"Copyright © AnsStory\"}},\"locales\":{\"root\":{\"label\":\"中文\",\"lang\":\"zh-CN\",\"themeConfig\":{\"nav\":[{\"text\":\"首页\",\"link\":\"/\"},{\"text\":\"指南\",\"link\":\"/guide/\"},{\"text\":\"配置\",\"link\":\"/guide/config\"},{\"text\":\"GitHub\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"sidebar\":{\"/guide/\":[{\"text\":\"指南\",\"items\":[{\"text\":\"简介\",\"link\":\"/guide/\"},{\"text\":\"快速开始\",\"link\":\"/guide/quickstart\"},{\"text\":\"功能说明\",\"link\":\"/guide/features\"},{\"text\":\"配置项\",\"link\":\"/guide/config\"},{\"text\":\"翻译服务\",\"link\":\"/guide/services\"},{\"text\":\"快捷键\",\"link\":\"/guide/shortcuts\"},{\"text\":\"FAQ\",\"link\":\"/guide/faq\"}]}]},\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"footer\":{\"message\":\"基于 MIT 许可发布\",\"copyright\":\"© 2026 Variable Translator\"}}},\"en\":{\"label\":\"English\",\"lang\":\"en-US\",\"themeConfig\":{\"nav\":[{\"text\":\"Home\",\"link\":\"/en/\"},{\"text\":\"Guide\",\"link\":\"/en/guide/\"},{\"text\":\"Config\",\"link\":\"/en/guide/config\"},{\"text\":\"GitHub\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"sidebar\":{\"/en/guide/\":[{\"text\":\"Guide\",\"items\":[{\"text\":\"Introduction\",\"link\":\"/en/guide/\"},{\"text\":\"Quick Start\",\"link\":\"/en/guide/quickstart\"},{\"text\":\"Features\",\"link\":\"/en/guide/features\"},{\"text\":\"Configuration\",\"link\":\"/en/guide/config\"},{\"text\":\"Translation Services\",\"link\":\"/en/guide/services\"},{\"text\":\"Shortcuts\",\"link\":\"/en/guide/shortcuts\"},{\"text\":\"FAQ\",\"link\":\"/en/guide/faq\"}]}]},\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"footer\":{\"message\":\"Released under the MIT License.\",\"copyright\":\"© 2026 Variable Translator\"}}}},\"scrollOffset\":134,\"cleanUrls\":true}");</script>
-
-</body>
-
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">}</span></span></code></pre></div><h3 id="clipboardformats-values" tabindex="-1">clipboardFormats Values <a class="header-anchor" href="#clipboardformats-values" aria-label="Permalink to &quot;clipboardFormats Values&quot;">​</a></h3><table tabindex="0"><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody><tr><td><code>camelCase</code></td><td>Lower camel case</td></tr><tr><td><code>PascalCase</code></td><td>Upper camel case</td></tr><tr><td><code>snake_case</code></td><td>Underscore-separated</td></tr><tr><td><code>CONSTANT_CASE</code></td><td>Constant style</td></tr><tr><td><code>param-case</code></td><td>Hyphen-separated</td></tr><tr><td><code>Header-Case</code></td><td>Capitalized hyphen-separated</td></tr><tr><td><code>Capital Case</code></td><td>Capitalized space-separated</td></tr><tr><td><code>no case</code></td><td>Space-separated</td></tr><tr><td><code>originalValue</code></td><td>The pre-translation text (what you selected)</td></tr></tbody></table><hr><h2 id="feature-4-switch-translation-service" tabindex="-1">Feature 4: Switch Translation Service <a class="header-anchor" href="#feature-4-switch-translation-service" aria-label="Permalink to &quot;Feature 4: Switch Translation Service&quot;">​</a></h2><p>Press <code>Alt+Shift+S</code> or use the editor context menu to switch between:</p><ul><li>Pinyin (zero configuration, default)</li><li>ChatGPT / OpenAI</li><li>Google Translate</li><li>Bing / Azure Translator</li><li>DeepLX</li><li>Baidu Translate</li><li>Tencent Translator</li></ul><p>Picking a service that is not yet configured prompts you to open the settings. See <a href="/hias-variable-translator/en/guide/services">Translation Services</a>.</p><hr><h2 id="naming-formats" tabindex="-1">Naming Formats <a class="header-anchor" href="#naming-formats" aria-label="Permalink to &quot;Naming Formats&quot;">​</a></h2><h3 id="file-translation-formats" tabindex="-1">File Translation Formats <a class="header-anchor" href="#file-translation-formats" aria-label="Permalink to &quot;File Translation Formats&quot;">​</a></h3><table tabindex="0"><thead><tr><th>Format</th><th>Example</th><th>Description</th></tr></thead><tbody><tr><td>camelCase</td><td>userName</td><td>Lower camel case</td></tr><tr><td>PascalCase</td><td>UserName</td><td>Upper camel case</td></tr><tr><td>snake_case</td><td>user_name</td><td>Underscore-separated, lowercase</td></tr><tr><td>CONSTANT_CASE</td><td>USER_NAME</td><td>Underscore-separated, uppercase</td></tr><tr><td>param-case</td><td>user-name</td><td>Hyphen-separated, lowercase</td></tr><tr><td>Header-Case</td><td>User-Name</td><td>Hyphen-separated, capitalized</td></tr></tbody></table><h3 id="additional-formats-for-selection-translation" tabindex="-1">Additional Formats for Selection Translation <a class="header-anchor" href="#additional-formats-for-selection-translation" aria-label="Permalink to &quot;Additional Formats for Selection Translation&quot;">​</a></h3><table tabindex="0"><thead><tr><th>Format</th><th>Example</th><th>Description</th></tr></thead><tbody><tr><td>Capital Case</td><td>User Name</td><td>Space-separated, capitalized</td></tr><tr><td>no case</td><td>user name</td><td>Space-separated, lowercase</td></tr></tbody></table></div></div></main><footer class="VPDocFooter" data-v-39a288b8 data-v-e257564d><!--[--><!--]--><div class="edit-info" data-v-e257564d><!----><div class="last-updated" data-v-e257564d><p class="VPLastUpdated" data-v-e257564d data-v-e98dd255>最后更新: <time datetime="2026-07-23T15:26:51.000Z" data-v-e98dd255></time></p></div></div><nav class="prev-next" aria-labelledby="doc-footer-aria-label" data-v-e257564d><span class="visually-hidden" id="doc-footer-aria-label" data-v-e257564d>Pager</span><div class="pager" data-v-e257564d><a class="VPLink link pager-link prev" href="/hias-variable-translator/en/guide/quickstart" data-v-e257564d><!--[--><span class="desc" data-v-e257564d>Previous page</span><span class="title" data-v-e257564d>Quick Start</span><!--]--></a></div><div class="pager" data-v-e257564d><a class="VPLink link pager-link next" href="/hias-variable-translator/en/guide/config" data-v-e257564d><!--[--><span class="desc" data-v-e257564d>Next page</span><span class="title" data-v-e257564d>Configuration</span><!--]--></a></div></nav></footer><!--[--><!--]--></div></div></div><!--[--><!--]--></div></div><footer class="VPFooter has-sidebar" data-v-5d98c3a5 data-v-e315a0ad><div class="container" data-v-e315a0ad><p class="message" data-v-e315a0ad>Released under the MIT License.</p><p class="copyright" data-v-e315a0ad>© 2026 Variable Translator</p></div></footer><!--[--><!--]--></div></div>
+    <script>window.__VP_HASH_MAP__=JSON.parse("{\"en_guide_config.md\":\"N7Z3Hi5-\",\"en_guide_faq.md\":\"DOmzXduS\",\"en_guide_features.md\":\"D-EiGM3d\",\"en_guide_index.md\":\"Bv-FUpHF\",\"en_guide_quickstart.md\":\"GDXe2QUD\",\"en_guide_services.md\":\"DDk198ks\",\"en_guide_shortcuts.md\":\"BuvTvpND\",\"en_index.md\":\"BtkclSox\",\"guide_config.md\":\"BZjOZE8j\",\"guide_faq.md\":\"BQVCayag\",\"guide_features.md\":\"BDBx6xPA\",\"guide_index.md\":\"sTwzegk0\",\"guide_quickstart.md\":\"t8cb3skU\",\"guide_services.md\":\"qbZRGXkp\",\"guide_shortcuts.md\":\"z-I56G-_\",\"index.md\":\"BOzPArxe\",\"plans_文件与变量翻译需求计划.md\":\"Bkup8zjo\"}");window.__VP_SITE_DATA__=JSON.parse("{\"lang\":\"en-US\",\"dir\":\"ltr\",\"title\":\"variable-translator\",\"description\":\"VSCode 插件 - 将非英文字符翻译为英文\",\"base\":\"/hias-variable-translator/\",\"head\":[],\"router\":{\"prefetchLinks\":true},\"appearance\":true,\"themeConfig\":{\"logo\":\"/logo.svg\",\"siteTitle\":\"Variable Translator\",\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/AnsStory\"}],\"search\":{\"provider\":\"local\",\"options\":{\"translations\":{\"button\":{\"buttonText\":\"搜索文档\",\"buttonAriaLabel\":\"搜索文档\"},\"modal\":{\"noResultsText\":\"没有找到结果\",\"resetButtonTitle\":\"清空搜索\",\"footer\":{\"selectText\":\"选择\",\"navigateText\":\"切换\"}}}}},\"lastUpdated\":{\"text\":\"最后更新\",\"formatOptions\":{\"dateStyle\":\"medium\",\"timeStyle\":\"short\"}},\"footer\":{\"message\":\"Released under the MIT License.\",\"copyright\":\"Copyright © AnsStory\"}},\"locales\":{\"root\":{\"label\":\"中文\",\"lang\":\"zh-CN\",\"themeConfig\":{\"nav\":[{\"text\":\"首页\",\"link\":\"/\"},{\"text\":\"指南\",\"link\":\"/guide/\"},{\"text\":\"配置\",\"link\":\"/guide/config\"},{\"text\":\"GitHub\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"sidebar\":{\"/guide/\":[{\"text\":\"指南\",\"items\":[{\"text\":\"简介\",\"link\":\"/guide/\"},{\"text\":\"快速开始\",\"link\":\"/guide/quickstart\"},{\"text\":\"功能说明\",\"link\":\"/guide/features\"},{\"text\":\"配置项\",\"link\":\"/guide/config\"},{\"text\":\"翻译服务\",\"link\":\"/guide/services\"},{\"text\":\"快捷键\",\"link\":\"/guide/shortcuts\"},{\"text\":\"FAQ\",\"link\":\"/guide/faq\"}]}]},\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"footer\":{\"message\":\"基于 MIT 许可发布\",\"copyright\":\"© 2026 Variable Translator\"}}},\"en\":{\"label\":\"English\",\"lang\":\"en-US\",\"themeConfig\":{\"nav\":[{\"text\":\"Home\",\"link\":\"/en/\"},{\"text\":\"Guide\",\"link\":\"/en/guide/\"},{\"text\":\"Config\",\"link\":\"/en/guide/config\"},{\"text\":\"GitHub\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"sidebar\":{\"/en/guide/\":[{\"text\":\"Guide\",\"items\":[{\"text\":\"Introduction\",\"link\":\"/en/guide/\"},{\"text\":\"Quick Start\",\"link\":\"/en/guide/quickstart\"},{\"text\":\"Features\",\"link\":\"/en/guide/features\"},{\"text\":\"Configuration\",\"link\":\"/en/guide/config\"},{\"text\":\"Translation Services\",\"link\":\"/en/guide/services\"},{\"text\":\"Shortcuts\",\"link\":\"/en/guide/shortcuts\"},{\"text\":\"FAQ\",\"link\":\"/en/guide/faq\"}]}]},\"socialLinks\":[{\"icon\":\"github\",\"link\":\"https://github.com/AnsStory/hias-variable-translator\"}],\"footer\":{\"message\":\"Released under the MIT License.\",\"copyright\":\"© 2026 Variable Translator\"}}}},\"scrollOffset\":134,\"cleanUrls\":true}");</script>
+    
+  </body>
 </html>

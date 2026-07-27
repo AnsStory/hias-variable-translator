@@ -32,6 +32,13 @@ export function initTranslateModule() {
   }
   translator = new Translator()
   undoManager = new UndoManager()
+
+  // 同步撤回窗口状态到 context key，供 Ctrl+Z 条件快捷键的 when 子句使用。
+  // 撤回完成后窗口结束前仍保持激活，避免重复按 Ctrl+Z 落到原生文件撤销上触发“文件不存在”报错
+  undoManager.onStateChange((isUndoWindowActive) => {
+    vscode.commands.executeCommand('setContext', 'variableTranslator.canUndoFile', isUndoWindowActive)
+  })
+  vscode.commands.executeCommand('setContext', 'variableTranslator.canUndoFile', false)
 }
 
 /**
@@ -154,7 +161,7 @@ export async function handleUndoTranslation(): Promise<void> {
   const records = undoManager.getValidRecords()
 
   if (records.length === 0) {
-    vscode.window.showWarningMessage('没有可撤回的翻译记录（已超过1分钟有效期）')
+    vscode.window.showWarningMessage('没有可撤回的翻译记录（已撤回或超过 1 分钟有效期）')
     return
   }
 

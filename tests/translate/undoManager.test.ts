@@ -151,6 +151,75 @@ describe('UndoManager - 撤回管理器', () => {
     })
   })
 
+  describe('onStateChange - 撤回窗口状态通知', () => {
+    it('添加记录时通知 true', () => {
+      const listener = vi.fn()
+      manager.onStateChange(listener)
+
+      manager.addRecord('/src/用户.ts', '/src/user.ts')
+
+      expect(listener).toHaveBeenLastCalledWith(true)
+    })
+
+    it('窗口期内删除最后一条记录仍通知 true（防止重复 Ctrl+Z 落到原生撤销）', () => {
+      const listener = vi.fn()
+      manager.onStateChange(listener)
+
+      manager.addRecord('/src/用户.ts', '/src/user.ts')
+      manager.removeRecord('/src/user.ts')
+
+      expect(listener).toHaveBeenLastCalledWith(true)
+    })
+
+    it('记录被撤回后窗口到期时通知 false', () => {
+      const listener = vi.fn()
+      manager.onStateChange(listener)
+
+      manager.addRecord('/src/用户.ts', '/src/user.ts')
+      manager.removeRecord('/src/user.ts')
+      expect(listener).toHaveBeenLastCalledWith(true)
+
+      // 推进到窗口结束（到期定时器在 60 秒 + 100ms 触发）
+      vi.advanceTimersByTime(60 * 1000 + 200)
+
+      expect(listener).toHaveBeenLastCalledWith(false)
+    })
+
+    it('记录到期后自动通知 false（无需等待 30 秒清理间隔）', () => {
+      const listener = vi.fn()
+      manager.onStateChange(listener)
+
+      manager.addRecord('/src/用户.ts', '/src/user.ts')
+      expect(listener).toHaveBeenLastCalledWith(true)
+
+      // 推进到刚过有效期（到期定时器在 60 秒 + 100ms 触发）
+      vi.advanceTimersByTime(60 * 1000 + 200)
+
+      expect(listener).toHaveBeenLastCalledWith(false)
+    })
+
+    it('存在其他有效记录时删除一条仍通知 true', () => {
+      const listener = vi.fn()
+      manager.onStateChange(listener)
+
+      manager.addRecord('/src/a.ts', '/src/a-translated.ts')
+      manager.addRecord('/src/b.ts', '/src/b-translated.ts')
+      manager.removeRecord('/src/a-translated.ts')
+
+      expect(listener).toHaveBeenLastCalledWith(true)
+    })
+
+    it('dispose 时通知 false', () => {
+      const listener = vi.fn()
+      manager.onStateChange(listener)
+
+      manager.addRecord('/src/用户.ts', '/src/user.ts')
+      manager.dispose()
+
+      expect(listener).toHaveBeenLastCalledWith(false)
+    })
+  })
+
   describe('dispose - 释放资源', () => {
     it('dispose 后清空所有记录', () => {
       manager.addRecord('/src/用户.ts', '/src/user.ts')

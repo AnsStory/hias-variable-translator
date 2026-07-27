@@ -18,6 +18,7 @@ Initial release of **hias-variable-translator**.
 - File path translation: auto-translate non-English names when creating or renaming files/folders
 - Toggle file translation on/off with status bar indicator (`Alt+Shift+D`)
 - Undo translation within 1 minute, including cleanup of translation-created empty directories (`Alt+Shift+Z`)
+- Conditional `Ctrl+Z` (`Cmd+Z` on macOS) keybinding for undoing file translation: active only while an undo record is valid (within 1 minute) and focus is outside text input areas (e.g. Explorer), so native text undo in the editor is unaffected
 - Auto-detect source language; supports Chinese, Japanese (hiragana/katakana) and Korean (syllables/letters)
 - 8 naming formats: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case
 - Multi-format clipboard copy (`copyToClipboard` / `clipboardFormats`), with `originalValue` support and Windows clipboard history (Win+V) compatibility

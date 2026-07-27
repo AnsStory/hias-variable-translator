@@ -20,12 +20,35 @@ export interface UndoRecord {
 export class UndoManager {
   private records: Map<string, UndoRecord> = new Map()
   private cleanupInterval: NodeJS.Timeout | null = null
+  private expiryTimers: Set<NodeJS.Timeout> = new Set()
+  private stateChangeListener: ((isUndoWindowActive: boolean) => void) | null = null
+
+  // 撤回窗口结束时刻：最近一条记录的过期时间点。撤回完成后窗口未结束前仍保持激活，
+  // 避免重复按 Ctrl+Z 落到 VSCode 原生文件撤销上（原生撤销栈中“创建原始文件”的记录
+  // 在翻译重命名后已失效，触发会报“文件不存在无法删除”）
+  private undoWindowEnd = 0
 
   // 撤回有效期：1分钟
   private readonly UNDO_VALIDITY_PERIOD = 60 * 1000
 
   constructor() {
     this.startCleanupInterval()
+  }
+
+  /**
+   * 注册状态变化监听器
+   * 在撤回窗口状态可能变化时触发（新增、删除、过期、释放），用于同步外部状态（如 VSCode context key）
+   * @param listener 监听回调，参数为撤回窗口当前是否激活（记录被撤回后到窗口结束前仍为 true）
+   */
+  onStateChange(listener: (isUndoWindowActive: boolean) => void): void {
+    this.stateChangeListener = listener
+  }
+
+  /**
+   * 通知状态变化
+   */
+  private notifyStateChange(): void {
+    this.stateChangeListener?.(Date.now() < this.undoWindowEnd)
   }
 
   /**
@@ -43,6 +66,16 @@ export class UndoManager {
     }
 
     this.records.set(translatedPath, record)
+    this.undoWindowEnd = Math.max(this.undoWindowEnd, record.timestamp + this.UNDO_VALIDITY_PERIOD)
+
+    // 到期后精确清理并刷新状态（避免依赖 30 秒清理间隔导致状态滞后）
+    const timer = setTimeout(() => {
+      this.expiryTimers.delete(timer)
+      this.cleanupExpiredRecords()
+    }, this.UNDO_VALIDITY_PERIOD + 100)
+    this.expiryTimers.add(timer)
+
+    this.notifyStateChange()
   }
 
   /**
@@ -60,6 +93,7 @@ export class UndoManager {
     // 检查是否过期
     if (this.isExpired(record)) {
       this.records.delete(translatedPath)
+      this.notifyStateChange()
       return null
     }
 
@@ -72,6 +106,7 @@ export class UndoManager {
    */
   removeRecord(translatedPath: string): void {
     this.records.delete(translatedPath)
+    this.notifyStateChange()
   }
 
   /**
@@ -104,6 +139,9 @@ export class UndoManager {
         this.records.delete(key)
       }
     }
+
+    // 无论是否删除了记录都刷新状态：记录被撤回消耗后窗口到期时也需要将 context 置为 false
+    this.notifyStateChange()
   }
 
   /**
@@ -114,7 +152,13 @@ export class UndoManager {
       clearInterval(this.cleanupInterval)
       this.cleanupInterval = null
     }
+    for (const timer of this.expiryTimers) {
+      clearTimeout(timer)
+    }
+    this.expiryTimers.clear()
     this.records.clear()
+    this.undoWindowEnd = 0
+    this.notifyStateChange()
   }
 
   /**
