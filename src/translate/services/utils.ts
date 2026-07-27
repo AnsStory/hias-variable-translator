@@ -20,7 +20,7 @@ export async function fetchWithTimeout(url: string, options: RequestInit = {}, t
     return response
   } catch (error) {
     if (isAbortError(error)) {
-      throw new Error(`请求超时（${timeoutMs / 1000}s）`)
+      throw new Error(`请求超时（${timeoutMs / 1000}s）`, { cause: error })
     }
     throw error
   } finally {

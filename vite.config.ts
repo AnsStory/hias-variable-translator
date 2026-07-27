@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => ({
       fileName: 'extension',
     },
     rollupOptions: {
-      external: ['vscode', 'path', 'fs', 'crypto', 'url', 'http', 'https'],
+      external: ['vscode', 'path', 'fs', 'fs/promises', 'crypto', 'url', 'http', 'https'],
       output: {
         entryFileNames: 'extension.js',
         chunkFileNames: '[name].js',

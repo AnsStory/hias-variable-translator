@@ -16,7 +16,6 @@ import {
   registerConfigListener,
   disposeTranslateModule,
 } from './translate'
-import { handleInsertConsoleLog, handleDeleteConsoleLog, handleCommentConsoleLog, handleUncommentConsoleLog } from './print'
 
 /**
  * 插件激活函数
@@ -64,29 +63,7 @@ function registerCommands(context: vscode.ExtensionContext) {
   // 切换翻译服务
   const switchTranslationServiceCmd = vscode.commands.registerCommand('variableTranslator.switchTranslationService', () => handleSwitchTranslationService())
 
-  // 插入 console.log
-  const insertConsoleLogCmd = vscode.commands.registerCommand('variableTranslator.insertConsoleLog', () => handleInsertConsoleLog())
-
-  // 删除 console.log
-  const deleteConsoleLogCmd = vscode.commands.registerCommand('variableTranslator.deleteConsoleLog', () => handleDeleteConsoleLog())
-
-  // 注释 console.log
-  const commentConsoleLogCmd = vscode.commands.registerCommand('variableTranslator.commentConsoleLog', () => handleCommentConsoleLog())
-
-  // 取消注释 console.log
-  const uncommentConsoleLogCmd = vscode.commands.registerCommand('variableTranslator.uncommentConsoleLog', () => handleUncommentConsoleLog())
-
-  context.subscriptions.push(
-    translateSelectionCmd,
-    translateCopyCmd,
-    undoTranslationCmd,
-    toggleFileTranslationCmd,
-    switchTranslationServiceCmd,
-    insertConsoleLogCmd,
-    deleteConsoleLogCmd,
-    commentConsoleLogCmd,
-    uncommentConsoleLogCmd
-  )
+  context.subscriptions.push(translateSelectionCmd, translateCopyCmd, undoTranslationCmd, toggleFileTranslationCmd, switchTranslationServiceCmd)
 }
 
 /**

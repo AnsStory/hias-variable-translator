@@ -299,8 +299,6 @@ describe('ConfigManager - 配置管理器', () => {
 
       const relevantKeys = [
         'variableTranslator.enableFileTranslation',
-        'variableTranslator.enableConsoleLog',
-        'variableTranslator.consoleLogTemplate',
         'variableTranslator.translationService',
         'variableTranslator.services',
         'variableTranslator.servicePriority',

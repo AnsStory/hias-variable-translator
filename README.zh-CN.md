@@ -63,32 +63,26 @@ npm run docs:preview
 变量翻译助手/
 ├── src/
 │   ├── extension.ts              # 插件入口，整合所有功能
-│   ├── translate/                # 翻译模块
-│   │   ├── index.ts              # 模块导出
-│   │   ├── handler.ts            # 翻译操作处理函数
-│   │   ├── translator.ts         # 翻译器，整合翻译服务
-│   │   ├── config.ts             # 配置管理器
-│   │   ├── clipboard.ts          # 剪贴板工具函数
-│   │   ├── namingConvention.ts   # 命名格式转换（8种格式）
-│   │   ├── chineseDetector.ts    # 非英文字符检测
-│   │   ├── undoManager.ts        # 撤回管理（1分钟缓存）
-│   │   └── services/             # 翻译服务实现
-│   │       ├── index.ts          # 服务接口定义
-│   │       ├── utils.ts          # 共享工具（fetchWithTimeout, isAbortError等）
-│   │       ├── pinyin.ts         # 拼音服务（降级方案）
-│   │       ├── openai.ts         # OpenAI服务
-│   │       ├── google.ts         # Google翻译服务（官方 Cloud Translation API）
-│   │       ├── bing.ts           # Bing翻译服务
-│   │       ├── deeplx.ts         # DeepLX服务
-│   │       ├── baidu.ts          # 百度翻译服务
-│   │       └── tencent.ts        # 腾讯翻译服务
-│   └── print/                    # 打印模块（console.log功能）
+│   └── translate/                # 翻译模块
 │       ├── index.ts              # 模块导出
-│       ├── handler.ts            # console.log操作处理
-│       ├── config.ts             # 打印模块配置
-│       └── ast.ts                # AST解析，确定插入位置
-├── tests/                        # 单元测试（Vitest, 208个测试用例）
-│   ├── print/                    # 打印模块测试
+│       ├── handler.ts            # 翻译操作处理函数
+│       ├── translator.ts         # 翻译器，整合翻译服务
+│       ├── config.ts             # 配置管理器
+│       ├── clipboard.ts          # 剪贴板工具函数
+│       ├── namingConvention.ts   # 命名格式转换（8种格式）
+│       ├── chineseDetector.ts    # 非英文字符检测
+│       ├── undoManager.ts        # 撤回管理（1分钟缓存）
+│       └── services/             # 翻译服务实现
+│           ├── index.ts          # 服务接口定义
+│           ├── utils.ts          # 共享工具（fetchWithTimeout, isAbortError等）
+│           ├── pinyin.ts         # 拼音服务（降级方案）
+│           ├── openai.ts         # OpenAI服务
+│           ├── google.ts         # Google翻译服务（官方 Cloud Translation API）
+│           ├── bing.ts           # Bing翻译服务
+│           ├── deeplx.ts         # DeepLX服务
+│           ├── baidu.ts          # 百度翻译服务
+│           └── tencent.ts        # 腾讯翻译服务
+├── tests/                        # 单元测试（Vitest）
 │   └── translate/                # 翻译模块测试
 ├── package.json                  # 插件配置
 ├── tsconfig.json                 # TypeScript 配置

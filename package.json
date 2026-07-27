@@ -1,8 +1,8 @@
 {
-  "name": "hais-variable-translator",
+  "name": "hias-variable-translator",
   "displayName": "变量翻译助手",
   "description": "将任意非英文字符自动检测并翻译为英文，支持文件路径翻译和选中文本翻译",
-  "version": "0.1.17",
+  "version": "0.1.0",
   "publisher": "ansstory",
   "icon": "icon.png",
   "homepage": "https://ansstory.github.io/hias-variable-translator/",
@@ -58,22 +58,6 @@
       {
         "command": "variableTranslator.switchTranslationService",
         "title": "切换翻译服务"
-      },
-      {
-        "command": "variableTranslator.insertConsoleLog",
-        "title": "插入 console.log"
-      },
-      {
-        "command": "variableTranslator.deleteConsoleLog",
-        "title": "删除 console.log"
-      },
-      {
-        "command": "variableTranslator.commentConsoleLog",
-        "title": "注释 console.log"
-      },
-      {
-        "command": "variableTranslator.uncommentConsoleLog",
-        "title": "取消注释 console.log"
       }
     ],
     "menus": {
@@ -120,26 +104,6 @@
       {
         "command": "variableTranslator.switchTranslationService",
         "key": "alt+shift+s"
-      },
-      {
-        "command": "variableTranslator.insertConsoleLog",
-        "key": "ctrl+alt+l",
-        "when": "editorTextFocus && editorHasSelection && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
-      },
-      {
-        "command": "variableTranslator.deleteConsoleLog",
-        "key": "ctrl+alt+d",
-        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
-      },
-      {
-        "command": "variableTranslator.commentConsoleLog",
-        "key": "ctrl+alt+c",
-        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
-      },
-      {
-        "command": "variableTranslator.uncommentConsoleLog",
-        "key": "ctrl+alt+u",
-        "when": "editorTextFocus && editorLangId =~ /^javascript|typescript|vue|html|jsx|tsx|svelte|astro$/"
       }
     ],
     "configuration": {
@@ -149,16 +113,6 @@
           "type": "boolean",
           "default": true,
           "description": "是否启用: 文件路径自动翻译（右键新建/重命名文件、文件夹时自动翻译）"
-        },
-        "variableTranslator.enableConsoleLog": {
-          "type": "boolean",
-          "default": false,
-          "description": "是否启用: 选中文本后按 Ctrl+Alt+L 快速插入 console.log"
-        },
-        "variableTranslator.consoleLogTemplate": {
-          "type": "string",
-          "default": "${value}, `${name}`",
-          "description": "console.log 参数模板。可用变量: ${value}=选中文本, ${name}=原始文本。支持 snippet 语法: $1, $2, ${1:placeholder} 等控制光标位置"
         },
         "variableTranslator.translationService": {
           "type": "string",
@@ -299,16 +253,6 @@
           },
           "default": [],
           "description": "复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）。用户选择的格式会排到第一位。originalValue 表示复制未翻译的原始值"
-        },
-        "variableTranslator.consoleLogCopyToClipboard": {
-          "type": "boolean",
-          "default": false,
-          "description": "插入 console.log 后是否自动将匹配内容复制到剪贴板"
-        },
-        "variableTranslator.consoleLogClipboardPattern": {
-          "type": "string",
-          "default": "",
-          "description": "console.log 复制到剪贴板的提取模板。使用与 consoleLogTemplate 相同的变量语法: ${value}=选中文本, ${name}=原始文本, ${name:prefix,suffix}=带前后缀。示例: ${name:log_,} 可提取 log_params"
         }
       }
     }
@@ -334,7 +278,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/acorn": "^4.0.6",
     "@types/node": "^18.19.130",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
@@ -354,8 +297,6 @@
     "vitest": "^2.1.9"
   },
   "dependencies": {
-    "@sveltejs/acorn-typescript": "^1.0.11",
-    "acorn": "^8.17.0",
     "pinyin-pro": "^3.0.0"
   },
   "volta": {

@@ -142,8 +142,6 @@ export class ConfigManager {
     return vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
       if (
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.enableFileTranslation`) ||
-        e.affectsConfiguration(`${this.CONFIG_PREFIX}.enableConsoleLog`) ||
-        e.affectsConfiguration(`${this.CONFIG_PREFIX}.consoleLogTemplate`) ||
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.translationService`) ||
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.services`) ||
         e.affectsConfiguration(`${this.CONFIG_PREFIX}.servicePriority`) ||
