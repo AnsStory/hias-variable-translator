@@ -12,11 +12,17 @@ export default defineConfig(({ mode }) => ({
       fileName: 'extension',
     },
     rollupOptions: {
-      external: ['vscode', 'path', 'fs', 'crypto', 'url', 'http', 'https'],
+      external: ['vscode', 'path', 'fs', 'fs/promises', 'crypto', 'url', 'http', 'https'],
       output: {
         entryFileNames: 'extension.js',
         chunkFileNames: '[name].js',
         assetFileNames: '[name].[ext]',
+        // 第三方依赖拆为独立 vendor chunk，主文件仅保留自有混淆代码
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+        },
       },
       plugins:
         mode === 'production'
