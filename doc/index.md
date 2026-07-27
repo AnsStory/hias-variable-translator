@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: 变量翻译助手
+  name: variable-translator
   text: VSCode 翻译插件
   tagline: 自动检测并翻译任意非英文字符为英文
   actions:

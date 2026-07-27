@@ -1,6 +1,6 @@
 {
   "name": "hias-variable-translator",
-  "displayName": "变量翻译助手",
+  "displayName": "variable-translator",
   "description": "将任意非英文字符自动检测并翻译为英文，支持文件路径翻译和选中文本翻译",
   "version": "0.1.0",
   "publisher": "ansstory",
@@ -107,7 +107,7 @@
       }
     ],
     "configuration": {
-      "title": "变量翻译助手",
+      "title": "variable-translator",
       "properties": {
         "variableTranslator.enableFileTranslation": {
           "type": "boolean",

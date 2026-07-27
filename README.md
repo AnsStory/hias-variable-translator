@@ -1,4 +1,4 @@
-# [变量翻译助手](https://ansstory.github.io/hias-variable-translator/)
+# [variable-translator](https://ansstory.github.io/hias-variable-translator/)
 
 VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
@@ -23,7 +23,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
 1. 打开 VSCode
 2. 按 `Ctrl+Shift+X` 打开扩展面板
-3. 搜索 "变量翻译助手"
+3. 搜索 "variable-translator"
 4. 点击 **Install** 安装
 
 ## 使用说明

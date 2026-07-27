@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: '变量翻译助手',
+  title: 'variable-translator',
   description: 'VSCode 插件 - 将非英文字符翻译为英文',
 
   head: [['link', { rel: 'icon', type: 'image/png', href: '/hias-variable-translator/favicon.png' }]],

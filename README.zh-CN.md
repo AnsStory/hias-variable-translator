@@ -1,4 +1,4 @@
-# [变量翻译助手](https://ansstory.github.io/hias-variable-translator/)
+# [variable-translator](https://ansstory.github.io/hias-variable-translator/)
 
 
 ## 开发
@@ -60,7 +60,7 @@ npm run docs:preview
 
 ### 项目结构
 ```
-变量翻译助手/
+variable-translator/
 ├── src/
 │   ├── extension.ts              # 插件入口，整合所有功能
 │   └── translate/                # 翻译模块
