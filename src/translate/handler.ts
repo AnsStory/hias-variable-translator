@@ -12,7 +12,7 @@ import { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat
 import { Translator } from './translator'
 import { UndoManager } from './undoManager'
 import { ConfigManager } from './config'
-import { TranslationServiceType } from './services'
+import { TranslationServiceType, TRANSLATION_SERVICE_OPTIONS } from './services'
 import { copyTranslationToClipboard, copyFileTranslationToClipboard, showClipboardStatus, showFileClipboardStatus } from './clipboard'
 
 let translator: Translator
@@ -224,7 +224,6 @@ export async function handleToggleFileTranslation(): Promise<void> {
  * 处理切换翻译服务
  */
 export async function handleSwitchTranslationService(): Promise<void> {
-  const { TRANSLATION_SERVICE_OPTIONS } = await import('./services')
   const currentService = ConfigManager.getTranslationService()
 
   // 创建QuickPick选项
