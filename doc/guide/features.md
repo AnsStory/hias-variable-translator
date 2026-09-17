@@ -190,7 +190,57 @@
 
 ---
 
-## 功能 4：切换翻译服务
+## 功能 4：翻译并剪切到剪贴板
+
+### 使用场景
+
+选中非英文文本后翻译，将结果按多种命名格式复制到剪贴板历史，同时**删除选中的原文**。适合需要替换文本并同时保留翻译结果的场景。
+
+### 操作流程
+
+```
+选中文本 → 按下 Alt+Shift+X → 选择翻译格式 → 翻译结果复制到剪贴板 → 原文本被删除
+```
+
+### 示例
+
+```
+选中：用户名称
+按下：Alt+Shift+X
+选择格式：camelCase
+
+配置的 clipboardFormats：["camelCase", "PascalCase", "snake_case"]
+
+复制到剪贴板历史：
+- userName（camelCase）
+- UserName（PascalCase）
+- user_name（snake_case）
+
+当前剪贴板：userName（用户选择的格式）
+原文本「用户名称」已被删除
+```
+
+### 与 Alt+Shift+C 的区别
+
+- **Alt+Shift+C**：翻译复制后，原文本保留不变
+- **Alt+Shift+X**：翻译复制后，原文本被删除（相当于"剪切翻译复制"）
+
+### 配置项
+
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "PascalCase",
+    "snake_case"
+  ]
+}
+```
+
+---
+
+## 功能 5：切换翻译服务
 
 按 `Alt+Shift+S` 或右键菜单选择「切换翻译服务」，在以下服务间快速切换：
 

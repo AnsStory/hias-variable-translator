@@ -4,6 +4,7 @@
 |------------------------|----------------|------|------|
 | `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 | 编辑器中选中非英文文本后翻译替换 |
 | `Alt+Shift+C` | `Option+Shift+C` | 翻译并复制到剪贴板 | 翻译后复制多种格式到剪贴板历史，不替换原文 |
+| `Alt+Shift+X` | `Option+Shift+X` | 翻译并剪切到剪贴板 | 翻译后复制到剪贴板，同时删除选中的原文 |
 | `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 | 删除翻译后的文件/目录（1 分钟内有效） |
 | `Ctrl+Z` | `Cmd+Z` | 撤回文件翻译（条件生效） | 仅在 1 分钟内且焦点不在文本输入区（如资源管理器）时生效，编辑器内保持原生文字撤销 |
 | `Alt+Shift+D` | `Option+Shift+D` | 切换文件翻译开关 | 开启/关闭文件路径翻译功能 |
@@ -63,6 +64,37 @@
 - `user_name`（snake_case）
 
 当前剪贴板保留用户选择的格式（`userName`），全部格式需通过 **Win+V** 剪贴板历史取用。
+
+### Alt+Shift+X - 翻译并剪切到剪贴板
+
+**生效条件**：编辑器聚焦且有选中文本。
+
+**使用方法**：
+1. 在编辑器中选中非英文文本
+2. 按 `Alt+Shift+X`
+3. 选择翻译格式
+4. 翻译结果复制到剪贴板历史，同时删除选中的原文
+
+**配置示例**：
+```json
+{
+  "variableTranslator.copyToClipboard": true,
+  "variableTranslator.clipboardFormats": [
+    "camelCase",
+    "PascalCase",
+    "snake_case"
+  ]
+}
+```
+
+**效果**：选中「用户名称」选择 camelCase 后：
+- 原文本「用户名称」被删除
+- 剪贴板历史中依次包含：
+  - `userName`（camelCase）
+  - `UserName`（PascalCase）
+  - `user_name`（snake_case）
+
+**与 Alt+Shift+C 的区别**：Alt+Shift+X 在翻译复制后会删除原文，相当于"剪切翻译复制"。
 
 ### Alt+Shift+Z / Ctrl+Z - 撤回文件翻译
 
