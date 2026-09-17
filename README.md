@@ -57,6 +57,15 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 
 **使用前提**：需在设置中开启 `copyToClipboard: true`，并配置 `clipboardFormats` 指定要复制的格式。(其中：originalValue为翻以前的原始文本)
 
+### 翻译并剪切到剪贴板
+
+1. 在编辑器中选中非英文文本
+2. 按 `Alt+Shift+X`
+3. 选择命名格式
+4. 翻译结果复制到剪贴板，同时删除选中的原文
+
+**使用前提**：需在设置中开启 `copyToClipboard: true`，并配置 `clipboardFormats` 指定要复制的格式。
+
 #### 配置示例
 
 ```json
@@ -81,6 +90,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 |------------------------|----------------|------|
 | `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 |
 | `Alt+Shift+C` | `Option+Shift+C` | 翻译并复制到剪贴板 |
+| `Alt+Shift+X` | `Option+Shift+X` | 翻译并剪切到剪贴板（删除原文） |
 | `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 |
 | `Ctrl+Z` | `Cmd+Z` | 撤回文件翻译（1 分钟内且焦点不在文本输入区时） |
 | `Alt+Shift+D` | `Option+Shift+D` | 切换文件翻译开关 |

@@ -48,6 +48,10 @@
         "title": "翻译并复制到剪贴板"
       },
       {
+        "command": "variableTranslator.translateCut",
+        "title": "翻译并剪切到剪贴板"
+      },
+      {
         "command": "variableTranslator.undoTranslation",
         "title": "撤回翻译"
       },
@@ -73,12 +77,17 @@
           "group": "variableTranslator@2"
         },
         {
-          "command": "variableTranslator.undoTranslation",
+          "command": "variableTranslator.translateCut",
+          "when": "editorHasSelection",
           "group": "variableTranslator@3"
         },
         {
-          "command": "variableTranslator.switchTranslationService",
+          "command": "variableTranslator.undoTranslation",
           "group": "variableTranslator@4"
+        },
+        {
+          "command": "variableTranslator.switchTranslationService",
+          "group": "variableTranslator@5"
         }
       ]
     },
@@ -91,6 +100,11 @@
       {
         "command": "variableTranslator.translateCopy",
         "key": "alt+shift+c",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "variableTranslator.translateCut",
+        "key": "alt+shift+x",
         "when": "editorTextFocus && editorHasSelection"
       },
       {

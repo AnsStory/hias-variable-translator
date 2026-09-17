@@ -3,7 +3,8 @@
  * 支持6种命名格式：camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case
  */
 
-export type NamingFormat = 'camelCase' | 'PascalCase' | 'snake_case' | 'CONSTANT_CASE' | 'param-case' | 'Header-Case' | 'Capital Case' | 'no case' | 'originalValue'
+export type NamingFormat =
+  'camelCase' | 'PascalCase' | 'snake_case' | 'CONSTANT_CASE' | 'param-case' | 'Header-Case' | 'Capital Case' | 'no case' | 'originalValue'
 
 /**
  * 格式选项，用于QuickPick
@@ -186,4 +187,57 @@ export function splitIntoWordsForFileName(text: string): string[] {
   const normalizedWords = camelCaseWords.replace(/[^a-zA-Z0-9]+/g, ' ')
   // 分割并过滤空字符串
   return normalizedWords.split(/\s+/).filter((word) => word.length > 0)
+}
+
+/**
+ * 检测字符是否为非英文字符（中文/日文/韩文等）
+ * @param char 要检测的字符
+ * @returns 是否为非英文字符
+ */
+function isNonEnglish(char: string): boolean {
+  const code = char.charCodeAt(0)
+  return (
+    (code >= 0x4e00 && code <= 0x9fff) || // CJK 统一汉字
+    (code >= 0x3400 && code <= 0x4dbf) || // CJK 扩展 A
+    (code >= 0x3040 && code <= 0x309f) || // 日文平假名
+    (code >= 0x30a0 && code <= 0x30ff) || // 日文片假名
+    (code >= 0xac00 && code <= 0xd7af) || // 韩文音节
+    (code >= 0x1100 && code <= 0x11ff) || // 韩文字母
+    (code >= 0xf900 && code <= 0xfaff) // CJK 兼容汉字
+  )
+}
+
+/**
+ * 将中英文混合文本拆分为连续的非英文部分和英文部分
+ * 例如："use用户Store" → ["use", "用户", "Store"]
+ * 例如："用户Store" → ["用户", "Store"]
+ * 例如："use用户" → ["use", "用户"]
+ * @param text 中英文混合文本
+ * @returns 拆分后的文本数组
+ */
+export function splitMixedText(text: string): string[] {
+  const parts: string[] = []
+  let currentPart = ''
+  let currentIsNonEnglish = false
+
+  for (const char of text) {
+    const charIsNonEnglish = isNonEnglish(char)
+
+    if (currentPart === '') {
+      currentIsNonEnglish = charIsNonEnglish
+      currentPart = char
+    } else if (charIsNonEnglish === currentIsNonEnglish) {
+      currentPart += char
+    } else {
+      parts.push(currentPart)
+      currentIsNonEnglish = charIsNonEnglish
+      currentPart = char
+    }
+  }
+
+  if (currentPart !== '') {
+    parts.push(currentPart)
+  }
+
+  return parts
 }

@@ -8,6 +8,7 @@ import {
   createStatusBarItem,
   handleTranslateSelection,
   handleTranslateCopy,
+  handleTranslateCut,
   handleUndoTranslation,
   handleToggleFileTranslation,
   handleSwitchTranslationService,
@@ -54,6 +55,9 @@ function registerCommands(context: vscode.ExtensionContext) {
   // 翻译并复制到剪贴板
   const translateCopyCmd = vscode.commands.registerCommand('variableTranslator.translateCopy', () => handleTranslateCopy())
 
+  // 翻译并剪切到剪贴板
+  const translateCutCmd = vscode.commands.registerCommand('variableTranslator.translateCut', () => handleTranslateCut())
+
   // 撤回翻译
   const undoTranslationCmd = vscode.commands.registerCommand('variableTranslator.undoTranslation', () => handleUndoTranslation())
 
@@ -63,7 +67,14 @@ function registerCommands(context: vscode.ExtensionContext) {
   // 切换翻译服务
   const switchTranslationServiceCmd = vscode.commands.registerCommand('variableTranslator.switchTranslationService', () => handleSwitchTranslationService())
 
-  context.subscriptions.push(translateSelectionCmd, translateCopyCmd, undoTranslationCmd, toggleFileTranslationCmd, switchTranslationServiceCmd)
+  context.subscriptions.push(
+    translateSelectionCmd,
+    translateCopyCmd,
+    translateCutCmd,
+    undoTranslationCmd,
+    toggleFileTranslationCmd,
+    switchTranslationServiceCmd
+  )
 }
 
 /**

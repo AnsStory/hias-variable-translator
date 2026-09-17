@@ -8,7 +8,15 @@ import * as path from 'path'
 import * as fs from 'fs/promises'
 import { existsSync } from 'fs'
 import { containsNonEnglish } from './chineseDetector'
-import { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords, splitIntoWordsForFileName } from './namingConvention'
+import {
+  NamingFormat,
+  FILE_FORMAT_OPTIONS,
+  TEXT_FORMAT_OPTIONS,
+  convertToFormat,
+  splitIntoWords,
+  splitIntoWordsForFileName,
+  splitMixedText,
+} from './namingConvention'
 import { Translator } from './translator'
 import { UndoManager } from './undoManager'
 import { ConfigManager } from './config'
@@ -99,6 +107,60 @@ export async function handleTranslateCopy(): Promise<void> {
     await vscode.env.clipboard.writeText(translatedText)
     // vscode.window.setStatusBarMessage(`已复制到剪贴板: ${translatedText}`, 3000)
   }
+}
+
+/**
+ * 处理翻译并剪切到剪贴板（删除选中文本）
+ */
+export async function handleTranslateCut(): Promise<void> {
+  const editor = vscode.window.activeTextEditor
+  if (!editor) {
+    vscode.window.showWarningMessage('请先选中文本')
+    return
+  }
+
+  const selection = editor.selection
+  const selectedText = editor.document.getText(selection)
+
+  if (!selectedText) {
+    vscode.window.showWarningMessage('请先选中要翻译的文本')
+    return
+  }
+
+  if (!containsNonEnglish(selectedText)) {
+    vscode.window.showInformationMessage('选中文本不包含非英文字符，无需翻译')
+    return
+  }
+
+  // 选择翻译格式
+  const format = await showFormatPicker(true)
+  if (!format) {
+    return
+  }
+
+  // 翻译文本
+  const result = await translator.translate(selectedText)
+
+  if (!result.success) {
+    vscode.window.showErrorMessage(`翻译失败: ${result.error}`)
+    return
+  }
+
+  // 复制到剪贴板
+  const copyCount = await copyTranslationToClipboard(selectedText, result.translatedText, format)
+  if (copyCount > 0) {
+    showClipboardStatus(selectedText, result.translatedText, format, copyCount)
+  } else {
+    // 未启用剪贴板复制，只复制用户选择的格式
+    const words = splitIntoWords(result.translatedText)
+    const translatedText = convertToFormat(words, format)
+    await vscode.env.clipboard.writeText(translatedText)
+  }
+
+  // 删除选中文本
+  await editor.edit((editBuilder) => {
+    editBuilder.delete(selection)
+  })
 }
 
 /**
@@ -380,22 +442,35 @@ async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
       }
 
       if (containsNonEnglish(dotPart)) {
-        // 翻译非英文部分
-        const result = await translator.translate(dotPart)
-        if (result.success) {
-          // 文件名专用净化：去除撇号等非法字符
-          const words = splitIntoWordsForFileName(result.translatedText)
-          const translated = convertToFormat(words, format)
-          if (translated) {
-            translatedDotParts.push(translated)
-            lastTranslatedPart = translated
-            lastOriginalPart = dotPart
+        // 拆分中英文，只翻译中文部分
+        const parts = splitMixedText(dotPart)
+        const words: string[] = []
+
+        for (const part of parts) {
+          if (containsNonEnglish(part)) {
+            // 中文部分，翻译
+            const result = await translator.translate(part)
+            if (result.success) {
+              // 将翻译结果分割为单词（处理可能的多词翻译）
+              const partWords = splitIntoWordsForFileName(result.translatedText)
+              words.push(...partWords)
+            } else {
+              words.push(part)
+            }
           } else {
-            // 净化后无有效单词，回退使用原始名称，避免空或非法文件名
-            translatedDotParts.push(dotPart)
-            lastOriginalPart = dotPart
+            // 英文部分，保持原样，作为独立单词
+            words.push(part)
           }
+        }
+
+        const translated = convertToFormat(words, format)
+
+        if (translated) {
+          translatedDotParts.push(translated)
+          lastTranslatedPart = translated
+          lastOriginalPart = dotPart
         } else {
+          // 净化后无有效单词，回退使用原始名称，避免空或非法文件名
           translatedDotParts.push(dotPart)
           lastOriginalPart = dotPart
         }
@@ -413,15 +488,31 @@ async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
   if (ext) {
     const extContent = ext.slice(1) // 去掉点号
     if (containsNonEnglish(extContent)) {
-      const result = await translator.translate(extContent)
-      if (result.success) {
-        // 文件名专用净化：去除撇号等非法字符
-        const words = splitIntoWordsForFileName(result.translatedText)
-        const translated = convertToFormat(words, format)
-        // 净化后无有效单词则保持原扩展名（translatedExt 已初始化为 ext）
-        if (translated) {
-          translatedExt = '.' + translated
+      // 拆分中英文，只翻译中文部分
+      const parts = splitMixedText(extContent)
+      const words: string[] = []
+
+      for (const part of parts) {
+        if (containsNonEnglish(part)) {
+          // 中文部分，翻译
+          const result = await translator.translate(part)
+          if (result.success) {
+            // 将翻译结果分割为单词（处理可能的多词翻译）
+            const partWords = splitIntoWordsForFileName(result.translatedText)
+            words.push(...partWords)
+          } else {
+            words.push(part)
+          }
+        } else {
+          // 英文部分，保持原样，作为独立单词
+          words.push(part)
         }
+      }
+
+      const translated = convertToFormat(words, format)
+      // 净化后无有效单词则保持原扩展名（translatedExt 已初始化为 ext）
+      if (translated) {
+        translatedExt = '.' + translated
       }
     }
   }

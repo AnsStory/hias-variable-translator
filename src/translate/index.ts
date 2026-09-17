@@ -4,7 +4,7 @@
  */
 
 export { containsNonEnglish } from './chineseDetector'
-export { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords } from './namingConvention'
+export { NamingFormat, FILE_FORMAT_OPTIONS, TEXT_FORMAT_OPTIONS, convertToFormat, splitIntoWords, splitMixedText } from './namingConvention'
 export { Translator } from './translator'
 export { UndoManager } from './undoManager'
 export type { UndoRecord } from './undoManager'
@@ -16,6 +16,7 @@ export {
   createStatusBarItem,
   handleTranslateSelection,
   handleTranslateCopy,
+  handleTranslateCut,
   handleUndoTranslation,
   handleToggleFileTranslation,
   handleSwitchTranslationService,
