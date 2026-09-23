@@ -156,6 +156,45 @@ function toNoCase(words: string[]): string {
 }
 
 /**
+ * 尾部数字快捷约定的探测结果
+ */
+export interface DigitFormatShortcut {
+  /** 剥离尾部数字后的文本（参与翻译与写入的部分） */
+  baseName: string
+  /** 数字编号对应的命名格式 */
+  format: NamingFormat
+}
+
+/**
+ * 探测"孤立尾部数字"快捷约定：
+ * 文本以单个数字结尾（1 ~ 选项数量），且该数字前一位不是数字、前面还有其它内容时，
+ * 将该数字视为格式编号（与 QuickPick 输入数字选格式同一套下标），命中则跳过弹窗，
+ * 数字本身不参与翻译与写入。
+ * @param text 待探测文本（路径最后一段去扩展名后的名称 / 选中文本）
+ * @param options 当前场景的格式选项（文件用 FILE_FORMAT_OPTIONS，文本用 TEXT_FORMAT_OPTIONS）
+ */
+export function detectTrailingFormatDigit(text: string, options: FormatOption[]): DigitFormatShortcut | undefined {
+  const lastChar = text.charAt(text.length - 1)
+  if (lastChar < '1' || lastChar > '9') {
+    return undefined
+  }
+  const num = parseInt(lastChar, 10)
+  if (num > options.length) {
+    return undefined
+  }
+  // 连续多位数字（如 '用户12'）视作名称的一部分，不生效
+  const prevChar = text.charAt(text.length - 2)
+  if (prevChar >= '0' && prevChar <= '9') {
+    return undefined
+  }
+  const baseName = text.slice(0, -1)
+  if (!baseName) {
+    return undefined
+  }
+  return { baseName, format: options[num - 1].value }
+}
+
+/**
  * 将翻译后的文本按单词分割
  * @param text 翻译后的文本
  * @returns 单词列表

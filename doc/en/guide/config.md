@@ -6,6 +6,7 @@
 |---------|------|---------|-------------|
 | `enableFileTranslation` | boolean | `true` | Enable file path translation |
 | `translateNewFileContent` | boolean | `true` | Also replace pre-translation names inside new file content |
+| `enableDigitFormatShortcut` | boolean | `true` | Enable trailing-digit format shortcut (a lone trailing 1-8 skips the format picker) |
 | `translationService` | string | `"copilot"` | Current translation service (`copilot` maps to Pinyin) |
 | `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | Service priority for fallback (high to low, comma-separated) |
 | `copyToClipboard` | boolean | `false` | Auto-copy the result to the clipboard after translation |
@@ -53,6 +54,25 @@ public class User {
 ```json
 {
   "variableTranslator.translateNewFileContent": true
+}
+```
+
+### enableDigitFormatShortcut
+
+- **Type**: `boolean`
+- **Default**: `true`
+- **Description**: Enables the "trailing-digit format shortcut": a lone digit at the end of a name (1 through the number of format options) is treated as a format number, skipping the format picker
+
+**Rules**:
+
+1. The digit maps to the same numbering as typing a number in the picker: 1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case; text scenarios add 7=Capital Case, 8=no case (7/8 do not apply to file/folder names — the picker shows as usual)
+2. Only the **last path segment** (extension stripped first) or the **selected text** is inspected, and only a single right-most digit counts; consecutive digits (`用户12`) or a digit not at the end (`用户1信息`) are treated as part of the name
+3. The digit **does not participate in translation or the written result**: creating `用户/信息/用户1.java` hits 1=camelCase and produces `user/information/user.java` (template content is replaced with `user`, not `用户1`/`user1`); selecting `用户1` and translating leaves `user` in the document — the digit disappears with the selection
+4. The clipboard original (`originalValue`) also drops the digit: for `用户1` it is `用户`
+
+```json
+{
+  "variableTranslator.enableDigitFormatShortcut": true
 }
 ```
 

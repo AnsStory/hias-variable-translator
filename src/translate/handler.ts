@@ -10,9 +10,11 @@ import { existsSync } from 'fs'
 import { containsNonEnglish } from './chineseDetector'
 import {
   NamingFormat,
+  DigitFormatShortcut,
   FILE_FORMAT_OPTIONS,
   TEXT_FORMAT_OPTIONS,
   convertToFormat,
+  detectTrailingFormatDigit,
   splitIntoWords,
   splitIntoWordsForFileName,
   splitMixedText,
@@ -61,6 +63,24 @@ export function createStatusBarItem() {
 }
 
 /**
+ * 文本翻译格式解析：命中尾部数字快捷约定（如选中 '用户1'）时跳过弹窗，
+ * 直接使用数字对应的格式，并返回剥离数字后的翻译文本（数字不参与翻译与剪贴板原文）
+ * @param selectedText 选中的文本
+ * @returns 格式与待翻译文本，用户取消选择时返回 undefined
+ */
+async function resolveTextFormat(selectedText: string): Promise<{ format: NamingFormat; translateText: string } | undefined> {
+  if (ConfigManager.isDigitFormatShortcutEnabled()) {
+    const shortcut = detectTrailingFormatDigit(selectedText, TEXT_FORMAT_OPTIONS)
+    if (shortcut) {
+      return { format: shortcut.format, translateText: shortcut.baseName }
+    }
+  }
+
+  const format = await showFormatPicker(true)
+  return format ? { format, translateText: selectedText } : undefined
+}
+
+/**
  * 处理翻译并复制到剪贴板（不替换原文）
  */
 export async function handleTranslateCopy(): Promise<void> {
@@ -83,14 +103,15 @@ export async function handleTranslateCopy(): Promise<void> {
     return
   }
 
-  // 选择翻译格式
-  const format = await showFormatPicker(true)
-  if (!format) {
+  // 选择翻译格式（尾部数字快捷约定命中时不弹窗）
+  const resolved = await resolveTextFormat(selectedText)
+  if (!resolved) {
     return
   }
+  const { format, translateText } = resolved
 
   // 翻译文本
-  const result = await translator.translate(selectedText)
+  const result = await translator.translate(translateText)
 
   if (!result.success) {
     vscode.window.showErrorMessage(`翻译失败: ${result.error}`)
@@ -98,9 +119,9 @@ export async function handleTranslateCopy(): Promise<void> {
   }
 
   // 复制到剪贴板（不替换原文）
-  const copyCount = await copyTranslationToClipboard(selectedText, result.translatedText, format)
+  const copyCount = await copyTranslationToClipboard(translateText, result.translatedText, format)
   if (copyCount > 0) {
-    showClipboardStatus(selectedText, result.translatedText, format, copyCount)
+    showClipboardStatus(translateText, result.translatedText, format, copyCount)
   } else {
     // 未启用剪贴板复制，只复制用户选择的格式
     const words = splitIntoWords(result.translatedText)
@@ -133,14 +154,15 @@ export async function handleTranslateCut(): Promise<void> {
     return
   }
 
-  // 选择翻译格式
-  const format = await showFormatPicker(true)
-  if (!format) {
+  // 选择翻译格式（尾部数字快捷约定命中时不弹窗）
+  const resolved = await resolveTextFormat(selectedText)
+  if (!resolved) {
     return
   }
+  const { format, translateText } = resolved
 
   // 翻译文本
-  const result = await translator.translate(selectedText)
+  const result = await translator.translate(translateText)
 
   if (!result.success) {
     vscode.window.showErrorMessage(`翻译失败: ${result.error}`)
@@ -148,9 +170,9 @@ export async function handleTranslateCut(): Promise<void> {
   }
 
   // 复制到剪贴板
-  const copyCount = await copyTranslationToClipboard(selectedText, result.translatedText, format)
+  const copyCount = await copyTranslationToClipboard(translateText, result.translatedText, format)
   if (copyCount > 0) {
-    showClipboardStatus(selectedText, result.translatedText, format, copyCount)
+    showClipboardStatus(translateText, result.translatedText, format, copyCount)
   } else {
     // 未启用剪贴板复制，只复制用户选择的格式
     const words = splitIntoWords(result.translatedText)
@@ -187,14 +209,15 @@ export async function handleTranslateSelection(): Promise<void> {
     return
   }
 
-  // 选择翻译格式
-  const format = await showFormatPicker(true)
-  if (!format) {
+  // 选择翻译格式（尾部数字快捷约定命中时不弹窗）
+  const resolved = await resolveTextFormat(selectedText)
+  if (!resolved) {
     return
   }
+  const { format, translateText } = resolved
 
   // 翻译文本
-  const result = await translator.translate(selectedText)
+  const result = await translator.translate(translateText)
 
   if (!result.success) {
     vscode.window.showErrorMessage(`翻译失败: ${result.error}`)
@@ -205,15 +228,15 @@ export async function handleTranslateSelection(): Promise<void> {
   const words = splitIntoWords(result.translatedText)
   const translatedText = convertToFormat(words, format)
 
-  // 替换选中文本
+  // 替换选中文本（整个选区被替换，快捷约定命中的数字随选区一并消失）
   await editor.edit((editBuilder) => {
     editBuilder.replace(selection, translatedText)
   })
 
   // 复制到剪贴板
-  const copyCount = await copyTranslationToClipboard(selectedText, result.translatedText, format)
+  const copyCount = await copyTranslationToClipboard(translateText, result.translatedText, format)
   if (copyCount > 0) {
-    showClipboardStatus(selectedText, result.translatedText, format, copyCount)
+    showClipboardStatus(translateText, result.translatedText, format, copyCount)
   }
 }
 
@@ -402,14 +425,6 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
 
   // 等待文件就绪
   await waitForFileReady(filePath)
-  // 等待 VSCode 编辑器稳定（避免新文件编辑器抢夺 QuickPick 焦点）
-  await new Promise((resolve) => setTimeout(resolve, 600))
-
-  // 选择翻译格式（取消时保留原文件/文件夹）
-  const format = await showFormatPicker()
-  if (!format) {
-    return
-  }
 
   // 获取文件名部分（不含扩展名）
   let nameWithoutExt: string
@@ -424,6 +439,33 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
     nameWithoutExt = relativePath.slice(0, -ext.length || undefined)
   }
 
+  // 尾部数字快捷约定：只看路径最后一段（去扩展名后、最后一个点号分隔的片段）
+  let digitShortcut: DigitFormatShortcut | undefined
+  let shortcutRawTail = ''
+  if (ConfigManager.isDigitFormatShortcutEnabled()) {
+    const segments = nameWithoutExt.split(/[/\\]/)
+    const lastSegment = segments[segments.length - 1] || ''
+    const lastSegmentDotParts = lastSegment.split('.')
+    const lastDotPart = lastSegmentDotParts[lastSegmentDotParts.length - 1] || ''
+    digitShortcut = detectTrailingFormatDigit(lastDotPart, FILE_FORMAT_OPTIONS)
+    if (digitShortcut) {
+      shortcutRawTail = lastDotPart
+    }
+  }
+
+  // 事件驱动等待"VSCode 打开新文件"的编辑器激活完成（焦点抢夺发生在打开编辑器那一刻，
+  // QuickPick 需要焦点落位后才展示），替代固定延时的魔数。
+  // 新建文件夹不会打开编辑器、尾部数字快捷命中不弹窗，均直接跳过等待
+  if (!digitShortcut && !isDirectory) {
+    await waitForEditorActivatedForFile(filePath)
+  }
+
+  // 选择翻译格式（取消时保留原文件/文件夹；快捷约定命中时不弹窗）
+  const format = digitShortcut ? digitShortcut.format : await showFormatPicker()
+  if (!format) {
+    return
+  }
+
   // 翻译路径的每个部分（支持路径分隔符和点号作为分隔符）
   const pathParts = nameWithoutExt.split(/[/\\]/)
   const translatedParts: string[] = []
@@ -432,22 +474,29 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
   // 收集所有"翻译前 -> 翻译后"的路径段映射，用于新建文件时同步替换内容中的名称（如 Java 模板）
   const segmentPairs: SegmentPair[] = []
 
-  for (const pathPart of pathParts) {
+  for (let partIndex = 0; partIndex < pathParts.length; partIndex++) {
+    const pathPart = pathParts[partIndex]
     if (!pathPart) continue
 
     // 将点号也作为分隔符处理
     const dotParts = pathPart.split('.')
     const translatedDotParts: string[] = []
 
-    for (const dotPart of dotParts) {
+    for (let dotIndex = 0; dotIndex < dotParts.length; dotIndex++) {
+      const dotPart = dotParts[dotIndex]
       if (!dotPart) {
         translatedDotParts.push(dotPart)
         continue
       }
 
+      // 快捷约定只作用于路径最后一段的最后一个片段，数字不参与翻译与写入
+      const isShortcutTarget =
+        digitShortcut !== undefined && partIndex === pathParts.length - 1 && dotIndex === dotParts.length - 1 && dotPart === shortcutRawTail
+      const translateInput = isShortcutTarget ? digitShortcut!.baseName : dotPart
+
       if (containsNonEnglish(dotPart)) {
         // 拆分中英文，只翻译中文部分
-        const parts = splitMixedText(dotPart)
+        const parts = splitMixedText(translateInput)
         const words: string[] = []
 
         for (const part of parts) {
@@ -472,7 +521,8 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
         if (translated) {
           translatedDotParts.push(translated)
           lastTranslatedPart = translated
-          lastOriginalPart = dotPart
+          // 剪贴板原文不含快捷数字；内容替换仍按盘面上的原始名称匹配
+          lastOriginalPart = translateInput
           segmentPairs.push({ original: dotPart, translated })
         } else {
           // 净化后无有效单词，回退使用原始名称，避免空或非法文件名
@@ -480,8 +530,8 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
           lastOriginalPart = dotPart
         }
       } else {
-        // 英文部分保持原样
-        translatedDotParts.push(dotPart)
+        // 英文部分保持原样（快捷命中的数字仍不参与写入）
+        translatedDotParts.push(translateInput)
       }
     }
 
@@ -622,6 +672,42 @@ async function createDirectoryRecursive(dirPath: string): Promise<void> {
   } catch {
     // 忽略错误（目录可能已存在）
   }
+}
+
+/**
+ * 目标文件当前是否已是激活编辑器
+ */
+function isEditorActiveForFile(filePath: string): boolean {
+  const editor = vscode.window.activeTextEditor
+  return !!editor && sameFilePath(editor.document.uri.fsPath, filePath)
+}
+
+/**
+ * 等待新文件的编辑器激活（事件驱动 + 超时保险丝）
+ * 编辑器激活说明"打开新文件"的焦点抢夺已经完成，此时弹 QuickPick 不会被抢焦点；
+ * 文件不会被打开（窗口失焦、后台打开等）时由超时兜底，行为退化为旧的固定延时上限
+ * @param filePath 文件路径
+ * @param timeoutMs 最长等待时间（毫秒）
+ */
+async function waitForEditorActivatedForFile(filePath: string, timeoutMs: number = 2000): Promise<void> {
+  if (isEditorActiveForFile(filePath)) {
+    return
+  }
+
+  await new Promise<void>((resolve) => {
+    const sub = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+      if (editor && sameFilePath(editor.document.uri.fsPath, filePath)) {
+        sub.dispose()
+        clearTimeout(timer)
+        // active 事件后 VSCode 焦点转移收尾并非同帧完成，留短暂余量再弹窗
+        setTimeout(resolve, 600)
+      }
+    })
+    const timer = setTimeout(() => {
+      sub.dispose()
+      resolve()
+    }, timeoutMs)
+  })
 }
 
 /**

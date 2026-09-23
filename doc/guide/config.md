@@ -6,6 +6,7 @@
 |--------|------|--------|------|
 | `enableFileTranslation` | boolean | `true` | 是否启用文件路径翻译功能 |
 | `translateNewFileContent` | boolean | `true` | 新建文件翻译后，是否同步替换文件内容中翻译前的名称 |
+| `enableDigitFormatShortcut` | boolean | `true` | 是否启用末尾数字快捷选格式（末段以孤立数字 1-8 结尾时跳过弹窗直选格式） |
 | `translationService` | string | `"copilot"` | 当前翻译服务（`copilot` 即拼音服务） |
 | `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | 翻译服务优先级（从高到低，逗号分隔） |
 | `copyToClipboard` | boolean | `false` | 翻译后是否自动将结果复制到剪贴板 |
@@ -53,6 +54,25 @@ public class User {
 ```json
 {
   "variableTranslator.translateNewFileContent": true
+}
+```
+
+### enableDigitFormatShortcut
+
+- **类型**：`boolean`
+- **默认值**：`true`
+- **说明**：是否启用「尾部数字快捷选格式」。名称末尾的孤立数字（1 ~ 格式选项编号）视作格式编号，直接跳过翻译格式弹窗
+
+**规则**：
+
+1. 数字编号与弹窗中"输入数字选格式"是同一套映射：1=camelCase、2=PascalCase、3=snake_case、4=CONSTANT_CASE、5=param-case、6=Header-Case，文本场景另有 7=Capital Case、8=no case（文件/文件夹场景 7、8 不生效，正常弹窗）
+2. 只识别**路径最后一段**（文件先去掉扩展名）或**选中文本**最右侧的单个数字；数字前一位仍是数字（如 `用户12`）、数字不在末尾（如 `用户1信息`）都视作名称的一部分，不生效
+3. 该数字**不参与翻译与写入**：新建 `用户/信息/用户1.java` 命中 1=camelCase，得到 `user/information/user.java`（内容模板中的名称替换为 `user` 而非 `用户1`/`user1`）；选中 `用户1` 翻译后文档中变为 `user`，数字随选区消失
+4. 剪贴板中的原文（`originalValue`）同样剥离数字：`用户1` 的原文为 `用户`
+
+```json
+{
+  "variableTranslator.enableDigitFormatShortcut": true
 }
 ```
 

@@ -10,6 +10,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 - **文件路径翻译**：新建文件时自动翻译路径中的非英文字符
 - **文本翻译**：选中文本后一键翻译替换
 - **多种命名格式**：支持 camelCase、PascalCase、snake_case 等 8 种命名格式
+- **尾部数字快捷选格式**：路径末段或选中文本以孤立数字 1-8 结尾时直接按编号选定格式、跳过弹窗，数字不参与翻译与写入
 - **多翻译服务**：支持 Pinyin、OpenAI、Google、Bing、百度、腾讯等 7 种翻译服务
 - **请求超时保护**：所有翻译服务均有 10 秒超时控制，避免长时间等待
 - **一键撤回**：1 分钟内可撤回文件翻译（`Alt+Shift+Z`，资源管理器中也可 `Ctrl+Z`），自动清理文件和目录
@@ -34,6 +35,8 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 2. 输入包含非英文字符的路径，如: `你好/世界/测试.test.js`
 3. 选择命名格式
 4. 文件自动翻译创建，结果为: `hello/world/test.test.js`
+
+**尾部数字快捷选格式**：路径最后一段（去扩展名）以孤立数字结尾时不弹窗，数字即格式编号（1=camelCase … 6=Header-Case，文本场景另有 7=Capital Case、8=no case），且数字不参与翻译、写入与剪贴板原文。如新建 `用户/信息/用户1.java` 直接得 `user/information/user.java`。可用 `enableDigitFormatShortcut: false` 关闭。
 
 ### 选中文本翻译
 
@@ -134,6 +137,9 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 {
   // 启用文件路径翻译功能（右键新建文件时自动翻译）
   "variableTranslator.enableFileTranslation": true,
+
+  // 启用尾部数字快捷选格式（末段/选中文本以孤立数字 1-8 结尾时直选格式、不弹窗，数字不参与翻译写入）
+  "variableTranslator.enableDigitFormatShortcut": true,
 
   // 选择翻译服务：copilot | openai | google | bing | deeplx | baidu | tencent
   "variableTranslator.translationService": "copilot",

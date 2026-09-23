@@ -139,6 +139,11 @@
           "default": true,
           "description": "新建文件翻译后，是否同步将文件内容中翻译前的名称替换为翻译后（如 redhat.java 生成的 package 声明与类名）"
         },
+        "variableTranslator.enableDigitFormatShortcut": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否启用: 末尾数字快捷选格式（新建/重命名路径最后一段或选中文本以孤立数字 1-8 结尾时，直接按编号选定翻译格式、不再弹窗，且该数字不参与翻译、写入与剪贴板原文）"
+        },
         "variableTranslator.translationService": {
           "type": "string",
           "enum": [

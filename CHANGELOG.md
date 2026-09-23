@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Trailing-digit format shortcut (`enableDigitFormatShortcut`, enabled by default): when the last path segment (extension stripped) or selected text ends with a lone digit, that digit is used as the format number (1=camelCase … 6=Header-Case; 7=Capital Case and 8=no case for text only), skipping the format picker. The digit is excluded from translation, the written result and the clipboard original (`originalValue`). Consecutive digits, non-trailing digits and out-of-range numbers keep the normal picker behavior
+
 ## [0.1.1] - 2026-07-27
 
 Initial release of **hias-variable-translator**.

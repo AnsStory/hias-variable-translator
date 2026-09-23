@@ -3,8 +3,17 @@
  * 测试 8 种命名格式转换和单词分割功能
  */
 
+import * as path from 'path'
 import { describe, it, expect } from 'vitest'
-import { convertToFormat, splitIntoWords, splitIntoWordsForFileName, NamingFormat } from '../../src/translate/namingConvention'
+import {
+  convertToFormat,
+  splitIntoWords,
+  splitIntoWordsForFileName,
+  detectTrailingFormatDigit,
+  FILE_FORMAT_OPTIONS,
+  TEXT_FORMAT_OPTIONS,
+  NamingFormat,
+} from '../../src/translate/namingConvention'
 
 describe('convertToFormat - 命名格式转换', () => {
   const words = ['hello', 'world']
@@ -200,5 +209,73 @@ describe('FILE_FORMAT_OPTIONS 和 TEXT_FORMAT_OPTIONS', () => {
     expect(TEXT_FORMAT_OPTIONS).toHaveLength(8)
     expect(TEXT_FORMAT_OPTIONS.map((o) => o.value)).toContain('Capital Case')
     expect(TEXT_FORMAT_OPTIONS.map((o) => o.value)).toContain('no case')
+  })
+})
+
+describe('detectTrailingFormatDigit - 尾部数字快捷选格式', () => {
+  it('文件场景 - 1-6 命中对应格式并剥离数字', () => {
+    const cases: [string, NamingFormat, string][] = [
+      ['用户1', 'camelCase', '用户'],
+      ['用户2', 'PascalCase', '用户'],
+      ['用户3', 'snake_case', '用户'],
+      ['用户4', 'CONSTANT_CASE', '用户'],
+      ['用户5', 'param-case', '用户'],
+      ['用户6', 'Header-Case', '用户'],
+    ]
+    for (const [text, format, baseName] of cases) {
+      expect(detectTrailingFormatDigit(text, FILE_FORMAT_OPTIONS)).toEqual({ format, baseName })
+    }
+  })
+
+  it('文件场景 - 7/8 超出选项范围不生效', () => {
+    expect(detectTrailingFormatDigit('用户7', FILE_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户8', FILE_FORMAT_OPTIONS)).toBeUndefined()
+  })
+
+  it('文本场景 - 7/8 命中 Capital Case 与 no case', () => {
+    expect(detectTrailingFormatDigit('用户7', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'Capital Case', baseName: '用户' })
+    expect(detectTrailingFormatDigit('用户8', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'no case', baseName: '用户' })
+  })
+
+  it('连续多位数字不生效（仅孤立末尾数字有效）', () => {
+    expect(detectTrailingFormatDigit('用户12', FILE_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户18', TEXT_FORMAT_OPTIONS)).toBeUndefined()
+  })
+
+  it('0 或 9 或无数字不生效', () => {
+    expect(detectTrailingFormatDigit('用户0', TEXT_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户9', TEXT_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户', FILE_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户信息', TEXT_FORMAT_OPTIONS)).toBeUndefined()
+  })
+
+  it('数字不在末尾或位于开头不生效', () => {
+    expect(detectTrailingFormatDigit('用户1信息', FILE_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('1用户', FILE_FORMAT_OPTIONS)).toBeUndefined()
+  })
+
+  it('剥离后为空不生效', () => {
+    expect(detectTrailingFormatDigit('1', TEXT_FORMAT_OPTIONS)).toBeUndefined()
+  })
+
+  it('中英文混合与含空格文本 - 数字仍按末尾规则剥离', () => {
+    expect(detectTrailingFormatDigit('use用户1', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'camelCase', baseName: 'use用户' })
+    expect(detectTrailingFormatDigit('用户 2', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'PascalCase', baseName: '用户 ' })
+  })
+
+  it('路径场景配合 extname 只看最后一段', () => {
+    // '用户/信息/用户.java' 中名称主体末段无数字 → 不生效
+    const relFile = path.join('用户', '信息', '用户.java')
+    const ext = path.extname(relFile)
+    const body = relFile.slice(0, -ext.length)
+    const lastSeg = body.split(path.sep).pop()!
+    expect(detectTrailingFormatDigit(lastSeg, FILE_FORMAT_OPTIONS)).toBeUndefined()
+
+    // '用户/信息/用户1.java' → camelCase + '用户'
+    const relFile1 = path.join('用户', '信息', '用户1.java')
+    const ext1 = path.extname(relFile1)
+    const body1 = relFile1.slice(0, -ext1.length)
+    const lastSeg1 = body1.split(path.sep).pop()!
+    expect(detectTrailingFormatDigit(lastSeg1, FILE_FORMAT_OPTIONS)).toEqual({ format: 'camelCase', baseName: '用户' })
   })
 })

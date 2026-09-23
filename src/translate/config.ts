@@ -34,6 +34,17 @@ export class ConfigManager {
   }
 
   /**
+   * 是否启用尾部数字快捷选格式：
+   * 路径最后一段（去扩展名）或选中文本以孤立数字 1-8 结尾时，直接按编号选定格式、跳过弹窗，
+   * 且该数字不参与翻译、写入与剪贴板原文
+   * @returns 是否启用
+   */
+  static isDigitFormatShortcutEnabled(): boolean {
+    const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
+    return config.get<boolean>('enableDigitFormatShortcut', true)
+  }
+
+  /**
    * 设置文件翻译开关状态
    * @param enabled 是否启用
    */

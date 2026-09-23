@@ -14,6 +14,18 @@ Create file → enter path → Enter → pick a naming format → Enter → tran
 
 If you press `Esc` to cancel the format picker, the original file/folder is **kept as-is** without translation.
 
+### Trailing-Digit Format Shortcut (skips the picker)
+
+With `enableDigitFormatShortcut` enabled (default), when the **last path segment** (extension stripped) ends with a lone digit, that digit is used directly as the format number — the same mapping as typing a number in the picker (1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case) — and **no picker is shown**. The digit itself is excluded from translation, from the written name, and from the clipboard original.
+
+```
+Input:  用户/信息/用户1.java
+Hit:    1 = camelCase (picker skipped)
+Result: user/information/user.java (Java template content is replaced with user, not 用户1/user1)
+```
+
+The picker shows as usual (digit treated as part of the name) when the shortcut does not apply: consecutive digits (`用户12`), a digit not at the end (`用户1信息`), or an out-of-range number (`7`/`8` for files, `0`/`9` anywhere). Selected text follows the same rule (7=Capital Case and 8=no case apply to text only) — see Feature 2.
+
 ### Example
 
 ```
@@ -102,6 +114,10 @@ Write non-English text anywhere, select it and translate-and-replace via shortcu
 ```
 Select text → press Alt+Shift+T → pick a naming format → Enter → replaced with English
 ```
+
+::: tip Trailing-digit format shortcut
+When the selected text ends with a lone digit (e.g. `用户1`), the picker is skipped and the digit's format number is used directly (1-8 all available for text). The digit is excluded from translation and from the clipboard original (`用户1`'s original is `用户`), and disappears with the replaced selection (result is `user`, not `user1`). See "Trailing-Digit Format Shortcut" under Feature 1 for the full rules.
+:::
 
 ### Example
 
