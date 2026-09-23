@@ -5,6 +5,7 @@
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
 | `enableFileTranslation` | boolean | `true` | 是否启用文件路径翻译功能 |
+| `translateNewFileContent` | boolean | `true` | 新建文件翻译后，是否同步替换文件内容中翻译前的名称 |
 | `translationService` | string | `"copilot"` | 当前翻译服务（`copilot` 即拼音服务） |
 | `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | 翻译服务优先级（从高到低，逗号分隔） |
 | `copyToClipboard` | boolean | `false` | 翻译后是否自动将结果复制到剪贴板 |
@@ -24,6 +25,34 @@
 ```json
 {
   "variableTranslator.enableFileTranslation": true
+}
+```
+
+### translateNewFileContent
+
+- **类型**：`boolean`
+- **默认值**：`true`
+- **说明**：仅对**新建文件**生效。语言服务器（如 redhat.java）会按翻译前的文件名生成模板内容（`package` 声明、类名），开启后路径翻译完成时会同步把内容中翻译前的路径段替换为翻译后；重命名已有文件不会改动内容
+
+**行为细节**：
+
+1. 重命名前先保存编辑器中的脏缓冲区，避免语言服务器插入的模板在改名后按旧路径写回，导致翻译前后两份文件并存
+2. 重命名后读取文件内容，将每个翻译前的路径段（含目录段，如 `用户`→`User`、`信息`→`Information`）替换为翻译后并保存
+3. 改名后 4 秒观察窗口内，若语言服务器迟到地把旧名模板写回旧路径，会自动并入翻译后的文件并删除复活的旧文件
+
+**示例**：新建 `用户/信息/用户.java`，翻译为 `User/Information/User.java` 后，内容同步变为：
+
+```java
+package User.Information;
+
+public class User {
+
+}
+```
+
+```json
+{
+  "variableTranslator.translateNewFileContent": true
 }
 ```
 

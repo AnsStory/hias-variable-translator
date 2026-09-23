@@ -25,6 +25,15 @@ export class ConfigManager {
   }
 
   /**
+   * 新建文件翻译时，是否同步替换文件内容中翻译前的名称（如 Java 模板的 package/类名）
+   * @returns 是否启用
+   */
+  static isTranslateNewFileContentEnabled(): boolean {
+    const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
+    return config.get<boolean>('translateNewFileContent', true)
+  }
+
+  /**
    * 设置文件翻译开关状态
    * @param enabled 是否启用
    */

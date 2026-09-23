@@ -5,6 +5,7 @@
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `enableFileTranslation` | boolean | `true` | Enable file path translation |
+| `translateNewFileContent` | boolean | `true` | Also replace pre-translation names inside new file content |
 | `translationService` | string | `"copilot"` | Current translation service (`copilot` maps to Pinyin) |
 | `servicePriority` | string | `"copilot,openai,google,bing,deeplx,baidu,tencent"` | Service priority for fallback (high to low, comma-separated) |
 | `copyToClipboard` | boolean | `false` | Auto-copy the result to the clipboard after translation |
@@ -24,6 +25,34 @@ All settings are prefixed with `variableTranslator.` — search `variableTransla
 ```json
 {
   "variableTranslator.enableFileTranslation": true
+}
+```
+
+### translateNewFileContent
+
+- **Type**: `boolean`
+- **Default**: `true`
+- **Description**: Applies to **newly created files** only. Language servers (e.g. redhat.java) generate template content (`package` declaration, class name) based on the pre-translation file name. When enabled, path translation also replaces every pre-translation path segment in the content with its translated form. Renaming an existing file never touches its content
+
+**Behavior details**:
+
+1. Before renaming, the dirty editor buffer is saved first, so a template inserted by a language server cannot be written back to the old path after the rename (which would leave both pre- and post-translation files on disk)
+2. After renaming, each pre-translation path segment (including directory segments, e.g. `用户`→`User`, `信息`→`Information`) is replaced in the file content and saved
+3. Within a 4-second settle window after the rename, if a language server belatedly writes the old-name template back to the old path, it is merged into the translated file and the resurrected old file is deleted
+
+**Example**: creating `用户/信息/用户.java` translates to `User/Information/User.java`, and the content becomes:
+
+```java
+package User.Information;
+
+public class User {
+
+}
+```
+
+```json
+{
+  "variableTranslator.translateNewFileContent": true
 }
 ```
 

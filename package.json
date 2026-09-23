@@ -134,6 +134,11 @@
           "default": true,
           "description": "是否启用: 文件路径自动翻译（右键新建/重命名文件、文件夹时自动翻译）"
         },
+        "variableTranslator.translateNewFileContent": {
+          "type": "boolean",
+          "default": true,
+          "description": "新建文件翻译后，是否同步将文件内容中翻译前的名称替换为翻译后（如 redhat.java 生成的 package 声明与类名）"
+        },
         "variableTranslator.translationService": {
           "type": "string",
           "enum": [

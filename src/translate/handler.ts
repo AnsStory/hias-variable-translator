@@ -22,6 +22,7 @@ import { UndoManager } from './undoManager'
 import { ConfigManager } from './config'
 import { TranslationServiceType, TRANSLATION_SERVICE_OPTIONS } from './services'
 import { copyTranslationToClipboard, copyFileTranslationToClipboard, showClipboardStatus, showFileClipboardStatus } from './clipboard'
+import { SegmentPair, buildSegmentPairs, replaceContentSegments } from './contentRewriter'
 
 let translator: Translator
 let undoManager: UndoManager
@@ -342,7 +343,7 @@ export function registerFileCreationListener(context: vscode.ExtensionContext): 
     }
 
     for (const fileUri of event.files) {
-      await handleFileCreated(fileUri)
+      await handleFileCreated(fileUri, true)
     }
   })
 
@@ -361,7 +362,7 @@ export function registerFileRenameListener(context: vscode.ExtensionContext): vo
     }
 
     for (const { newUri } of event.files) {
-      await handleFileCreated(newUri)
+      await handleFileCreated(newUri, false)
     }
   })
 
@@ -371,8 +372,9 @@ export function registerFileRenameListener(context: vscode.ExtensionContext): vo
 /**
  * 处理文件创建事件（取消时保留原文件/文件夹）
  * @param fileUri 文件URI
+ * @param isNewFile 是否来自新建文件事件（仅新建时同步替换文件内容，重命名已有文件不动内容）
  */
-async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
+async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false): Promise<void> {
   const filePath = fileUri.fsPath
 
   // 检查是文件还是文件夹
@@ -401,7 +403,7 @@ async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
   // 等待文件就绪
   await waitForFileReady(filePath)
   // 等待 VSCode 编辑器稳定（避免新文件编辑器抢夺 QuickPick 焦点）
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  await new Promise((resolve) => setTimeout(resolve, 600))
 
   // 选择翻译格式（取消时保留原文件/文件夹）
   const format = await showFormatPicker()
@@ -427,6 +429,8 @@ async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
   const translatedParts: string[] = []
   let lastTranslatedPart: string = ''
   let lastOriginalPart: string = ''
+  // 收集所有"翻译前 -> 翻译后"的路径段映射，用于新建文件时同步替换内容中的名称（如 Java 模板）
+  const segmentPairs: SegmentPair[] = []
 
   for (const pathPart of pathParts) {
     if (!pathPart) continue
@@ -469,6 +473,7 @@ async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
           translatedDotParts.push(translated)
           lastTranslatedPart = translated
           lastOriginalPart = dotPart
+          segmentPairs.push({ original: dotPart, translated })
         } else {
           // 净化后无有效单词，回退使用原始名称，避免空或非法文件名
           translatedDotParts.push(dotPart)
@@ -540,7 +545,26 @@ async function handleFileCreated(fileUri: vscode.Uri): Promise<void> {
 
   // 重命名
   try {
+    // 重命名前先保存原路径的脏编辑器缓冲区：
+    // redhat.java 等语言服务器会向新建文件插入类模板但不保存，若先改名、缓冲区后保存，
+    // 会把中文文件按旧路径重新写回，与翻译后的文件并存
+    if (!isDirectory) {
+      await saveDirtyDocumentForFile(filePath)
+    }
+
     await vscode.workspace.fs.rename(fileUri, vscode.Uri.file(finalPath), { overwrite: false })
+
+    // 新建文件场景：把内容中翻译前的名称（package/类名等模板内容）同步替换为翻译后
+    if (!isDirectory && isNewFile && ConfigManager.isTranslateNewFileContentEnabled()) {
+      const pairs = buildSegmentPairs(segmentPairs)
+      if (pairs.length > 0) {
+        await translateFileContent(finalPath, pairs)
+        // 语言服务器可能在改名之后才把模板落盘（迟到写入），后台观察窗口内做兜底合并
+        void settleLateLanguageServerWrites(filePath, finalPath, pairs, workspaceFolder.uri.fsPath).catch((error) => {
+          console.error('迟到内容兜底处理失败:', error)
+        })
+      }
+    }
 
     // 清理空的中文目录
     await cleanupEmptyDirs(path.dirname(filePath), workspaceFolder.uri.fsPath)
@@ -615,6 +639,131 @@ async function waitForFileReady(filePath: string, maxWait: number = 1000): Promi
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
   }
+}
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * 比较两个文件路径是否指向同一文件（win32 下大小写不敏感）
+ */
+function sameFilePath(a: string, b: string): boolean {
+  const na = path.normalize(a)
+  const nb = path.normalize(b)
+  return process.platform === 'win32' ? na.toLowerCase() === nb.toLowerCase() : na === nb
+}
+
+/**
+ * 查找路径对应的已打开文档（含未加入编辑器的可见缓冲区）
+ */
+function findOpenDocumentByPath(filePath: string): vscode.TextDocument | undefined {
+  return vscode.workspace.textDocuments.find((doc) => !doc.isClosed && sameFilePath(doc.uri.fsPath, filePath))
+}
+
+/**
+ * 重命名前保存原路径的脏缓冲区（语言服务器插入的模板可能尚未落盘）
+ */
+async function saveDirtyDocumentForFile(filePath: string): Promise<void> {
+  const doc = findOpenDocumentByPath(filePath)
+  if (doc && doc.isDirty) {
+    await doc.save()
+  }
+}
+
+/**
+ * 将新内容写回文件：优先经编辑器缓冲区（改名后编辑器已跟随到新路径），避免磁盘/缓冲区不一致
+ */
+async function applyContentToFile(filePath: string, newContent: string): Promise<void> {
+  const doc = findOpenDocumentByPath(filePath)
+  if (doc) {
+    const fullRange = new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length))
+    const edit = new vscode.WorkspaceEdit()
+    edit.replace(doc.uri, fullRange, newContent)
+    await vscode.workspace.applyEdit(edit)
+    await doc.save()
+  } else {
+    await fs.writeFile(filePath, newContent)
+  }
+}
+
+/**
+ * 读取文件当前内容（优先缓冲区），把翻译前的路径段替换为翻译后并写回
+ */
+async function translateFileContent(filePath: string, pairs: SegmentPair[]): Promise<void> {
+  const doc = findOpenDocumentByPath(filePath)
+  let current: string
+  try {
+    current = doc ? doc.getText() : (await fs.readFile(filePath)).toString('utf8')
+  } catch {
+    return
+  }
+  const updated = replaceContentSegments(current, pairs)
+  if (updated !== current) {
+    await applyContentToFile(filePath, updated)
+  }
+}
+
+/**
+ * 等待文件内容稳定（size+mtime 连续不变），用于迟到写入的落盘收尾
+ */
+async function waitForFileStable(filePath: string, quietMs: number = 500, maxWaitMs: number = 1500): Promise<void> {
+  const startTime = Date.now()
+  let prev = ''
+  let quietFor = 0
+  while (Date.now() - startTime < maxWaitMs) {
+    let sig: string
+    try {
+      const stat = await fs.stat(filePath)
+      sig = `${stat.size}:${stat.mtimeMs}`
+    } catch {
+      return // 文件已消失
+    }
+    if (sig === prev) {
+      quietFor += 250
+      if (quietFor >= quietMs) {
+        return
+      }
+    } else {
+      quietFor = 0
+      prev = sig
+    }
+    await sleep(250)
+  }
+}
+
+/**
+ * 改名后的迟到写入兜底观察窗口（仅新建文件场景）
+ * redhat.java 可能在改名之后才把按旧名生成的模板落盘：
+ * 1. 旧路径文件复活 -> 取其内容替换翻译段后并入新文件（迟到模板是语言服务器的权威内容），删除复活文件并再清理空中文目录
+ * 2. 模板迟到写入已跟随到新路径的缓冲区 -> 窗口结束时再做一次内容替换
+ */
+async function settleLateLanguageServerWrites(originalPath: string, finalPath: string, pairs: SegmentPair[], workspaceRoot: string): Promise<void> {
+  const settleWindowMs = 4000
+  const deadline = Date.now() + settleWindowMs
+
+  while (Date.now() < deadline) {
+    if (existsSync(originalPath)) {
+      await waitForFileStable(originalPath)
+      try {
+        const lateContent = (await fs.readFile(originalPath)).toString('utf8')
+        const translatedLate = replaceContentSegments(lateContent, pairs)
+        const doc = findOpenDocumentByPath(finalPath)
+        const current = doc ? doc.getText() : (await fs.readFile(finalPath)).toString('utf8')
+        if (translatedLate !== current) {
+          await applyContentToFile(finalPath, translatedLate)
+        }
+        await fs.unlink(originalPath)
+      } catch {
+        // 兜底路径失败时保留现场（两份文件仍存在），不打断用户操作
+      }
+      break
+    }
+    await sleep(250)
+  }
+
+  // 迟到编辑落在缓冲区里的情况：改名跟随的文档仍可能含翻译前名称，替换并保存
+  await translateFileContent(finalPath, pairs)
+  // 复活文件可能重建了中文目录，再清一次空目录
+  await cleanupEmptyDirs(path.dirname(originalPath), workspaceRoot)
 }
 
 /**
