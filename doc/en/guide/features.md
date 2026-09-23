@@ -16,15 +16,22 @@ If you press `Esc` to cancel the format picker, the original file/folder is **ke
 
 ### Trailing-Digit Format Shortcut (skips the picker)
 
-With `enableDigitFormatShortcut` enabled (default), when the **last path segment** (extension stripped) ends with a lone digit, that digit is used directly as the format number — the same mapping as typing a number in the picker (1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case) — and **no picker is shown**. The digit itself is excluded from translation, from the written name, and from the clipboard original.
+With `enableDigitFormatShortcut` enabled (default), a lone digit at the end of **each path segment** (extension stripped first; segments split by path separators and dots) is used as that **segment's** format number — the same mapping as typing a number in the picker (1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case) — and the digit is excluded from that segment's translation and written name. Directory and file formats are independent:
+
+- When the file segment (the last one) hits, **the picker is skipped**; otherwise the picker shows and its choice applies only to the file segment plus segments with "no digit and nothing to inherit"
+- A directory segment without a digit inherits the format of the **nearest downstream segment that has a digit**; if nothing in the whole path has a digit, everything uses the picked format (legacy behavior)
 
 ```
 Input:  用户/信息/用户1.java
-Hit:    1 = camelCase (picker skipped)
+Hit:    file segment 1 = camelCase (picker skipped)
 Result: user/information/user.java (Java template content is replaced with user, not 用户1/user1)
+
+Input:  用户/信息1/用户2.java
+Hit:    信息1 = camelCase(1), 用户2 = PascalCase(2), 用户 inherits 信息1 downstream
+Result: user/information/User.java
 ```
 
-The picker shows as usual (digit treated as part of the name) when the shortcut does not apply: consecutive digits (`用户12`), a digit not at the end (`用户1信息`), or an out-of-range number (`7`/`8` for files, `0`/`9` anywhere). Selected text follows the same rule (7=Capital Case and 8=no case apply to text only) — see Feature 2.
+The clipboard original also drops the digit (`用户2.java`'s original is `用户`). A digit stays literal when the shortcut does not apply to that segment: consecutive digits (`用户12`), a digit not at the end (`用户1信息`), or an out-of-range number (`7`/`8` for files, `0`/`9` anywhere). Selected text follows the same rule (7=Capital Case and 8=no case apply to text only) — see Feature 2.
 
 ### Example
 

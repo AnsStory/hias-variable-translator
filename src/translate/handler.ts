@@ -15,6 +15,8 @@ import {
   TEXT_FORMAT_OPTIONS,
   convertToFormat,
   detectTrailingFormatDigit,
+  detectPathSegmentShortcuts,
+  resolveSegmentFormats,
   splitIntoWords,
   splitIntoWordsForFileName,
   splitMixedText,
@@ -439,60 +441,70 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
     nameWithoutExt = relativePath.slice(0, -ext.length || undefined)
   }
 
-  // 尾部数字快捷约定：只看路径最后一段（去扩展名后、最后一个点号分隔的片段）
-  let digitShortcut: DigitFormatShortcut | undefined
-  let shortcutRawTail = ''
-  if (ConfigManager.isDigitFormatShortcutEnabled()) {
-    const segments = nameWithoutExt.split(/[/\\]/)
-    const lastSegment = segments[segments.length - 1] || ''
-    const lastSegmentDotParts = lastSegment.split('.')
-    const lastDotPart = lastSegmentDotParts[lastSegmentDotParts.length - 1] || ''
-    digitShortcut = detectTrailingFormatDigit(lastDotPart, FILE_FORMAT_OPTIONS)
-    if (digitShortcut) {
-      shortcutRawTail = lastDotPart
-    }
-  }
-
-  // 事件驱动等待"VSCode 打开新文件"的编辑器激活完成（焦点抢夺发生在打开编辑器那一刻，
-  // QuickPick 需要焦点落位后才展示），替代固定延时的魔数。
-  // 新建文件夹不会打开编辑器、尾部数字快捷命中不弹窗，均直接跳过等待
-  if (!digitShortcut && !isDirectory) {
-    await waitForEditorActivatedForFile(filePath)
-  }
-
-  // 选择翻译格式（取消时保留原文件/文件夹；快捷约定命中时不弹窗）
-  const format = digitShortcut ? digitShortcut.format : await showFormatPicker()
-  if (!format) {
-    return
-  }
-
   // 翻译路径的每个部分（支持路径分隔符和点号作为分隔符）
   const pathParts = nameWithoutExt.split(/[/\\]/)
+  const dotSegments = pathParts.map((part) => part.split('.'))
+  const flatParts = dotSegments.flat()
+
+  // 尾部数字快捷约定：每个片段（路径段及其点号子段）末尾的孤立数字视为该片段自身的格式编号，
+  // 数字不参与本片段翻译与写入；文件段（最后一个片段）命中时跳过格式弹窗
+  const detectedShortcuts = detectPathSegmentShortcuts(nameWithoutExt, FILE_FORMAT_OPTIONS).shortcuts
+  const shortcuts: (DigitFormatShortcut | undefined)[] = ConfigManager.isDigitFormatShortcutEnabled()
+    ? detectedShortcuts
+    : detectedShortcuts.map(() => undefined)
+
+  const lastPartShortcut = shortcuts[flatParts.length - 1]
+
+  // 文件段格式：命中末尾数字免弹窗；否则弹窗选择（取消时保留原文件/文件夹）。
+  // 事件驱动等待"VSCode 打开新文件"的编辑器激活完成（焦点抢夺发生在打开编辑器那一刻，
+  // QuickPick 需要焦点落位后才展示），替代固定延时的魔数。
+  // 新建文件夹不会打开编辑器、快捷命中不弹窗，均直接跳过等待
+  let format: NamingFormat
+  if (lastPartShortcut) {
+    format = lastPartShortcut.format
+  } else {
+    if (!isDirectory) {
+      await waitForEditorActivatedForFile(filePath)
+    }
+    const picked = await showFormatPicker()
+    if (!picked) {
+      return
+    }
+    format = picked
+  }
+  const fileFormat = format
+
+  // 每片段格式从后向前倒推：优先自身数字编号，否则继承最近下游片段，最终回落到文件段格式
+  const partFormats = resolveSegmentFormats(shortcuts, fileFormat)
+
   const translatedParts: string[] = []
   let lastTranslatedPart: string = ''
   let lastOriginalPart: string = ''
   // 收集所有"翻译前 -> 翻译后"的路径段映射，用于新建文件时同步替换内容中的名称（如 Java 模板）
   const segmentPairs: SegmentPair[] = []
 
-  for (let partIndex = 0; partIndex < pathParts.length; partIndex++) {
-    const pathPart = pathParts[partIndex]
-    if (!pathPart) continue
+  let flatIndex = 0
+  for (const dotParts of dotSegments) {
+    // 空路径段保持原逻辑：整段跳过，不进入翻译结果
+    if (dotParts.length === 1 && dotParts[0] === '') {
+      flatIndex++
+      continue
+    }
 
-    // 将点号也作为分隔符处理
-    const dotParts = pathPart.split('.')
     const translatedDotParts: string[] = []
 
-    for (let dotIndex = 0; dotIndex < dotParts.length; dotIndex++) {
-      const dotPart = dotParts[dotIndex]
+    for (const dotPart of dotParts) {
+      const shortcut = shortcuts[flatIndex]
+      const partFormat = partFormats[flatIndex]
+      flatIndex++
+
       if (!dotPart) {
         translatedDotParts.push(dotPart)
         continue
       }
 
-      // 快捷约定只作用于路径最后一段的最后一个片段，数字不参与翻译与写入
-      const isShortcutTarget =
-        digitShortcut !== undefined && partIndex === pathParts.length - 1 && dotIndex === dotParts.length - 1 && dotPart === shortcutRawTail
-      const translateInput = isShortcutTarget ? digitShortcut!.baseName : dotPart
+      // 快捷命中的数字不参与翻译与写入
+      const translateInput = shortcut ? shortcut.baseName : dotPart
 
       if (containsNonEnglish(dotPart)) {
         // 拆分中英文，只翻译中文部分
@@ -516,14 +528,14 @@ async function handleFileCreated(fileUri: vscode.Uri, isNewFile: boolean = false
           }
         }
 
-        const translated = convertToFormat(words, format)
+        const translated = convertToFormat(words, partFormat)
 
         if (translated) {
           translatedDotParts.push(translated)
           lastTranslatedPart = translated
-          // 剪贴板原文不含快捷数字；内容替换仍按盘面上的原始名称匹配
+          // 剪贴板原文不含快捷数字；内容替换仍按盘面上的原始名称（含数字）匹配
           lastOriginalPart = translateInput
-          segmentPairs.push({ original: dotPart, translated })
+          segmentPairs.push({ original: shortcut ? shortcut.raw : dotPart, translated })
         } else {
           // 净化后无有效单词，回退使用原始名称，避免空或非法文件名
           translatedDotParts.push(dotPart)

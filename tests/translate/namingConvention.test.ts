@@ -10,6 +10,8 @@ import {
   splitIntoWords,
   splitIntoWordsForFileName,
   detectTrailingFormatDigit,
+  detectPathSegmentShortcuts,
+  resolveSegmentFormats,
   FILE_FORMAT_OPTIONS,
   TEXT_FORMAT_OPTIONS,
   NamingFormat,
@@ -223,7 +225,7 @@ describe('detectTrailingFormatDigit - 尾部数字快捷选格式', () => {
       ['用户6', 'Header-Case', '用户'],
     ]
     for (const [text, format, baseName] of cases) {
-      expect(detectTrailingFormatDigit(text, FILE_FORMAT_OPTIONS)).toEqual({ format, baseName })
+      expect(detectTrailingFormatDigit(text, FILE_FORMAT_OPTIONS)).toEqual({ format, baseName, raw: text })
     }
   })
 
@@ -233,8 +235,8 @@ describe('detectTrailingFormatDigit - 尾部数字快捷选格式', () => {
   })
 
   it('文本场景 - 7/8 命中 Capital Case 与 no case', () => {
-    expect(detectTrailingFormatDigit('用户7', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'Capital Case', baseName: '用户' })
-    expect(detectTrailingFormatDigit('用户8', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'no case', baseName: '用户' })
+    expect(detectTrailingFormatDigit('用户7', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'Capital Case', baseName: '用户', raw: '用户7' })
+    expect(detectTrailingFormatDigit('用户8', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'no case', baseName: '用户', raw: '用户8' })
   })
 
   it('连续多位数字不生效（仅孤立末尾数字有效）', () => {
@@ -259,8 +261,8 @@ describe('detectTrailingFormatDigit - 尾部数字快捷选格式', () => {
   })
 
   it('中英文混合与含空格文本 - 数字仍按末尾规则剥离', () => {
-    expect(detectTrailingFormatDigit('use用户1', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'camelCase', baseName: 'use用户' })
-    expect(detectTrailingFormatDigit('用户 2', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'PascalCase', baseName: '用户 ' })
+    expect(detectTrailingFormatDigit('use用户1', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'camelCase', baseName: 'use用户', raw: 'use用户1' })
+    expect(detectTrailingFormatDigit('用户 2', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'PascalCase', baseName: '用户 ', raw: '用户 2' })
   })
 
   it('路径场景配合 extname 只看最后一段', () => {
@@ -276,6 +278,59 @@ describe('detectTrailingFormatDigit - 尾部数字快捷选格式', () => {
     const ext1 = path.extname(relFile1)
     const body1 = relFile1.slice(0, -ext1.length)
     const lastSeg1 = body1.split(path.sep).pop()!
-    expect(detectTrailingFormatDigit(lastSeg1, FILE_FORMAT_OPTIONS)).toEqual({ format: 'camelCase', baseName: '用户' })
+    expect(detectTrailingFormatDigit(lastSeg1, FILE_FORMAT_OPTIONS)).toEqual({ format: 'camelCase', baseName: '用户', raw: '用户1' })
+  })
+})
+
+describe('detectPathSegmentShortcuts + resolveSegmentFormats - 路径级分段格式', () => {
+  const resolve = (nameWithoutExt: string, pickedFormat: NamingFormat) => {
+    const { shortcuts } = detectPathSegmentShortcuts(nameWithoutExt, FILE_FORMAT_OPTIONS)
+    const last = shortcuts[shortcuts.length - 1]
+    return resolveSegmentFormats(shortcuts, last ? last.format : pickedFormat)
+  }
+
+  it("'用户/信息/用户2.java' → 全 PascalCase（文件段数字兜底）", () => {
+    expect(resolve('用户/信息/用户2', 'CONSTANT_CASE')).toEqual(['PascalCase', 'PascalCase', 'PascalCase'])
+  })
+
+  it("'用户/信息1/用户2.java' → 目录 camelCase（用户继承信息1），文件 PascalCase", () => {
+    expect(resolve('用户/信息1/用户2', 'CONSTANT_CASE')).toEqual(['camelCase', 'camelCase', 'PascalCase'])
+  })
+
+  it("'用户/信息1/用户.java'（弹窗选 snake_case）→ 目录 camelCase，文件段用弹窗", () => {
+    expect(resolve('用户/信息1/用户', 'snake_case')).toEqual(['camelCase', 'camelCase', 'snake_case'])
+  })
+
+  it("'用户12/信息/用户.java' → 连续数字按字面，全部弹窗格式", () => {
+    expect(resolve('用户12/信息/用户', 'Header-Case')).toEqual(['Header-Case', 'Header-Case', 'Header-Case'])
+  })
+
+  it('点号子段独立判定：用户2.信息1 → 各取自身数字，最上游继承下游', () => {
+    expect(resolve('用户/用户2.信息1', 'CONSTANT_CASE')).toEqual(['PascalCase', 'PascalCase', 'camelCase'])
+  })
+})
+
+describe('resolveSegmentFormats - 分段格式倒推继承', () => {
+  const camel = detectTrailingFormatDigit('信息1', FILE_FORMAT_OPTIONS)
+  const pascal = detectTrailingFormatDigit('用户2', FILE_FORMAT_OPTIONS)
+
+  it("'用户/信息/用户2.java'：无数字段回落到文件段格式（全 PascalCase）", () => {
+    expect(resolveSegmentFormats([undefined, undefined, pascal], 'PascalCase')).toEqual(['PascalCase', 'PascalCase', 'PascalCase'])
+  })
+
+  it("'用户/信息1/用户2.java'：前段继承最近下游带数字段，文件段用自己的数字", () => {
+    expect(resolveSegmentFormats([undefined, camel, pascal], 'PascalCase')).toEqual(['camelCase', 'camelCase', 'PascalCase'])
+  })
+
+  it("'用户/信息1/用户.java'（弹窗选 snake_case）：弹窗只兜底文件段，前段仍继承目录数字", () => {
+    expect(resolveSegmentFormats([undefined, camel, undefined], 'snake_case')).toEqual(['camelCase', 'camelCase', 'snake_case'])
+  })
+
+  it('全无数字：所有段沿用弹窗格式', () => {
+    expect(resolveSegmentFormats([undefined, undefined, undefined], 'CONSTANT_CASE')).toEqual(['CONSTANT_CASE', 'CONSTANT_CASE', 'CONSTANT_CASE'])
+  })
+
+  it('单一片段：直接取文件段格式', () => {
+    expect(resolveSegmentFormats([camel], 'PascalCase')).toEqual(['PascalCase'])
   })
 })

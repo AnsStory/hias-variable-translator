@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Trailing-digit format shortcut (`enableDigitFormatShortcut`, enabled by default): when the last path segment (extension stripped) or selected text ends with a lone digit, that digit is used as the format number (1=camelCase … 6=Header-Case; 7=Capital Case and 8=no case for text only), skipping the format picker. The digit is excluded from translation, the written result and the clipboard original (`originalValue`). Consecutive digits, non-trailing digits and out-of-range numbers keep the normal picker behavior
+- Trailing-digit format shortcut (`enableDigitFormatShortcut`, enabled by default): a lone digit at the end of each path segment (extension stripped; segments split by separators and dots) or of selected text is used as that segment's format number (1=camelCase … 6=Header-Case; 7=Capital Case and 8=no case for text only), and the digit is excluded from translation, the written result and the clipboard original (`originalValue`). Directory and file formats are independent: the file segment's digit skips the picker, a directory segment without a digit inherits the nearest downstream segment that has one, and the picker (when needed) applies only to the file segment and segments with nothing to inherit. Consecutive digits, non-trailing digits and out-of-range numbers keep the normal picker behavior
 
 ## [0.1.1] - 2026-07-27
 

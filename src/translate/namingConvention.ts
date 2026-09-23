@@ -163,14 +163,16 @@ export interface DigitFormatShortcut {
   baseName: string
   /** 数字编号对应的命名格式 */
   format: NamingFormat
+  /** 命中快捷的原始片段（含数字，用于匹配盘面上的名称做内容替换） */
+  raw: string
 }
 
 /**
  * 探测"孤立尾部数字"快捷约定：
  * 文本以单个数字结尾（1 ~ 选项数量），且该数字前一位不是数字、前面还有其它内容时，
- * 将该数字视为格式编号（与 QuickPick 输入数字选格式同一套下标），命中则跳过弹窗，
+ * 将该数字视为本片段格式编号（与 QuickPick 输入数字选格式同一套下标），
  * 数字本身不参与翻译与写入。
- * @param text 待探测文本（路径最后一段去扩展名后的名称 / 选中文本）
+ * @param text 待探测文本（路径某一片段去扩展名后的名称 / 选中文本）
  * @param options 当前场景的格式选项（文件用 FILE_FORMAT_OPTIONS，文本用 TEXT_FORMAT_OPTIONS）
  */
 export function detectTrailingFormatDigit(text: string, options: FormatOption[]): DigitFormatShortcut | undefined {
@@ -191,7 +193,41 @@ export function detectTrailingFormatDigit(text: string, options: FormatOption[])
   if (!baseName) {
     return undefined
   }
-  return { baseName, format: options[num - 1].value }
+  return { baseName, format: options[num - 1].value, raw: text }
+}
+
+/**
+ * 将路径名称（不含扩展名）按路径分隔符与点号打平为片段，并逐片段探测尾部数字快捷格式
+ * @param nameWithoutExt 去掉扩展名后的相对路径名称
+ * @param options 当前场景的格式选项（文件用 FILE_FORMAT_OPTIONS）
+ * @returns 打平后的片段列表与逐一片段的快捷探测结果（下标一一对应）
+ */
+export function detectPathSegmentShortcuts(
+  nameWithoutExt: string,
+  options: FormatOption[],
+): { flatParts: string[]; shortcuts: (DigitFormatShortcut | undefined)[] } {
+  const pathParts = nameWithoutExt.split(/[/\\]/)
+  const flatParts = pathParts.map((part) => part.split('.')).flat()
+  const shortcuts = flatParts.map((part) => detectTrailingFormatDigit(part, options))
+  return { flatParts, shortcuts }
+}
+
+/**
+ * 按"每段独立、向下游继承"的规则倒推每个路径片段的翻译格式：
+ * 片段有自己的快捷数字则用自己的格式；否则继承最近下游片段的格式；
+ * 下游都没有快捷数字时回落到文件段格式（弹窗选择或文件段自身的快捷格式）
+ * @param shortcuts 与路径片段一一对应的快捷探测结果（未命中为 undefined），至少含一个元素
+ * @param fileFormat 文件段（最后一个片段）的格式
+ * @returns 每个片段应使用的格式列表
+ */
+export function resolveSegmentFormats(shortcuts: (DigitFormatShortcut | undefined)[], fileFormat: NamingFormat): NamingFormat[] {
+  const formats: NamingFormat[] = new Array(shortcuts.length)
+  formats[shortcuts.length - 1] = fileFormat
+  for (let i = shortcuts.length - 2; i >= 0; i--) {
+    const own = shortcuts[i]
+    formats[i] = own ? own.format : formats[i + 1]
+  }
+  return formats
 }
 
 /**

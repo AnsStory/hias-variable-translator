@@ -142,7 +142,7 @@
         "variableTranslator.enableDigitFormatShortcut": {
           "type": "boolean",
           "default": true,
-          "description": "是否启用: 末尾数字快捷选格式（新建/重命名路径最后一段或选中文本以孤立数字 1-8 结尾时，直接按编号选定翻译格式、不再弹窗，且该数字不参与翻译、写入与剪贴板原文）"
+          "description": "是否启用: 末尾数字快捷选格式（新建/重命名时路径每个片段或选中文本以孤立数字 1-8 结尾时，该数字即本片段的翻译格式编号，文件段命中不再弹窗；数字不参与翻译、写入与剪贴板原文，无数字的目录段继承最近下游带数字片段的格式）"
         },
         "variableTranslator.translationService": {
           "type": "string",

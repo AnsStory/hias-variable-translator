@@ -66,9 +66,10 @@ public class User {
 **Rules**:
 
 1. The digit maps to the same numbering as typing a number in the picker: 1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case; text scenarios add 7=Capital Case, 8=no case (7/8 do not apply to file/folder names — the picker shows as usual)
-2. Only the **last path segment** (extension stripped first) or the **selected text** is inspected, and only a single right-most digit counts; consecutive digits (`用户12`) or a digit not at the end (`用户1信息`) are treated as part of the name
-3. The digit **does not participate in translation or the written result**: creating `用户/信息/用户1.java` hits 1=camelCase and produces `user/information/user.java` (template content is replaced with `user`, not `用户1`/`user1`); selecting `用户1` and translating leaves `user` in the document — the digit disappears with the selection
-4. The clipboard original (`originalValue`) also drops the digit: for `用户1` it is `用户`
+2. Every **segment** of the path (split by separators and dots, extension stripped first) is judged independently: a lone digit at a segment's end (previous character is not a digit, content precedes it) is that segment's format number; consecutive digits (`用户12`) or a digit not at the end (`用户1信息`) stay part of the name
+3. **Directory and file formats are separate**: the file segment's (last segment's) digit sets the file format, otherwise the picker shows and its choice applies only to the file segment and segments with nothing to inherit; a directory segment without a digit inherits the nearest downstream segment that has one; if the whole path has no digits, everything uses the picked format
+4. Digits are **excluded from translation and the written result**: creating `用户/信息1/用户2.java` produces `user/information/User.java` (directories camelCase, file PascalCase; template content is replaced with `User`, not `用户2`/`User2`); selecting `用户1` and translating leaves `user` in the document — the digit disappears with the selection
+5. The clipboard original (`originalValue`) also drops the digit: for `用户2.java` it is `用户`
 
 ```json
 {
