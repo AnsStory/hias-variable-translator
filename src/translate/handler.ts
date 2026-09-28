@@ -1047,8 +1047,8 @@ export function updateStatusBar(): void {
     google: 'Google',
     bing: 'Bing',
     deeplx: 'DeepLX',
-    baidu: '百度',
-    tencent: '腾讯',
+    baidu: 'Baidu',
+    tencent: 'Tencent',
   }
   const serviceName = serviceNames[currentService] || currentService
 
