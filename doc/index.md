@@ -33,8 +33,8 @@ features:
     title: 翻译并复制
     details: Alt+Shift+C 将翻译结果按多种命名格式逐条写入剪贴板历史（Win+V 可全部取用）
   - icon: 🔤
-    title: 8 种命名格式
-    details: camelCase、PascalCase、snake_case、CONSTANT_CASE、param-case、Header-Case、Capital Case、no case
+    title: 9 种命名格式
+    details: camelCase、PascalCase、snake_case、CONSTANT_CASE、param-case、Header-Case、Capital Case、no case、Sentence case
   - icon: 🔀
     title: 多服务自动降级
     details: 支持 OpenAI、谷歌、Bing、DeepLX、百度、腾讯等服务，失败时按优先级降级，最终拼音兜底

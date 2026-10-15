@@ -65,10 +65,13 @@ variable-translator/
 │   ├── extension.ts              # 插件入口，整合所有功能
 │   └── translate/                # 翻译模块
 │       ├── index.ts              # 模块导出
-│       ├── handler.ts            # 翻译操作处理函数
+│       ├── handler.ts            # 选中文本翻译/格式化命令入口、状态栏、模块单例
+│       ├── fileTranslation.ts    # 文件路径翻译（新建/重命名监听、改名后内容同步、空目录清理、撤回）
+│       ├── formatPicker.ts       # 格式 QuickPick 与选中文本格式解析（尾部数字快捷）
 │       ├── translator.ts         # 翻译器，整合翻译服务
 │       ├── config.ts             # 配置管理器
 │       ├── clipboard.ts          # 剪贴板工具函数
+│       ├── contentRewriter.ts    # 新建文件内容中的路径段名替换
 │       ├── namingConvention.ts   # 命名格式转换（8种格式）
 │       ├── chineseDetector.ts    # 非英文字符检测
 │       ├── undoManager.ts        # 撤回管理（1分钟缓存）

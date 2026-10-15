@@ -3,6 +3,7 @@
 | Shortcut (Windows/Linux) | Shortcut (macOS) | Feature | Description |
 |--------------------------|------------------|---------|-------------|
 | `Alt+Shift+T` | `Option+Shift+T` | Translate selection | Translate and replace selected non-English text |
+| `Alt+Shift+N` | `Option+Shift+N` | Format selection & copy | Strip symbols and reformat into the clipboard; translates first when the selection has non-English text (works on pure English too, never replaces) |
 | `Alt+Shift+C` | `Option+Shift+C` | Translate & copy | Copy multiple formats to the clipboard history, without replacing |
 | `Alt+Shift+Z` | `Option+Shift+Z` | Undo file translation | Delete the translated file/directories (within 1 minute) |
 | `Ctrl+Z` | `Cmd+Z` | Undo file translation (conditional) | Only within 1 minute and when focus is outside text input areas (e.g. the Explorer); `Ctrl+Z` in the editor keeps its native text undo |
@@ -32,8 +33,29 @@ These commands are also available in the editor context menu (translate/copy req
 - Header-Case
 - Capital Case
 - no case
+- Sentence case
 
 Use VSCode's built-in `Ctrl+Z` to undo the replacement.
+
+### Alt+Shift+N - Format Selection & Copy
+
+**Requires**: editor focused with a selection (non-English characters are not required).
+
+**Usage**:
+1. Select text that carries symbols, e.g. `application/json`
+2. Press `Alt+Shift+N`
+3. Pick a naming format
+4. `applicationJson` is copied to the clipboard; the selection is left untouched
+
+**Difference from Alt+Shift+T**: translate selection silently skips pure-English text; format selection reformats without translating, and only translates the non-English fragments when they are present.
+
+**Difference from Alt+Shift+C**: both only write to the clipboard and never modify the document; Alt+Shift+C requires non-English text in the selection, while Alt+Shift+N also works on pure-English text with symbols.
+
+**Symbol handling**: `/` `.` `+` `@` `-` `_`, spaces and every other non-alphanumeric character act as separators (in-word apostrophes are dropped), so `application/vnd.api+json@2.0` becomes `applicationVndApiJson20` in camelCase.
+
+::: tip Why not Alt+Shift+F
+`Shift+Alt+F` is VSCode's native "Format Document", which this extension leaves untouched; the command binds `N` (Naming) instead.
+:::
 
 ### Alt+Shift+C - Translate & Copy to Clipboard
 

@@ -65,7 +65,7 @@ public class User {
 
 **规则**：
 
-1. 数字编号与弹窗中"输入数字选格式"是同一套映射：1=camelCase、2=PascalCase、3=snake_case、4=CONSTANT_CASE、5=param-case、6=Header-Case，文本场景另有 7=Capital Case、8=no case（文件/文件夹场景 7、8 不生效，正常弹窗）
+1. 数字编号与弹窗中"输入数字选格式"是同一套映射：1=camelCase、2=PascalCase、3=snake_case、4=CONSTANT_CASE、5=param-case、6=Header-Case，文本场景另有 7=Capital Case、8=no case、9=Sentence case（文件/文件夹场景 7、8、9 不生效，正常弹窗）
 2. 路径按分隔符与点号切成的**每个片段独立判定**（文件先去掉扩展名）：片段末尾的孤立数字（前一位不是数字、前面还有内容）即该片段的格式编号；连续多位（如 `用户12`）、数字不在末尾（如 `用户1信息`）都视作名称的一部分
 3. **目录与文件格式分离**：文件段（最后一片段）的数字决定文件段格式、未命中时弹窗（所选格式只作用于文件段与无继承来源的片段）；无数字的目录段继承最近下游带数字片段的格式；整条路径无数字时全部用弹窗格式
 4. 数字**不参与翻译与写入**：新建 `用户/信息1/用户2.java` → `user/information/User.java`（目录 camelCase、文件 PascalCase，内容模板中的名称替换为 `User` 而非 `用户2`/`User2`）；选中 `用户1` 翻译后文档中变为 `user`，数字随选区消失
@@ -131,8 +131,9 @@ public class User {
 - `CONSTANT_CASE` - 常量格式
 - `param-case` - 连字符
 - `Header-Case` - 头部连字符
-- `Capital Case` - 首字母大写空格分隔
+- `Capital Case` - 每词首字母大写空格分隔
 - `no case` - 空格分隔
+- `Sentence case` - 仅整句首字母大写空格分隔
 - `originalValue` - 翻译前的原始文本
 
 ```json
@@ -146,7 +147,8 @@ public class User {
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case"
+    "Capital Case",
+    "Sentence case"
   ]
 }
 ```
@@ -335,7 +337,8 @@ public class User {
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case"
+    "Capital Case",
+    "Sentence case"
   ],
 
   // 翻译服务配置（无需配置的服务可省略）

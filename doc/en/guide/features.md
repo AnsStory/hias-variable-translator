@@ -31,7 +31,7 @@ Hit:    信息1 = camelCase(1), 用户2 = PascalCase(2), 用户 inherits 信息1
 Result: user/information/User.java
 ```
 
-The clipboard original also drops the digit (`用户2.java`'s original is `用户`). A digit stays literal when the shortcut does not apply to that segment: consecutive digits (`用户12`), a digit not at the end (`用户1信息`), or an out-of-range number (`7`/`8` for files, `0`/`9` anywhere). Selected text follows the same rule (7=Capital Case and 8=no case apply to text only) — see Feature 2.
+The clipboard original also drops the digit (`用户2.java`'s original is `用户`). A digit stays literal when the shortcut does not apply to that segment: consecutive digits (`用户12`), a digit not at the end (`用户1信息`), or an out-of-range number (`7`/`8`/`9` for files, `0` anywhere). Selected text follows the same rule (7=Capital Case, 8=no case and 9=Sentence case apply to text only) — see Feature 2.
 
 ### Example
 
@@ -141,6 +141,7 @@ Format options:
 - Header-Case:    User-Name
 - Capital Case:   User Name
 - no case:        user name
+- Sentence case:  User name
 ```
 
 ### Undo
@@ -192,7 +193,8 @@ Current clipboard: userName (the format you picked)
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case"
+    "Capital Case",
+    "Sentence case"
   ]
 }
 ```
@@ -209,6 +211,7 @@ Current clipboard: userName (the format you picked)
 | `Header-Case` | Capitalized hyphen-separated |
 | `Capital Case` | Capitalized space-separated |
 | `no case` | Space-separated |
+| `Sentence case` | Only the first letter of the phrase capitalized |
 | `originalValue` | The pre-translation text (what you selected) |
 
 ---
@@ -229,6 +232,69 @@ Picking a service that is not yet configured prompts you to open the settings. S
 
 ---
 
+## Feature 5: Format Selection & Copy (Strip Symbols)
+
+### Scenario
+
+The selection is already English but carries separators such as `/` `.` `+` `@` `-` `_`, and you just want it collapsed into a naming format (e.g. the MIME type `application/json` → `applicationJson`). Non-English fragments inside the selection are translated first.
+
+Unlike "Selection Translation" (`Alt+Shift+T`), which silently skips pure-English text, this command **does not require non-English characters** — it only strips symbols and reformats.
+
+Like "Translate & Copy" (`Alt+Shift+C`), the result **goes to the clipboard and never touches the document**; the difference is that this command also works on pure-English selections.
+
+### Workflow
+
+```
+Select text → press Alt+Shift+N → pick a naming format → the result lands on the clipboard (document unchanged)
+```
+
+::: tip Trailing-digit format shortcut
+Same convention as Feature 2: selecting `application/json1` skips the picker and uses format number 1 (camelCase); the digit is excluded from the result (`applicationJson`).
+:::
+
+### Example
+
+```
+Selected:   application/json
+Pressed:    Alt+Shift+N → type 1 (camelCase)
+
+Clipboard:  applicationJson   (the selection stays as it was)
+```
+
+Every symbol acts as a separator, so arbitrarily complex strings split and rejoin:
+
+```
+Selected: application/vnd.api+json@2.0
+
+- camelCase:      applicationVndApiJson20
+- PascalCase:     ApplicationVndApiJson20
+- snake_case:     application_vnd_api_json_2_0
+- CONSTANT_CASE:  APPLICATION_VND_API_JSON_2_0
+- param-case:     application-vnd-api-json-2-0
+- Header-Case:    Application-Vnd-Api-Json-2-0
+- Capital Case:   Application Vnd Api Json 2 0
+- no case:        application vnd api json 2 0
+- Sentence case:  Application vnd api json 2 0
+```
+
+Mixed text translates only its non-English fragments; English and symbols feed the splitter as-is:
+
+```
+Selected: 用户名称/json
+Pressed:  Alt+Shift+N → type 3 (snake_case)
+
+Result:   user_name_json
+```
+
+### Notes
+
+- In-word apostrophes (`'` `’` `＇` `` ` ``) are removed to keep words intact (`user's` → `users`); every other non-alphanumeric character is a separator
+- A selection of pure symbols (e.g. `///`) yields no words after sanitizing, so nothing is copied
+- Without `copyToClipboard` only the format you picked is copied; with it enabled the formats in `clipboardFormats` are written one by one into the clipboard history (**Win+V**), and the current clipboard holds the format you picked
+- The selection is never modified, so there is nothing to undo
+
+---
+
 ## Naming Formats
 
 ### File Translation Formats
@@ -246,5 +312,6 @@ Picking a service that is not yet configured prompts you to open the settings. S
 
 | Format | Example | Description |
 |--------|---------|-------------|
-| Capital Case | User Name | Space-separated, capitalized |
+| Capital Case | User Name | Space-separated, every word capitalized |
 | no case | user name | Space-separated, lowercase |
+| Sentence case | User name | Space-separated, only the first letter capitalized |

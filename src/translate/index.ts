@@ -15,6 +15,7 @@ export {
   initTranslateModule,
   createStatusBarItem,
   handleTranslateSelection,
+  handleFormatSelection,
   handleTranslateCopy,
   handleTranslateCut,
   handleUndoTranslation,

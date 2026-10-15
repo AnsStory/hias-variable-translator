@@ -1,6 +1,6 @@
 /**
  * 命名格式转换模块测试
- * 测试 8 种命名格式转换和单词分割功能
+ * 测试 9 种命名格式转换和单词分割功能
  */
 
 import * as path from 'path'
@@ -50,6 +50,12 @@ describe('convertToFormat - 命名格式转换', () => {
 
   it('no case - 全小写空格分隔', () => {
     expect(convertToFormat(words, 'no case')).toBe('hello world')
+  })
+
+  it('Sentence case - 仅整句首字母大写空格分隔', () => {
+    expect(convertToFormat(words, 'Sentence case')).toBe('Hello world')
+    expect(convertToFormat(['user', 'full', 'name'], 'Sentence case')).toBe('User full name')
+    expect(convertToFormat(['HELLO', 'WORLD'], 'Sentence case')).toBe('Hello world')
   })
 
   it('originalValue - 原始值（首字母大写空格分隔）', () => {
@@ -192,6 +198,42 @@ describe('splitIntoWordsForFileName - 文件名专用分割（字符净化）', 
   })
 })
 
+describe('选中内容去符号格式化 - 端到端（application/json 场景）', () => {
+  it('斜杠分隔 → camelCase', () => {
+    expect(convertToFormat(splitIntoWordsForFileName('application/json'), 'camelCase')).toBe('applicationJson')
+  })
+
+  it('多种复杂符号混合 → 各命名格式', () => {
+    const words = splitIntoWordsForFileName('application/vnd.api+json@2.0')
+    expect(words).toEqual(['application', 'vnd', 'api', 'json', '2', '0'])
+    expect(convertToFormat(words, 'camelCase')).toBe('applicationVndApiJson20')
+    expect(convertToFormat(words, 'PascalCase')).toBe('ApplicationVndApiJson20')
+    expect(convertToFormat(words, 'snake_case')).toBe('application_vnd_api_json_2_0')
+    expect(convertToFormat(words, 'CONSTANT_CASE')).toBe('APPLICATION_VND_API_JSON_2_0')
+    expect(convertToFormat(words, 'param-case')).toBe('application-vnd-api-json-2-0')
+    expect(convertToFormat(words, 'Header-Case')).toBe('Application-Vnd-Api-Json-2-0')
+    expect(convertToFormat(words, 'Capital Case')).toBe('Application Vnd Api Json 2 0')
+    expect(convertToFormat(words, 'no case')).toBe('application vnd api json 2 0')
+    expect(convertToFormat(words, 'Sentence case')).toBe('Application vnd api json 2 0')
+  })
+
+  it('已带分隔符的命名互转', () => {
+    expect(convertToFormat(splitIntoWordsForFileName('user_name.test'), 'camelCase')).toBe('userNameTest')
+    expect(convertToFormat(splitIntoWordsForFileName('HTTP Status/Code'), 'camelCase')).toBe('httpStatusCode')
+  })
+
+  it('纯符号（无可格式化文字）→ 空数组', () => {
+    expect(splitIntoWordsForFileName('///')).toEqual([])
+    expect(splitIntoWordsForFileName(' - @#$% ')).toEqual([])
+  })
+
+  it('尾部快捷数字剥离后仍按符号切分', () => {
+    const shortcut = detectTrailingFormatDigit('application/json1', TEXT_FORMAT_OPTIONS)
+    expect(shortcut).toEqual({ format: 'camelCase', baseName: 'application/json', raw: 'application/json1' })
+    expect(convertToFormat(splitIntoWordsForFileName(shortcut!.baseName), shortcut!.format)).toBe('applicationJson')
+  })
+})
+
 describe('FILE_FORMAT_OPTIONS 和 TEXT_FORMAT_OPTIONS', () => {
   it('FILE_FORMAT_OPTIONS - 包含 6 种格式', async () => {
     const { FILE_FORMAT_OPTIONS } = await import('../../src/translate/namingConvention')
@@ -206,11 +248,12 @@ describe('FILE_FORMAT_OPTIONS 和 TEXT_FORMAT_OPTIONS', () => {
     ])
   })
 
-  it('TEXT_FORMAT_OPTIONS - 包含 8 种格式（文件 + Capital Case + no case）', async () => {
+  it('TEXT_FORMAT_OPTIONS - 包含 9 种格式（文件 + Capital Case + no case + Sentence case）', async () => {
     const { TEXT_FORMAT_OPTIONS } = await import('../../src/translate/namingConvention')
-    expect(TEXT_FORMAT_OPTIONS).toHaveLength(8)
+    expect(TEXT_FORMAT_OPTIONS).toHaveLength(9)
     expect(TEXT_FORMAT_OPTIONS.map((o) => o.value)).toContain('Capital Case')
     expect(TEXT_FORMAT_OPTIONS.map((o) => o.value)).toContain('no case')
+    expect(TEXT_FORMAT_OPTIONS.map((o) => o.value)).toContain('Sentence case')
   })
 })
 
@@ -229,24 +272,26 @@ describe('detectTrailingFormatDigit - 尾部数字快捷选格式', () => {
     }
   })
 
-  it('文件场景 - 7/8 超出选项范围不生效', () => {
+  it('文件场景 - 7/8/9 超出选项范围不生效', () => {
     expect(detectTrailingFormatDigit('用户7', FILE_FORMAT_OPTIONS)).toBeUndefined()
     expect(detectTrailingFormatDigit('用户8', FILE_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户9', FILE_FORMAT_OPTIONS)).toBeUndefined()
   })
 
-  it('文本场景 - 7/8 命中 Capital Case 与 no case', () => {
+  it('文本场景 - 7/8/9 命中 Capital Case、no case 与 Sentence case', () => {
     expect(detectTrailingFormatDigit('用户7', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'Capital Case', baseName: '用户', raw: '用户7' })
     expect(detectTrailingFormatDigit('用户8', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'no case', baseName: '用户', raw: '用户8' })
+    expect(detectTrailingFormatDigit('用户9', TEXT_FORMAT_OPTIONS)).toEqual({ format: 'Sentence case', baseName: '用户', raw: '用户9' })
   })
 
   it('连续多位数字不生效（仅孤立末尾数字有效）', () => {
     expect(detectTrailingFormatDigit('用户12', FILE_FORMAT_OPTIONS)).toBeUndefined()
     expect(detectTrailingFormatDigit('用户18', TEXT_FORMAT_OPTIONS)).toBeUndefined()
+    expect(detectTrailingFormatDigit('用户19', TEXT_FORMAT_OPTIONS)).toBeUndefined()
   })
 
-  it('0 或 9 或无数字不生效', () => {
+  it('0 或无数字不生效', () => {
     expect(detectTrailingFormatDigit('用户0', TEXT_FORMAT_OPTIONS)).toBeUndefined()
-    expect(detectTrailingFormatDigit('用户9', TEXT_FORMAT_OPTIONS)).toBeUndefined()
     expect(detectTrailingFormatDigit('用户', FILE_FORMAT_OPTIONS)).toBeUndefined()
     expect(detectTrailingFormatDigit('用户信息', TEXT_FORMAT_OPTIONS)).toBeUndefined()
   })

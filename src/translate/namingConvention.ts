@@ -4,7 +4,7 @@
  */
 
 export type NamingFormat =
-  'camelCase' | 'PascalCase' | 'snake_case' | 'CONSTANT_CASE' | 'param-case' | 'Header-Case' | 'Capital Case' | 'no case' | 'originalValue'
+  'camelCase' | 'PascalCase' | 'snake_case' | 'CONSTANT_CASE' | 'param-case' | 'Header-Case' | 'Capital Case' | 'no case' | 'Sentence case' | 'originalValue'
 
 /**
  * 格式选项，用于QuickPick
@@ -34,8 +34,9 @@ export const FILE_FORMAT_OPTIONS: FormatOption[] = [
  */
 export const TEXT_FORMAT_OPTIONS: FormatOption[] = [
   ...FILE_FORMAT_OPTIONS,
-  { label: 'Capital Case', description: '首字母大写空格分隔', value: 'Capital Case' },
+  { label: 'Capital Case', description: '每词首字母大写空格分隔', value: 'Capital Case' },
   { label: 'no case', description: '小写空格分隔', value: 'no case' },
+  { label: 'Sentence case', description: '仅整句首字母大写空格分隔', value: 'Sentence case' },
 ]
 
 /**
@@ -71,6 +72,8 @@ export function convertToFormat(words: string[], format: NamingFormat): string {
       return toCapitalCase(words)
     case 'no case':
       return toNoCase(words)
+    case 'Sentence case':
+      return toSentenceCase(words)
     default:
       return toCamelCase(words)
   }
@@ -156,6 +159,15 @@ function toNoCase(words: string[]): string {
 }
 
 /**
+ * 转换为Sentence case（仅整句首个单词首字母大写，其余小写，空格分隔）
+ * @param words 单词列表
+ * @returns Sentence case字符串
+ */
+function toSentenceCase(words: string[]): string {
+  return words.map((word, index) => (index === 0 ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word.toLowerCase())).join(' ')
+}
+
+/**
  * 尾部数字快捷约定的探测结果
  */
 export interface DigitFormatShortcut {
@@ -204,7 +216,7 @@ export function detectTrailingFormatDigit(text: string, options: FormatOption[])
  */
 export function detectPathSegmentShortcuts(
   nameWithoutExt: string,
-  options: FormatOption[],
+  options: FormatOption[]
 ): { flatParts: string[]; shortcuts: (DigitFormatShortcut | undefined)[] } {
   const pathParts = nameWithoutExt.split(/[/\\]/)
   const flatParts = pathParts.map((part) => part.split('.')).flat()

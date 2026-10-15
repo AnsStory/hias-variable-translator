@@ -33,8 +33,8 @@ features:
     title: Translate & Copy
     details: Alt+Shift+C writes the translation in multiple naming formats to the clipboard history (retrieve all via Win+V)
   - icon: 🔤
-    title: 8 Naming Formats
-    details: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case and no case
+    title: 9 Naming Formats
+    details: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case and Sentence case
   - icon: 🔀
     title: Multi-Service Fallback
     details: OpenAI, Google, Bing, DeepLX, Baidu and Tencent with priority-based fallback, ending in a Pinyin safety net

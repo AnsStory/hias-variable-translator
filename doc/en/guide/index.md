@@ -2,7 +2,7 @@
 
 **variable-translator** is a VSCode extension that automatically detects any non-English characters (Chinese, Japanese, Korean, Russian, etc.) in file paths or selected text and translates them into properly-cased English.
 
-Know exactly what to name something in your native language, but stuck on the English? Just type it as-is and let the extension translate it into `camelCase`, `snake_case` or any of the 8 supported naming formats.
+Know exactly what to name something in your native language, but stuck on the English? Just type it as-is and let the extension translate it into `camelCase`, `snake_case` or any of the 9 supported naming formats.
 
 ## Core Features
 
@@ -18,7 +18,7 @@ Know exactly what to name something in your native language, but stuck on the En
 ## Highlights
 
 - **Automatic language detection**: no source language needed — any non-English characters are recognized
-- **8 naming formats**: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case
+- **9 naming formats**: camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case, Sentence case
 - **Multiple translation services**: OpenAI, Google Translate, Bing/Azure, DeepLX, Baidu, Tencent and Pinyin
 - **Automatic fallback**: failed services fall back by priority, ending with Pinyin — translation never fails
 - **Timeout protection**: a global 10-second translation timeout keeps the editor responsive
@@ -53,8 +53,9 @@ The extension automatically detects and translates the following languages into 
 
 | Format | Example | Description |
 |--------|---------|-------------|
-| Capital Case | User Name | Space-separated, capitalized |
+| Capital Case | User Name | Space-separated, every word capitalized |
 | no case | user name | Space-separated, lowercase |
+| Sentence case | User name | Space-separated, only the first letter capitalized |
 
 ## Next Steps
 

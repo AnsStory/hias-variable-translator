@@ -2,7 +2,7 @@
 
 **variable-translator** 是一款 VSCode 插件，自动检测文件路径或选中文本中的任意非英文字符（中文、日文、韩文、俄文等），并将其翻译为符合命名规范的英文。
 
-写代码时想好了中文名却卡在英文命名？直接输入中文，让插件帮你翻译成 `camelCase`、`snake_case` 等 8 种命名格式。
+写代码时想好了中文名却卡在英文命名？直接输入中文，让插件帮你翻译成 `camelCase`、`snake_case` 等 9 种命名格式。
 
 ## 核心功能
 
@@ -18,7 +18,7 @@
 ## 功能特点
 
 - **多语言自动检测**：无需指定源语言，任意非英文字符均可识别
-- **8 种命名格式**：camelCase、PascalCase、snake_case、CONSTANT_CASE、param-case、Header-Case、Capital Case、no case
+- **9 种命名格式**：camelCase、PascalCase、snake_case、CONSTANT_CASE、param-case、Header-Case、Capital Case、no case、Sentence case
 - **多翻译服务**：OpenAI、谷歌翻译、Bing/Azure、DeepLX、百度翻译、腾讯翻译君、拼音
 - **自动降级**：翻译失败按优先级降级到下一个服务，最终拼音兜底，保证翻译永不失败
 - **超时保护**：全局 10 秒翻译超时，不会卡住编辑器
@@ -53,8 +53,9 @@
 
 | 格式 | 示例 | 说明 |
 |------|------|------|
-| Capital Case | User Name | 首字母大写，空格分隔 |
+| Capital Case | User Name | 每词首字母大写，空格分隔 |
 | no case | user name | 全小写，空格分隔 |
+| Sentence case | User name | 仅整句首字母大写，空格分隔 |
 
 ## 下一步
 

@@ -3,6 +3,7 @@
 | 快捷键 (Windows/Linux) | 快捷键 (macOS) | 功能 | 说明 |
 |------------------------|----------------|------|------|
 | `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 | 编辑器中选中非英文文本后翻译替换 |
+| `Alt+Shift+N` | `Option+Shift+N` | 格式化选中文本并复制 | 去除符号后按命名格式化并复制到剪贴板，含非英文时先翻译（纯英文也可用，不替换原文） |
 | `Alt+Shift+C` | `Option+Shift+C` | 翻译并复制到剪贴板 | 翻译后复制多种格式到剪贴板历史，不替换原文 |
 | `Alt+Shift+X` | `Option+Shift+X` | 翻译并剪切到剪贴板 | 翻译后复制到剪贴板，同时删除选中的原文 |
 | `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 | 删除翻译后的文件/目录（1 分钟内有效） |
@@ -33,8 +34,29 @@
 - Header-Case
 - Capital Case
 - no case
+- Sentence case
 
 替换后可用 VSCode 自带的 `Ctrl+Z` 撤销。
+
+### Alt+Shift+N - 格式化选中文本并复制
+
+**生效条件**：编辑器聚焦且有选中文本（不要求含非英文字符）。
+
+**使用方法**：
+1. 选中带符号的文本，如 `application/json`
+2. 按 `Alt+Shift+N`
+3. 选择命名格式
+4. `applicationJson` 复制到剪贴板，原文保持不变
+
+**与 Alt+Shift+T 的区别**：Alt+Shift+T 遇到纯英文会直接跳过（不提示、不改动）；Alt+Shift+N 不翻译也能去符号格式化，选中内容含非英文时才会先翻译。
+
+**与 Alt+Shift+C 的区别**：两者都只写剪贴板、不改原文；Alt+Shift+C 要求选中文本含非英文，Alt+Shift+N 对纯英文带符号内容同样生效。
+
+**符号处理**：`/` `.` `+` `@` `-` `_` 空格等所有非字母数字字符都视作分隔符（词内撇号直接删除），因此 `application/vnd.api+json@2.0` 选 camelCase 得到 `applicationVndApiJson20`。
+
+::: tip 为什么不是 Alt+Shift+F
+`Shift+Alt+F` 是 VSCode 原生的"格式化文档"，不占用；本命令取命名（Naming）的 `N`。
+:::
 
 ### Alt+Shift+C - 翻译并复制到剪贴板
 

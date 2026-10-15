@@ -65,7 +65,7 @@ public class User {
 
 **Rules**:
 
-1. The digit maps to the same numbering as typing a number in the picker: 1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case; text scenarios add 7=Capital Case, 8=no case (7/8 do not apply to file/folder names — the picker shows as usual)
+1. The digit maps to the same numbering as typing a number in the picker: 1=camelCase, 2=PascalCase, 3=snake_case, 4=CONSTANT_CASE, 5=param-case, 6=Header-Case; text scenarios add 7=Capital Case, 8=no case, 9=Sentence case (7/8/9 do not apply to file/folder names — the picker shows as usual)
 2. Every **segment** of the path (split by separators and dots, extension stripped first) is judged independently: a lone digit at a segment's end (previous character is not a digit, content precedes it) is that segment's format number; consecutive digits (`用户12`) or a digit not at the end (`用户1信息`) stay part of the name
 3. **Directory and file formats are separate**: the file segment's (last segment's) digit sets the file format, otherwise the picker shows and its choice applies only to the file segment and segments with nothing to inherit; a directory segment without a digit inherits the nearest downstream segment that has one; if the whole path has no digits, everything uses the picked format
 4. Digits are **excluded from translation and the written result**: creating `用户/信息1/用户2.java` produces `user/information/User.java` (directories camelCase, file PascalCase; template content is replaced with `User`, not `用户2`/`User2`); selecting `用户1` and translating leaves `user` in the document — the digit disappears with the selection
@@ -133,6 +133,7 @@ public class User {
 - `Header-Case`
 - `Capital Case`
 - `no case`
+- `Sentence case`
 - `originalValue` — the pre-translation text
 
 ```json
@@ -146,7 +147,8 @@ public class User {
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case"
+    "Capital Case",
+    "Sentence case"
   ]
 }
 ```
@@ -333,7 +335,8 @@ Copy what you need into `settings.json`:
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case"
+    "Capital Case",
+    "Sentence case"
   ],
 
   // Per-service configuration (omit services you don't use)

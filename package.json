@@ -44,6 +44,10 @@
         "title": "翻译选中文本"
       },
       {
+        "command": "variableTranslator.formatSelection",
+        "title": "格式化选中文本并复制（去符号，非英文先翻译）"
+      },
+      {
         "command": "variableTranslator.translateCopy",
         "title": "翻译并复制到剪贴板"
       },
@@ -82,12 +86,17 @@
           "group": "variableTranslator@3"
         },
         {
-          "command": "variableTranslator.undoTranslation",
+          "command": "variableTranslator.formatSelection",
+          "when": "editorHasSelection",
           "group": "variableTranslator@4"
         },
         {
-          "command": "variableTranslator.switchTranslationService",
+          "command": "variableTranslator.undoTranslation",
           "group": "variableTranslator@5"
+        },
+        {
+          "command": "variableTranslator.switchTranslationService",
+          "group": "variableTranslator@6"
         }
       ]
     },
@@ -95,6 +104,11 @@
       {
         "command": "variableTranslator.translateSelection",
         "key": "alt+shift+t",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "variableTranslator.formatSelection",
+        "key": "alt+shift+n",
         "when": "editorTextFocus && editorHasSelection"
       },
       {
@@ -278,7 +292,8 @@
               "CONSTANT_CASE",
               "param-case",
               "Header-Case",
-              "Capital Case"
+              "Capital Case",
+              "Sentence case"
             ]
           },
           "default": [],

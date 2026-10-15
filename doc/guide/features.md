@@ -31,7 +31,7 @@
 结果：user/information/User.java
 ```
 
-剪贴板原文同样剥离数字（`用户2.java` 的原文为 `用户`）。数字不生效时该片段按字面参与翻译：连续多位（`用户12`）、数字不在末尾（`用户1信息`）、编号越界（文件场景的 `7`/`8`、任何场景的 `0`/`9`）。文本选中场景同样适用此规则（7=Capital Case、8=no case 仅在文本中生效），详见功能 2。
+剪贴板原文同样剥离数字（`用户2.java` 的原文为 `用户`）。数字不生效时该片段按字面参与翻译：连续多位（`用户12`）、数字不在末尾（`用户1信息`）、编号越界（文件场景的 `7`/`8`/`9`、任何场景的 `0`）。文本选中场景同样适用此规则（7=Capital Case、8=no case、9=Sentence case 仅在文本中生效），详见功能 2。
 
 ### 示例
 
@@ -141,6 +141,7 @@
 - Header-Case:    User-Name
 - Capital Case:   User Name
 - no case:        user name
+- Sentence case:  User name
 ```
 
 ### 撤回
@@ -192,7 +193,8 @@
     "CONSTANT_CASE",
     "param-case",
     "Header-Case",
-    "Capital Case"
+    "Capital Case",
+    "Sentence case"
   ]
 }
 ```
@@ -207,8 +209,9 @@
 | `CONSTANT_CASE` | 常量格式 |
 | `param-case` | 连字符 |
 | `Header-Case` | 头部连字符 |
-| `Capital Case` | 首字母大写空格分隔 |
+| `Capital Case` | 每词首字母大写空格分隔 |
 | `no case` | 空格分隔 |
+| `Sentence case` | 仅整句首字母大写空格分隔 |
 | `originalValue` | 翻译前的原始文本（即你选中的中文文本） |
 
 ---
@@ -279,6 +282,69 @@
 
 ---
 
+## 功能 6：格式化选中文本并复制（去符号）
+
+### 使用场景
+
+选中的内容已经是英文、但夹着 `/` `.` `+` `@` `-` `_` 等符号，想直接压成某种命名格式（如 MIME `application/json` → `applicationJson`）。含非英文片段时也会先翻译再格式化。
+
+与「翻译选中文本」（`Alt+Shift+T`）的区别：该命令遇到纯英文会静默跳过，而本命令**不要求含非英文字符**，只做去符号 + 格式化。
+
+与「翻译并复制」（`Alt+Shift+C`）的行为一致：**结果只写入剪贴板，不改动编辑器原文**，区别在于本命令对纯英文带符号内容也生效。
+
+### 操作流程
+
+```
+选中文本 → 按下 Alt+Shift+N → 选择命名格式 → 格式化结果写入剪贴板（原文保持不变）
+```
+
+::: tip 尾部数字快捷选格式
+与功能 2 同一套约定：选中 `application/json1` 时跳过弹窗直接按编号 1 取 camelCase，数字不参与格式化（结果为 `applicationJson`）。
+:::
+
+### 示例
+
+```
+选中：application/json
+按下：Alt+Shift+N → 输入 1（camelCase）
+
+剪贴板：applicationJson（原文不变）
+```
+
+任意复杂符号都视作分隔符，逐段拆分后重组：
+
+```
+选中：application/vnd.api+json@2.0
+
+- camelCase:      applicationVndApiJson20
+- PascalCase:     ApplicationVndApiJson20
+- snake_case:     application_vnd_api_json_2_0
+- CONSTANT_CASE:  APPLICATION_VND_API_JSON_2_0
+- param-case:     application-vnd-api-json-2-0
+- Header-Case:    Application-Vnd-Api-Json-2-0
+- Capital Case:   Application Vnd Api Json 2 0
+- no case:        application vnd api json 2 0
+- Sentence case:  Application vnd api json 2 0
+```
+
+中英混排时只翻译非英文片段，英文与符号原样参与拆分：
+
+```
+选中：用户名称/json
+按下：Alt+Shift+N → 输入 3（snake_case）
+
+结果：user_name_json
+```
+
+### 说明
+
+- 词内撇号（`'` `’` `＇` `` ` ``）直接删除以保留单词完整性（`user's` → `users`），其余非字母数字字符一律作为分隔符
+- 选中内容全是符号（如 `///`）时净化后无有效单词，不写入剪贴板
+- 未开启 `copyToClipboard` 时只复制用户选择的那一种格式；开启后按 `clipboardFormats` 逐条写入剪贴板历史（**Win+V** 取用），当前剪贴板为用户选择的格式
+- 原文不会被改动，因此无需撤销
+
+---
+
 ## 命名格式说明
 
 ### 文件翻译格式
@@ -296,5 +362,6 @@
 
 | 格式 | 示例 | 说明 |
 |------|------|------|
-| Capital Case | User Name | 首字母大写，空格分隔 |
+| Capital Case | User Name | 每词首字母大写，空格分隔 |
 | no case | user name | 全小写，空格分隔 |
+| Sentence case | User name | 仅整句首字母大写，空格分隔 |

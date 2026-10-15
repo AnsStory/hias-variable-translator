@@ -9,7 +9,8 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 - **多语言支持**：自动检测中文、日文、韩文、俄文等任意非英文字符并翻译为英文
 - **文件路径翻译**：新建文件时自动翻译路径中的非英文字符
 - **文本翻译**：选中文本后一键翻译替换
-- **多种命名格式**：支持 camelCase、PascalCase、snake_case 等 8 种命名格式
+- **格式化选中文本并复制**：`application/json` → `applicationJson`，所有符号都视作分隔符去符号格式化，含非英文时先翻译，结果写入剪贴板不替换原文
+- **多种命名格式**：支持 camelCase、PascalCase、snake_case 等 9 种命名格式
 - **尾部数字快捷选格式**：路径每个片段或选中文本以孤立数字 1-8 结尾时直接按编号选定该片段格式、文件段命中跳过弹窗，数字不参与翻译与写入，目录与文件格式可各自独立
 - **多翻译服务**：支持 Pinyin、OpenAI、Google、Bing、百度、腾讯等 7 种翻译服务
 - **请求超时保护**：所有翻译服务均有 10 秒超时控制，避免长时间等待
@@ -36,7 +37,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 3. 选择命名格式
 4. 文件自动翻译创建，结果为: `hello/world/test.test.js`
 
-**尾部数字快捷选格式**：路径每个片段（含目录与文件，按分隔符/点号切分）末尾的孤立数字即该片段的格式编号（1=camelCase … 6=Header-Case，文本场景另有 7=Capital Case、8=no case），数字不参与翻译、写入与剪贴板原文；文件段命中则跳过弹窗，无数字的目录段继承最近下游带数字片段的格式。如新建 `用户/信息1/用户2.java` 直接得 `user/information/User.java`（目录 camelCase、文件 PascalCase）。可用 `enableDigitFormatShortcut: false` 关闭。
+**尾部数字快捷选格式**：路径每个片段（含目录与文件，按分隔符/点号切分）末尾的孤立数字即该片段的格式编号（1=camelCase … 6=Header-Case，文本场景另有 7=Capital Case、8=no case、9=Sentence case），数字不参与翻译、写入与剪贴板原文；文件段命中则跳过弹窗，无数字的目录段继承最近下游带数字片段的格式。如新建 `用户/信息1/用户2.java` 直接得 `user/information/User.java`（目录 camelCase、文件 PascalCase）。可用 `enableDigitFormatShortcut: false` 关闭。
 
 ### 选中文本翻译
 
@@ -44,6 +45,15 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 2. 按 `Alt+Shift+T`
 3. 选择命名格式
 4. 文本自动替换为英文
+
+### 格式化选中文本并复制
+
+1. 在编辑器中选中带符号的文本（如 `application/json`）
+2. 按 `Alt+Shift+N`
+3. 选择命名格式
+4. `applicationJson` 复制到剪贴板，原文不变
+
+与「翻译选中文本」不同，纯英文也能直接使用；选中内容含非英文片段时会先翻译再格式化。
 
 ### 撤回翻译
 
@@ -74,7 +84,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 ```json
 {
   "variableTranslator.copyToClipboard": true,
-  "variableTranslator.clipboardFormats": ["camelCase","originalValue","PascalCase","no case","snake_case","CONSTANT_CASE","param-case","Header-Case","Capital Case",]
+  "variableTranslator.clipboardFormats": ["camelCase","originalValue","PascalCase","no case","snake_case","CONSTANT_CASE","param-case","Header-Case","Capital Case","Sentence case"]
 }
 ```
 
@@ -92,6 +102,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 | 快捷键 (Windows/Linux) | 快捷键 (macOS) | 功能 |
 |------------------------|----------------|------|
 | `Alt+Shift+T` | `Option+Shift+T` | 翻译选中文本 |
+| `Alt+Shift+N` | `Option+Shift+N` | 格式化选中文本并复制（去符号，非英文先翻译） |
 | `Alt+Shift+C` | `Option+Shift+C` | 翻译并复制到剪贴板 |
 | `Alt+Shift+X` | `Option+Shift+X` | 翻译并剪切到剪贴板（删除原文） |
 | `Alt+Shift+Z` | `Option+Shift+Z` | 撤回文件翻译 |
@@ -118,6 +129,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
 |------|------|------|
 | Capital Case | User Name | 首字母大写，空格分隔 |
 | no case | user name | 全小写，空格分隔 |
+| Sentence case | User name | 仅整句首字母大写，空格分隔 |
 
 ## 翻译服务
 
@@ -151,7 +163,7 @@ VSCode 插件 - 自动检测并翻译任意非英文字符为英文
   "variableTranslator.copyToClipboard": false,
 
   // 复制到剪贴板的命名格式（支持多选，按顺序逐条写入剪贴板历史）
-  // 可选值：camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case, originalValue
+  // 可选值：camelCase, PascalCase, snake_case, CONSTANT_CASE, param-case, Header-Case, Capital Case, no case, Sentence case, originalValue
   // originalValue 表示复制原始翻译前的文本
   "variableTranslator.clipboardFormats": [],
 

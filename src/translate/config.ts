@@ -149,7 +149,18 @@ export class ConfigManager {
     const config = vscode.workspace.getConfiguration(this.CONFIG_PREFIX)
     const formats = config.get<string[]>('clipboardFormats', [])
     // 过滤无效的格式值
-    const validFormats = ['camelCase', 'PascalCase', 'snake_case', 'CONSTANT_CASE', 'param-case', 'Header-Case', 'Capital Case', 'no case', 'originalValue']
+    const validFormats = [
+      'camelCase',
+      'PascalCase',
+      'snake_case',
+      'CONSTANT_CASE',
+      'param-case',
+      'Header-Case',
+      'Capital Case',
+      'no case',
+      'Sentence case',
+      'originalValue',
+    ]
     return formats.filter((f) => validFormats.includes(f))
   }
 
